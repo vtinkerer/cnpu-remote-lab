@@ -1,0 +1,53 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "production": [
+      "default",
+      "!{projectRoot}/.eslintrc.json",
+      "!{projectRoot}/eslint.config.js",
+      // "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
+      // "!{projectRoot}/tsconfig.spec.json",
+      "!{projectRoot}/src/test-setup.[jt]s",
+      "!{projectRoot}/test-setup.[jt]s",
+      "!{projectRoot}/cypress/**/*",
+      "!{projectRoot}/**/*.cy.[jt]s?(x)",
+      "!{projectRoot}/cypress.config.[jt]s"
+    ],
+    "sharedGlobals": []
+  },
+  "plugins": [
+    {
+      "plugin": "@nx/eslint/plugin",
+      "options": {
+        "targetName": "lint"
+      }
+    },
+    {
+      "plugin": "@nx/vite/plugin",
+      "options": {
+        "buildTargetName": "build",
+        "previewTargetName": "preview",
+        "testTargetName": "test",
+        "serveTargetName": "serve",
+        "serveStaticTargetName": "serve-static"
+      }
+    }
+  ],
+  "targetDefaults": {
+    "@nx/js:tsc": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
+    },
+    "@nx/esbuild:esbuild": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
+    },
+    "e2e": {
+      "cache": true,
+      "inputs": ["default", "^production"]
+    }
+  }
+}
