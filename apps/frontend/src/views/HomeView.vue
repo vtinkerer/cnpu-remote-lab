@@ -37,7 +37,7 @@ const m = ref(0);
 
 <template>
   <header class="sticky-header">asdasdas</header>
-  <div style="display: flex; flex-direction: column">
+  <div class="background">
     <Section>
       <ScopeChart style="flex: 1"></ScopeChart>
     </Section>
@@ -73,7 +73,14 @@ const m = ref(0);
   position: sticky;
   top: 0px;
   z-index: 1000;
-  background-color: white;
-  height: 10vh;
+  height: 6vh;
+  background-color: #e3e3e3;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15), 0 2px 2px rgba(0, 0, 0, 0.15),
+    0 4px 4px rgba(0, 0, 0, 0.15), 0 8px 8px rgba(0, 0, 0, 0.15);
+}
+.background {
+  background-color: #eef0f6;
+  display: flex;
+  flex-direction: column;
 }
 </style>
