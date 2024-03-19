@@ -13,3 +13,4 @@ export * from './websocket/server-to-client/dto/voltage-input-real.dto';
 export * from './websocket/server-to-client/dto/pwm-real.dto';
 export * from './websocket/server-to-client/dto/capacitor-real.dto';
 export * from './websocket/server-to-client/dto/current-load-real.dto';
+export * from './http/get-user-init-state.response';

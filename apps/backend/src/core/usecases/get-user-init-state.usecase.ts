@@ -1,3 +1,4 @@
+import { GetUserInitStateResponse } from '@cnpu-remote-lab-nx/shared';
 import { Logger } from '../../logger/logger';
 import {
   AnonymousUser,
@@ -11,9 +12,7 @@ export class GetUserInitState {
 
   constructor(private readonly userRepository: IUserRepository) {}
 
-  async execute(
-    sessionId: string
-  ): Promise<{ isActive: boolean; url: string | null }> {
+  async execute(sessionId: string): Promise<GetUserInitStateResponse> {
     this.logger.info('Getting user init state');
 
     const user = await this.userRepository.getUser(sessionId);
@@ -24,7 +23,6 @@ export class GetUserInitState {
       this.logger.info('Unknown user');
       return {
         isActive: false,
-        url: null,
       };
     }
 
@@ -48,7 +46,7 @@ export class GetUserInitState {
 
     return {
       isActive: true,
-      url: null,
+      stopDate: user.maxDate.toISO(),
     };
   }
 }

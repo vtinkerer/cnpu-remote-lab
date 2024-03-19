@@ -11,6 +11,7 @@ import {
   isVoltageInputRealDto,
 } from '@cnpu-remote-lab-nx/shared';
 import type { ClientToServerDTO, ScopeData } from '@cnpu-remote-lab-nx/shared';
+import { DateTime, Duration } from 'luxon';
 
 export const useBackendDataStore = defineStore('backend-data', () => {
   const websocket = ref<WebSocket | null>(null);
@@ -81,13 +82,22 @@ export const useBackendDataStore = defineStore('backend-data', () => {
     sessionId.value = id;
   }
 
-  const isActive = ref(false);
+  const timeLeft = ref('');
   async function getIsActive() {
     const data = await getInitState(sessionId.value);
     if (!data.isActive) {
       if (data.url) window.location.href = data.url;
       router.push({ path: '/unknown-user' });
+      return;
     }
+    const stopTimestamp = DateTime.fromISO(data.stopDate!).toMillis();
+    const calculateTimeLeft = () => {
+      const millisLeft = stopTimestamp - DateTime.now().toMillis();
+      const duration = Duration.fromMillis(millisLeft);
+      timeLeft.value = duration.toFormat('hh:mm:ss');
+    };
+    calculateTimeLeft();
+    setInterval(calculateTimeLeft, 1000);
   }
 
   return {
@@ -100,5 +110,6 @@ export const useBackendDataStore = defineStore('backend-data', () => {
     realIload,
     realCf,
     realPWMDC,
+    timeLeft,
   };
 });

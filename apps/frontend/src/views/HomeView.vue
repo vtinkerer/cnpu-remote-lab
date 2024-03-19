@@ -36,7 +36,9 @@ const m = ref(0);
 </script>
 
 <template>
-  <header class="sticky-header">asdasdas</header>
+  <header class="sticky-header">
+    <div>{{ store.timeLeft }}</div>
+  </header>
   <div class="background">
     <Section>
       <ScopeChart style="flex: 1"></ScopeChart>
@@ -77,6 +79,9 @@ const m = ref(0);
   background-color: #e3e3e3;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15), 0 2px 2px rgba(0, 0, 0, 0.15),
     0 4px 4px rgba(0, 0, 0, 0.15), 0 8px 8px rgba(0, 0, 0, 0.15);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .background {
   background-color: #eef0f6;
