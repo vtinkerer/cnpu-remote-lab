@@ -43,7 +43,7 @@ async function main() {
   //   },
   // });
   const server = buildApp({});
-  server.listen({ port: 3000, host: '0.0.0.0' }, (err, address) => {
+  server.listen({ port: 3000 }, (err, address) => {
     const logger = new Logger(main.name);
     if (err) {
       logger.error(err);
