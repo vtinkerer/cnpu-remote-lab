@@ -22,7 +22,7 @@ try:
     scope.open(device_data, sampling_frequency=100e6, buffer_size=600)
     while True: 
         if device_data.name != "Digital Discovery":
-            scope.trigger(device_data, enable=True, source=scope.trigger_source.analog, channel=1, level=0.5)
+            scope.trigger(device_data, enable=True, source=scope.trigger_source.analog, channel=1, level=0.01)
             # wavegen.generate(device_data, channel=1, function=wavegen.function.triangle, offset=0, frequency=sig_frequency, amplitude=2)
             buffer = scope.record(device_data, channel=1)
 
