@@ -14,9 +14,7 @@ export class Logger implements ILogger {
 
   constructor(private readonly context: string) {}
 
-  private doLog(level: 'info' | 'error' | 'warn', ...args: any[]) {
-    const arg = args[0];
-
+  private doLog(level: 'info' | 'error' | 'warn', arg: any) {
     if (!Logger.logger) {
       throw new Error('Logger not initialized');
     }
@@ -34,19 +32,18 @@ export class Logger implements ILogger {
     if (typeof arg === 'string') {
       return Logger.logger[level]({ context: this.context, msg: arg });
     }
-    // @ts-expect-error
-    return Logger.logger[level](...args);
+    return Logger.logger[level](arg);
   }
 
-  info(...args: any[]) {
-    this.doLog('info', ...args);
+  info(arg: any) {
+    this.doLog('info', arg);
   }
 
-  error(...args: any[]) {
-    this.doLog('error', ...args);
+  error(arg: any) {
+    this.doLog('error', arg);
   }
 
-  warn(...args: any[]) {
-    this.doLog('warn', ...args);
+  warn(arg: any) {
+    this.doLog('warn', arg);
   }
 }

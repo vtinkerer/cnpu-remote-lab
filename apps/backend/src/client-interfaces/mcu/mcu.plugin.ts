@@ -11,6 +11,7 @@ import { McuReceiver } from './mcu-receiver';
 import { McuSender } from '../../adapters/mcu/mcu.adapter';
 import { DelimiterParser, SerialPort } from 'serialport';
 import { SendMcuDataToUserUsecase } from '../../core/usecases/send-mcu-data-to-user.usecase';
+import { createFakeSerialPort } from '../../fakes/serial-port.fake';
 
 export type McuMessage =
   | VoltageOutputDto
@@ -23,17 +24,14 @@ export interface IMcuReceiver {
   on(event: 'error', listener: (error: Error) => void): void;
 }
 
-export const mcuPlugin = (overrides?: {
-  sender: IMcuSender;
-  receiver: IMcuReceiver;
-}) =>
+export const mcuPlugin = () =>
   fp(async (fastify, ops) => {
     const logger = new Logger('mcuPlugin');
 
-    let mcuReceiver = overrides?.receiver;
-    let mcuSender = overrides?.sender;
+    let mcuReceiver: IMcuReceiver;
+    let mcuSender: IMcuSender;
 
-    if (!overrides) {
+    if (!fastify.config.is_fake_serial_port) {
       // TODO: Create SerialPort connection here
       const serialPort = new SerialPort({
         baudRate: fastify.config.baud_rate,
@@ -48,6 +46,10 @@ export const mcuPlugin = (overrides?: {
       });
       const parser = serialPort.pipe(new DelimiterParser({ delimiter: ';' }));
       mcuReceiver = new McuReceiver(parser);
+    } else {
+      const fakes = createFakeSerialPort(logger);
+      mcuReceiver = fakes.receiver;
+      mcuSender = fakes.sender;
     }
 
     mcuReceiver.on('data', (data) => {

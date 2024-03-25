@@ -25,6 +25,7 @@ import {
 } from '../client-interfaces/scope/scope.plugin';
 import { IMcuSender } from '../core/interfaces/mcu-sender.interface';
 import { ClientDisconnectTimeoutAdapter } from '../adapters/client-disconnect-timeout.adapter';
+import { createFakeUserSessionPlugin } from '../fakes/user-session.fake';
 
 export type AppDependenciesOverrides = {
   mcu?: {
@@ -36,18 +37,7 @@ export type AppDependenciesOverrides = {
   };
 };
 
-/**
- *
- * @param envData - override the .env file (used for testing)
- * @returns
- */
-export function buildApp({
-  envData,
-  overrides,
-}: {
-  envData?: ConfigType;
-  overrides?: AppDependenciesOverrides;
-}) {
+export function buildApp() {
   const server = fastify({
     logger: true,
     // disableRequestLogging: true,
@@ -63,7 +53,6 @@ export function buildApp({
     confKey: 'config',
     schema: configSchema,
     dotenv: true,
-    data: envData,
   });
 
   // Decorators
@@ -132,8 +121,8 @@ export function buildApp({
 
   // Interfaces
   server.register(WebSocket);
-  server.register(mcuPlugin(overrides?.mcu));
-  server.register(scopePlugin(overrides?.scope));
+  server.register(mcuPlugin());
+  server.register(scopePlugin());
 
   server.register(universalRoutes);
 
@@ -150,6 +139,8 @@ export function buildApp({
 
   // Errors/Exceptions
   server.setErrorHandler(errorHandler);
+
+  server.register(createFakeUserSessionPlugin());
 
   return server;
 }

@@ -5,6 +5,7 @@ import { SendScopeDataToUserUsecase } from '../../core/usecases/send-scope-data-
 import { ScopeData } from '@cnpu-remote-lab-nx/shared';
 import * as child_process from 'child_process';
 import { ScopeReader } from './scope-reader';
+import { createFakeScope } from '../../fakes/scope.fake';
 
 export interface IScopeReader {
   on(event: 'scope-data', listener: (data: ScopeData) => void): void;
@@ -13,13 +14,13 @@ export interface IScopeReader {
   once(event: 'scope-data', listener: (data: ScopeData) => void): void;
 }
 
-export const scopePlugin = (overrides?: { reader: IScopeReader }) =>
+export const scopePlugin = () =>
   fp(async (fastify, ops) => {
     const logger = new Logger('scopePlugin');
 
-    let scopeReader = overrides?.reader;
+    let scopeReader: IScopeReader;
 
-    if (!overrides) {
+    if (!fastify.config.is_fake_scope) {
       const pythonProcess = child_process.spawn('python3', [
         fastify.config.scope_script_path,
       ]);
@@ -27,6 +28,8 @@ export const scopePlugin = (overrides?: { reader: IScopeReader }) =>
         pythonProcess,
         fastify.config.scope_script_delimiter
       );
+    } else {
+      scopeReader = createFakeScope();
     }
 
     scopeReader.on('scope-data', async (scopeData) => {
