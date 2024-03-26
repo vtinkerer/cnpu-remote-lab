@@ -27,6 +27,7 @@ import { IMcuSender } from '../core/interfaces/mcu-sender.interface';
 import { ClientDisconnectTimeoutAdapter } from '../adapters/client-disconnect-timeout.adapter';
 import { createFakeUserSessionPlugin } from '../fakes/user-session.fake';
 import path from 'node:path';
+import fs from 'node:fs';
 
 export type AppDependenciesOverrides = {
   mcu?: {
@@ -40,6 +41,8 @@ export type AppDependenciesOverrides = {
 
 const envFilePath = path.resolve(process.cwd(), '.env');
 console.log('envFilePath', envFilePath);
+const fileContent = fs.readFileSync(envFilePath, 'utf8');
+console.log('fileContent', fileContent);
 
 export function buildApp() {
   const server = fastify({
