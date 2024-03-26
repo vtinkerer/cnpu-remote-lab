@@ -1,5 +1,6 @@
 import { Logger } from './logger/logger';
 import { buildApp } from './fastify/server';
+require('dotenv').config();
 
 async function main() {
   const server = buildApp();
