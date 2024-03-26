@@ -1,8 +1,8 @@
 import { Static, Type } from '@sinclair/typebox';
 
 export const configSchema = Type.Object({
-  username: Type.String(),
-  password: Type.String(),
+  lde_username: Type.String(),
+  lde_password: Type.String(),
   frontend_url: Type.String(),
   weblab_poll_interval_seconds: Type.Number(),
   weblab_timeout_seconds: Type.Number(),

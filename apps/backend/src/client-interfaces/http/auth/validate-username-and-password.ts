@@ -15,11 +15,11 @@ export const validateUsernameAndPassword: preHandlerHookHandler = async (
     return;
   }
   if (
-    authInfo.username !== config.username ||
-    authInfo.password !== config.password
+    authInfo.username !== config.lde_username ||
+    authInfo.password !== config.lde_password
   ) {
     request.server.log.warn(
-      `Invalid credentials provided to access ${request.url}. Username provided: ${authInfo.username} (expected: ${config.username})`
+      `Invalid credentials provided to access ${request.url}. Username provided: ${authInfo.username} (expected: ${config.lde_username})`
     );
     if (request.url.endsWith('/test')) {
       return reply
