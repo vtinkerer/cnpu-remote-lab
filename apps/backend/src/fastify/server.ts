@@ -40,9 +40,9 @@ export type AppDependenciesOverrides = {
 };
 
 const envFilePath = path.resolve(process.cwd(), '.env');
-console.log('envFilePath', envFilePath);
+// console.log('envFilePath', envFilePath);
 const fileContent = fs.readFileSync(envFilePath, 'utf8');
-console.log('fileContent', fileContent);
+// console.log('fileContent', fileContent);
 
 export function buildApp() {
   const server = fastify({

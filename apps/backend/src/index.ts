@@ -2,6 +2,8 @@ import { Logger } from './logger/logger';
 import { buildApp } from './fastify/server';
 require('dotenv').config();
 
+console.log('env: ', process.env);
+
 async function main() {
   const server = buildApp();
   server.listen({ port: 3000 }, (err, address) => {
