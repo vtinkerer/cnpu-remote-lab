@@ -26,6 +26,7 @@ import {
 import { IMcuSender } from '../core/interfaces/mcu-sender.interface';
 import { ClientDisconnectTimeoutAdapter } from '../adapters/client-disconnect-timeout.adapter';
 import { createFakeUserSessionPlugin } from '../fakes/user-session.fake';
+import path from 'node:path';
 
 export type AppDependenciesOverrides = {
   mcu?: {
@@ -36,6 +37,9 @@ export type AppDependenciesOverrides = {
     reader: IScopeReader;
   };
 };
+
+const envFilePath = path.resolve(process.cwd(), '.env');
+console.log('envFilePath', envFilePath);
 
 export function buildApp() {
   const server = fastify({
@@ -52,7 +56,10 @@ export function buildApp() {
   server.register(fastifyEnv, {
     confKey: 'config',
     schema: configSchema,
-    dotenv: true,
+    dotenv: {
+      path: envFilePath,
+    },
+    // env,
   });
 
   // Decorators
