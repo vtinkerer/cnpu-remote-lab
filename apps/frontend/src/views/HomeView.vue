@@ -37,35 +37,95 @@ const m = ref(0);
 
 <template>
   <header class="sticky-header">
-    <div>{{ store.timeLeft }}</div>
+    <div> Time left: {{ store.timeLeft }}</div>
   </header>
-  <div class="background">
-    <Section>
-      <ScopeChart style="flex: 1"></ScopeChart>
-    </Section>
-    <Section style="display: flex; height: 35vh; padding: auto">
-      <UserInputVIn class="input" />
-      <UserInputILoad class="input" />
-      <UserInputCapacitor class="input" />
-      <UserInputPWM class="input" />
-      <UserInputPWMType class="input" />
-    </Section>
-    <Section style="display: flex; height: 15vh; padding: auto">
-      <RealVin class="output" />
-      <RealILoad class="output" />
-      <RealCapacity class="output" />
-      <RealPWM class="output" />
-    </Section>
-    <Section>
-      <VoutGraph />
-    </Section>
+  
+  <div class="background container-fluid">
+
+    <div class="row">
+
+      <!-- 1st component (Schematic Diagram) -->
+      <div class="col-md-6 border border-dark" style="background-color:lavender;">
+
+        <Section>
+          <h2 class="font-weight-bold text-center">DC-DC Buck Converter - Schematic Diagramm</h2>
+          <div class="container-overwritten">
+            
+        
+            <img class="img-fluid" src="../img/buck.svg"/>
+         
+            
+              <UserInputVIn class="btn-vin" />
+              <UserInputILoad class="btn-iload" />
+              <UserInputCapacitor class="btn-icap" />
+              <UserInputPWM class="btn-ipwm" />
+              <UserInputPWMType class="btn-ipwm-type" />
+          </div>
+        </Section>   
+      
+      </div>
+    
+      <div class="col-md-6 border border-dark" style="background-color:lavender;">
+    
+        <Section>
+          <h2 class="font-weight-bold text-center">Experiment recommendations</h2>
+          <div>
+            <p class="lead numbered-paragraph">1. Set Manual PWM mode.</p>
+            <p class="lead numbered-paragraph">2. Set desired  PWM mode.</p>
+            <p class="lead numbered-paragraph">3. Set initial value of PWM duty cycle.</p>
+            <p class="lead numbered-paragraph">4. Add point to "Output voltage vs PWM" chart.</p>
+            <p class="lead numbered-paragraph">5. Increase the level of PWM duty cycle.</p>
+            <p class="lead numbered-paragraph">6. Repeat 4 and 5 until PWM duty cycle 100%.</p>
+            <p class="lead numbered-paragraph">7. Save "Output voltage vs PWM" chart.</p>
+          </div>
+        </Section>
+      </div>
+
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 border border-dark" style="background-color:lavender;">
+        <Section>
+          <h2 class="font-weight-bold text-center">Oscilloscope</h2>
+          <ScopeChart style="flex: 1"></ScopeChart>
+        </Section>
+      </div>
+
+      <div class="col-md-6 border border-dark" style="background-color:lavender;">
+
+        <Section>
+          <h2 class="font-weight-bold text-center">Output Voltage vs PWM</h2>
+          <VoutGraph />
+          <div class="row" align="center">
+            <div class="col">
+              <button class="btn btn-lg btn-warning"></button>
+            </div>
+            <div class="col">
+              <button class="btn btn-lg btn-warning"></button>
+            </div>
+            <div class="col">
+              <button class="btn btn-lg btn-warning"></button>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              <p class="font-italic text-center">Add Point</p>
+            </div>
+            <div class="col">
+              <p class="font-italic text-center">Save Chart</p>
+            </div>
+            <div class="col">
+              <p class="font-italic text-center">Reset Chart</p>
+            </div>
+          </div>  
+        </Section>
+      </div>
+    </div>
   </div>
 </template>
 
 <style>
 .input {
-  flex: 1;
-  display: flex;
   align-items: center;
 }
 .output {
@@ -88,4 +148,106 @@ const m = ref(0);
   display: flex;
   flex-direction: column;
 }
+
+.numbered-paragraph {
+  margin: 0px; 
+  margin-left: 30px;
+}
+
+.img-overlay:before {
+  content: ' ';
+  display: block;
+  height: 50%;
+}
+
+.img-overlay {
+  position: absolute;
+  top: 0;
+  bottom: 25;
+  left: 0;
+  right: 0;
+  text-align: center;
+}
+
+.img-wrapper {
+  position: relative;
+}
+
+
+/* Make the image responsive */
+.container-overwritten img {
+  width: 100%;
+  height: auto;
+}
+
+.container-overwritten .btn-vin {
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: scale(0.3);
+  font-size: 16px;
+  padding: 1px 1px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.container-overwritten .btn-ipwm {
+  position: absolute;
+  top: 50%;
+  left: 70%;
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: scale(0.3);
+  font-size: 16px;
+  padding: 1px 1px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.container-overwritten .btn-ipwm-type {
+  position: absolute;
+  top: 50%;
+  left: 90%;
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: scale(0.3);
+  font-size: 16px;
+  padding: 1px 1px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.container-overwritten .btn-iload {
+  position: absolute;
+  top: 50%;
+  left: 30%;
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: scale(0.3);
+  font-size: 16px;
+  padding: 1px 1px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.container-overwritten .btn-icap {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: scale(0.3);
+  font-size: 16px;
+  padding: 1px 1px;
+  border: none;
+  cursor: pointer;
+  border-radius: 1px;
+}
+
 </style>
