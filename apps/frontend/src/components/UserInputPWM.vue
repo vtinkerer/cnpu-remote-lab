@@ -17,7 +17,7 @@ watch(value, (newValue) => {
 </script>
 
 <template>
-  <div style="display: flex; flex-direction: column">
+  <div class="fst-italic" style="font-size: 12px; text-align: center; display: flex; flex-direction: column">
     PWM (%)
     <MyRoundSlider :max="100" v-model="value" :step="1" />
   </div>

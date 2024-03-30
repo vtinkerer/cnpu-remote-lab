@@ -5,5 +5,5 @@ const store = useBackendDataStore();
 </script>
 
 <template>
-  <div>PWM = {{ store.realPWMDC }}</div>
+  <div>PWM = {{ store.realPWMDC }} %</div>
 </template>

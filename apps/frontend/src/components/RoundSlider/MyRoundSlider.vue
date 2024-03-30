@@ -15,8 +15,9 @@ const model = defineModel();
 onMounted(() => {
   const id = '#' + randomRoundSliderId.value;
   $(id).roundSlider({
-    radius: 120,
-    handleSize: '+16',
+    width: 10,
+    radius: 23,
+    handleSize: 7,
     sliderType: 'min-range',
     // circleShape: 'pie',
     value: model.value,
@@ -272,7 +273,7 @@ onMounted(() => {
 }
 .rs-tooltip-text {
   font-family: verdana;
-  font-size: 13px;
+  font-size: 9px;
   border-radius: 7px;
   text-align: center;
   color: inherit;
@@ -369,7 +370,7 @@ onMounted(() => {
   box-shadow: 0px 0px 4px 0px #000;
 }
 .rs-tooltip-text {
-  font-size: 26px;
+  font-size: 13px;
   font-weight: 500;
   font-family: Avenir, Tahoma, Verdana, sans-serif;
 }
@@ -386,7 +387,7 @@ onMounted(() => {
 }
 
 .rs-tooltip-text {
-  font-size: 26px;
+  font-size: 13px;
   font-weight: 500;
   font-family: Avenir, Tahoma, Verdana, sans-serif;
 }

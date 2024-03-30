@@ -17,8 +17,8 @@ watch(value, (newValue) => {
 </script>
 
 <template>
-  <div style="display: flex; flex-direction: column">
-    Iload (mA)
+  <div class="fst-italic" style="font-size: 12px; text-align: center;">
+    R<sub>Load</sub>(&Omega;)
     <MyRoundSlider :max="2000" v-model="value" :step="1" />
   </div>
 </template>

@@ -5,5 +5,5 @@ const store = useBackendDataStore();
 </script>
 
 <template>
-  <div>Cf = {{ store.realCf }}</div>
+  <div>C<sub>F</sub> = {{ store.realCf }} pF</div>
 </template>
