@@ -5,5 +5,5 @@ const store = useBackendDataStore();
 </script>
 
 <template>
-  <div>R<sub>Load</sub> = {{ store.realIload }} &Omega;</div>
+  <div>{{ store.realIload }} &Omega;</div>
 </template>

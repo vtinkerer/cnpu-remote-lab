@@ -98,28 +98,7 @@ const m = ref(0);
         <Section>
           <h3 class="font-weight-bold text-center">Output Voltage vs PWM</h3>
           <VoutGraph />
-          <div class="row" align="center">
-            <div class="col">
-              <button class="btn btn-lg btn-warning"></button>
-            </div>
-            <div class="col">
-              <button class="btn btn-lg btn-warning"></button>
-            </div>
-            <div class="col">
-              <button class="btn btn-lg btn-warning"></button>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col">
-              <p class="fst-italic text-center">Add Point</p>
-            </div>
-            <div class="col">
-              <p class="fst-italic text-center">Save Chart</p>
-            </div>
-            <div class="col">
-              <p class="fst-italic text-center">Reset Chart</p>
-            </div>
-          </div>  
+            
         </Section>
       </div>
     </div>
@@ -199,7 +178,7 @@ const m = ref(0);
 .container-overwritten .btn-rload {
   position: absolute;
   top: 58%;
-  left: 84%;
+  left: 96%;
   font-size: 16px;
   transform: translate(-50%, -50%);
   padding: 1px 1px;
@@ -244,7 +223,7 @@ const m = ref(0);
 .container-overwritten .real-rload {
   position: absolute;
   top: 27%;
-  left: 84%;
+  left: 96%;
   transform: translate(-50%, -50%);
   font-size: 12px;
   padding: 1px;

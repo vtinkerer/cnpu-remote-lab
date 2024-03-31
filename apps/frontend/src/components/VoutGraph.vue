@@ -32,13 +32,13 @@ Chart.register(
 
 const store = useBackendDataStore();
 
-const graphData = ref<{ pwm: number; voltage: number }[]>([]);
+const graphData = ref<{ pwm: number; voltage: number;}[]>([]);
 const chartRef = ref<HTMLCanvasElement | null>(null);
 let chart: Chart | null = null;
 
+// handler for 'Add point' button 
 const addPoint = () => {
   const indexToInsert = graphData.value.findIndex((element) => element.pwm >= store.realPWMDC);
-
   // If the point already exists, update it
   if (graphData.value[indexToInsert]?.pwm === store.realPWMDC) {
     graphData.value[indexToInsert].voltage = store.realVin;
@@ -60,12 +60,26 @@ const addPoint = () => {
   });
 };
 
+// handler for 'Save chart' button 
+const saveAsImage = () => {
+    if (!chart) {
+      return;
+    }
+    let a = document.createElement('a');
+    a.href = chart.toBase64Image();
+    a.download = "buck_v_vs_pwm.png";
+    a.click();
+};
+
+// handler for 'Reset chart' button 
 const clearData = () => {
   graphData.value = [];
 };
 
+
 const renderScope = () => {
   const ctx = chartRef.value?.getContext('2d');
+  console.log(graphData);
   if (!ctx) {
     return;
   }
@@ -75,12 +89,15 @@ const renderScope = () => {
   }
 
   chart = new Chart(ctx, {
+    type: 'line',
     data: {
       labels: graphData.value.map((val) => val.pwm),
       datasets: [
         {
           type: 'line',
           label: 'Voltage',
+          borderColor: '#3062b3',
+          backgroundColor: '#3062b3',
           data: graphData.value.map((val) => val.voltage),
           cubicInterpolationMode: 'monotone',
           tension: 0.4,
@@ -88,21 +105,74 @@ const renderScope = () => {
       ],
     },
     options: {
+      parsing: {
+      xAxisKey: 'pwm',
+      yAxisKey: 'voltage',
+    },
       maintainAspectRatio: false,
-      responsive: true,
+      responsive: true, 
+      scales: {
+        x: {
+          beginAtZero: true,
+          type: 'linear',
+          min: 0,
+          max: 100,
+          ticks: {
+            stepSize: 10,
+          },
+          title: {
+          display: true,
+          text: 'PWM, %',
+          color: '#911',  
+        }
+        },
+        y: { 
+          beginAtZero: true,
+          min: 0,
+          max: 22,
+          ticks: {
+            stepSize: 2,
+          },
+          title: {
+          display: true,
+          text: 'Voltage, V',
+          color: '#3062b3',  
+        }
+          
+        },
+      },
       datasets: {
         line: {
           animation: {
             duration: 0,
           },
         },
+        
       },
+      
     },
   });
 };
 
+
 onMounted(() => {
   renderScope();
+});
+
+// needed for making output image non-transparent
+Chart.register({
+  id: 'customBackground',
+  beforeDraw: (chart, args, opts) => {
+    const ctx = chart.canvas.getContext('2d');
+    if (!ctx) {
+      return;
+    }
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-over';
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, chart.width, chart.height);
+    ctx.restore();
+  }
 });
 
 watch(
@@ -114,12 +184,46 @@ watch(
 );
 </script>
 
+
 <template>
   <div style="text-align: center">
     <div style="position: relative; height: 40vh; width: 40vw; margin: auto">
       <canvas ref="chartRef"></canvas>
     </div>
-    <button @click="addPoint">Add PWM={{ store.realPWMDC }}, Vin={{ store.realVin }}</button>
-    <button @click="clearData">Clear</button>
+    <div class="point-info">
+      Point: PWM={{ store.realPWMDC }}, Vin={{ store.realVin }}
+    </div>
+  </div>
+  <div class="row" align="center">
+    <div class="col">
+      <button class="btn btn-lg btn-warning"@click="addPoint"></button>
+    </div>
+    <div class="col">
+      <button class="btn btn-lg btn-warning" @click="saveAsImage"></button>
+    </div>
+    <div class="col">
+      <button class="btn btn-lg btn-warning" @click="clearData"></button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <p class="fst-italic text-center">Add Point</p>
+    </div>
+    <div class="col">
+      <p class="fst-italic text-center">Save Chart</p>
+    </div>
+    <div class="col">
+      <p class="fst-italic text-center">Reset Chart</p>
+    </div>
   </div>
 </template>
+
+
+<style>
+.point-info {
+  width: auto;
+  padding: 1px;
+  border: 1px solid black;
+  background-color: white;
+}
+</style>

@@ -5,5 +5,5 @@ const store = useBackendDataStore();
 </script>
 
 <template>
-  <div>V<sub>in</sub> = {{ store.realVin }} V</div>
+  <div>{{ store.realVin }} V</div>
 </template>
