@@ -188,18 +188,7 @@ watch(
   </div>
   <div class="row" align="center">
     <div class="col">
-      <button class="btn btn-lg btn-warning" @click="addPoint"></button>
-    </div>
-    <div class="col">
-      <button class="btn btn-lg btn-warning" @click="saveAsImage"></button>
-    </div>
-    <div class="col">
-      <button class="btn btn-lg btn-warning" @click="clearData"></button>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col">
-      <p class="fst-italic text-center">Add Point</p>
+      <p class="btn btn-md btn-primary"@click="addPoint">Add Point</p>
     </div>
     <div class="col">
       <button class="btn btn-md btn-primary"@click="saveAsImage">Save Chart</button>
