@@ -33,6 +33,7 @@ const store = useBackendDataStore();
 store.setSessionId(session_id!);
 store.getIsActive();
 store.connectToWebSocket();
+
 const m = ref(0);
 </script>
 
@@ -58,11 +59,16 @@ const m = ref(0);
               <RealPWM class="real-pwm"/>
               <RealCapacity class="real-capacity"/>
               <RealILoad class="real-rload"/>
+              
               <RealVLoad class="real-vload"/>
-
+              
               <UserInputVIn class="btn-vin" />
-              <UserInputVLoad class="btn-vload"/>
-              <UserInputPWM class="btn-ipwm" />
+              <div v-if="store.typePWM.pwmType === 'auto'">
+                <UserInputVLoad class="btn-vload"/>
+              </div>
+              <div v-if="store.typePWM.pwmType === 'manual'">
+                <UserInputPWM class="btn-ipwm" />
+              </div>
               <UserInputCapacitor class="btn-icap" />
               <UserInputILoad class="btn-rload" />
               <UserInputPWMType class="btn-ipwm-type"/>
@@ -200,7 +206,7 @@ const m = ref(0);
   font-size: 12px;
   padding: 1px;
   border: 1px solid black;
-  background-color: white;
+  background-color: #deded9;
 }
 
 .container-overwritten .real-pwm {
@@ -210,8 +216,9 @@ const m = ref(0);
   transform: translate(-50%, -50%);
   font-size: 12px;
   padding: 1px;
+  border-radius: 5px;
   border: 1px solid black;
-  background-color: white;
+  background-color:#deded9;
 }
 
 .container-overwritten .real-capacity {
@@ -221,8 +228,9 @@ const m = ref(0);
   transform: translate(-50%, -50%);
   font-size: 12px;
   padding: 1px;
+  border-radius: 5px;
   border: 1px solid black;
-  background-color: white;  
+  background-color: #deded9;  
 }
 
 .container-overwritten .real-rload {
@@ -232,8 +240,9 @@ const m = ref(0);
   transform: translate(-50%, -50%);
   font-size: 12px;
   padding: 1px;
+  border-radius: 5px;
   border: 1px solid black;
-  background-color: white;
+  background-color: #deded9;
 }
 
 .container-overwritten .real-vload {
@@ -243,8 +252,9 @@ const m = ref(0);
   transform: translate(-50%, -50%);
   font-size: 12px;
   padding: 1px;
+  border-radius: 5px;
   border: 1px solid black;
-  background-color: white;
+  background-color: #deded9;
 }
 
 .container-overwritten .btn-vload {

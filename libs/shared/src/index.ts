@@ -6,7 +6,7 @@ export { ServerToClientDTO } from './websocket/server-to-client/server-to-client
 export { VoltageInputDTO } from './websocket/client-to-server/dto/voltage-input.dto';
 export { CurrentLoad } from './websocket/client-to-server/dto/current-load.dto';
 export { PWM } from './websocket/client-to-server/dto/pwm.dto';
-export { PWMType } from './websocket/client-to-server/dto/pwm-type.dto';
+export * from './websocket/client-to-server/dto/pwm-type.dto';
 export { CapacitorInput } from './websocket/client-to-server/dto/capacitor-input.dto';
 export * from './websocket/server-to-client/dto/scope-data.dto';
 export * from './websocket/server-to-client/dto/voltage-input-real.dto';

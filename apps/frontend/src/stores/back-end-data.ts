@@ -9,6 +9,8 @@ import {
   isScopeDataDto,
   isSessionIsOverDto,
   isVoltageInputRealDto,
+  isVoltageOutputDto,
+  isPWMTypeDto,
 } from '@cnpu-remote-lab-nx/shared';
 import type { ClientToServerDTO, ScopeData } from '@cnpu-remote-lab-nx/shared';
 import { DateTime, Duration } from 'luxon';
@@ -22,6 +24,9 @@ export const useBackendDataStore = defineStore('backend-data', () => {
   const realIload = ref(0);
   const realCf = ref(0);
   const realPWMDC = ref(0);
+  const VOut = ref(0);
+  const typePWM = ref({pwmType: 'auto'});
+
   function connectToWebSocket() {
     if (!sessionId.value) {
       throw new Error('Session ID not provided');
@@ -66,6 +71,16 @@ export const useBackendDataStore = defineStore('backend-data', () => {
         realPWMDC.value = dto.pwmPercentage;
         return;
       }
+
+      if (isVoltageOutputDto(dto)) {
+        VOut.value = dto.voltage;
+        return;
+      }
+
+      if (isPWMTypeDto(dto)) {
+        typePWM.value.pwmType = dto.pwmType;
+      }
+
     };
   }
 
@@ -111,5 +126,7 @@ export const useBackendDataStore = defineStore('backend-data', () => {
     realCf,
     realPWMDC,
     timeLeft,
+    VOut,
+    typePWM,
   };
 });

@@ -9,6 +9,8 @@ const store = useBackendDataStore();
 watch(isChecked, (isChecked) => {
   console.log(isChecked);
   if (isChecked) {
+    console.log("typePWM:" + store.typePWM.pwmType);
+    store.typePWM = new PWMType({pwmType: 'manual'});
     store.sendToWebSocket(
     new PWMType({
       pwmType: 'manual',
@@ -16,9 +18,11 @@ watch(isChecked, (isChecked) => {
   );
 
   } else {
-  store.sendToWebSocket(
-    new PWMType({
-      pwmType: 'auto',
+    console.log("typePWM:" + store.typePWM.pwmType);
+    store.typePWM = new PWMType({pwmType: 'auto'});
+    store.sendToWebSocket(
+      new PWMType({
+        pwmType: 'auto',
     }),
   );
   }

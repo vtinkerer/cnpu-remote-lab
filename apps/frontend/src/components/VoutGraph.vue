@@ -32,7 +32,7 @@ Chart.register(
 
 const store = useBackendDataStore();
 
-const graphData = ref<{ pwm: number; voltage: number;}[]>([]);
+const graphData = ref<{ pwm: number; voltage: number }[]>([]);
 const chartRef = ref<HTMLCanvasElement | null>(null);
 let chart: Chart | null = null;
 
@@ -41,7 +41,7 @@ const addPoint = () => {
   const indexToInsert = graphData.value.findIndex((element) => element.pwm >= store.realPWMDC);
   // If the point already exists, update it
   if (graphData.value[indexToInsert]?.pwm === store.realPWMDC) {
-    graphData.value[indexToInsert].voltage = store.realVin;
+    graphData.value[indexToInsert].voltage = store.VOut;
     return;
   }
 
@@ -49,26 +49,26 @@ const addPoint = () => {
   if (indexToInsert === -1) {
     return graphData.value.push({
       pwm: store.realPWMDC,
-      voltage: store.realVin,
+      voltage: store.VOut,
     });
   }
 
   // If there's a point bigger than the current one, insert it in the right place and shift all the others
   graphData.value.splice(indexToInsert, 0, {
     pwm: store.realPWMDC,
-    voltage: store.realVin,
+    voltage: store.VOut,
   });
 };
 
 // handler for 'Save chart' button 
 const saveAsImage = () => {
-    if (!chart) {
-      return;
-    }
-    let a = document.createElement('a');
-    a.href = chart.toBase64Image();
-    a.download = "buck_v_vs_pwm.png";
-    a.click();
+  if (!chart) {
+    return;
+  }
+  let a = document.createElement('a');
+  a.href = chart.toBase64Image();
+  a.download = 'buck_v_vs_pwm.png';
+  a.click();
 };
 
 // handler for 'Reset chart' button 
@@ -191,7 +191,7 @@ watch(
       <canvas ref="chartRef"></canvas>
     </div>
     <div class="point-info">
-      Point: PWM={{ store.realPWMDC }}, Vin={{ store.realVin }}
+      Point: PWM={{ store.realPWMDC }}, Vin={{ store.VOut }}
     </div>
   </div>
   <div class="row" align="center">
@@ -199,10 +199,10 @@ watch(
       <button class="btn btn-md btn-primary"@click="addPoint">Add Point</button>
     </div>
     <div class="col">
-      <button class="btn btn-md btn-primary" @click="saveAsImage">Save Chart</button>
+      <button class="btn btn-md btn-primary"@click="saveAsImage">Save Chart</button>
     </div>
     <div class="col">
-      <button class="btn btn-md btn-primary" @click="clearData">Reset Chart</button>
+      <button class="btn btn-md btn-primary"@click="clearData">Reset Chart</button>
     </div>
   </div>
 </template>
