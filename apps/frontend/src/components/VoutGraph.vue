@@ -36,7 +36,7 @@ const graphData = ref<{ pwm: number; voltage: number }[]>([]);
 const chartRef = ref<HTMLCanvasElement | null>(null);
 let chart: Chart | null = null;
 
-// handler for 'Add point' button 
+// handler for 'Add point' button
 const addPoint = () => {
   const indexToInsert = graphData.value.findIndex((element) => element.pwm >= store.realPWMDC);
   // If the point already exists, update it
@@ -60,7 +60,7 @@ const addPoint = () => {
   });
 };
 
-// handler for 'Save chart' button 
+// handler for 'Save chart' button
 const saveAsImage = () => {
   if (!chart) {
     return;
@@ -71,11 +71,10 @@ const saveAsImage = () => {
   a.click();
 };
 
-// handler for 'Reset chart' button 
+// handler for 'Reset chart' button
 const clearData = () => {
   graphData.value = [];
 };
-
 
 const renderScope = () => {
   const ctx = chartRef.value?.getContext('2d');
@@ -106,11 +105,11 @@ const renderScope = () => {
     },
     options: {
       parsing: {
-      xAxisKey: 'pwm',
-      yAxisKey: 'voltage',
-    },
+        xAxisKey: 'pwm',
+        yAxisKey: 'voltage',
+      },
       maintainAspectRatio: false,
-      responsive: true, 
+      responsive: true,
       scales: {
         x: {
           beginAtZero: true,
@@ -121,12 +120,12 @@ const renderScope = () => {
             stepSize: 10,
           },
           title: {
-          display: true,
-          text: 'PWM, %',
-          color: '#911',  
-        }
+            display: true,
+            text: 'PWM, %',
+            color: '#911',
+          },
         },
-        y: { 
+        y: {
           beginAtZero: true,
           min: 0,
           max: 22,
@@ -134,11 +133,10 @@ const renderScope = () => {
             stepSize: 2,
           },
           title: {
-          display: true,
-          text: 'Voltage, V',
-          color: '#3062b3',  
-        }
-          
+            display: true,
+            text: 'Voltage, V',
+            color: '#3062b3',
+          },
         },
       },
       datasets: {
@@ -147,13 +145,10 @@ const renderScope = () => {
             duration: 0,
           },
         },
-        
       },
-      
     },
   });
 };
-
 
 onMounted(() => {
   renderScope();
@@ -172,7 +167,7 @@ Chart.register({
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, chart.width, chart.height);
     ctx.restore();
-  }
+  },
 });
 
 watch(
@@ -184,19 +179,27 @@ watch(
 );
 </script>
 
-
 <template>
   <div style="text-align: center">
     <div style="position: relative; height: 40vh; width: 40vw; margin: auto">
       <canvas ref="chartRef"></canvas>
     </div>
-    <div class="point-info">
-      Point: PWM={{ store.realPWMDC }}, Vin={{ store.VOut }}
-    </div>
+    <div class="point-info">Point: PWM={{ store.realPWMDC }}, VOut={{ store.VOut }}</div>
   </div>
   <div class="row" align="center">
     <div class="col">
-      <button class="btn btn-md btn-primary"@click="addPoint">Add Point</button>
+      <button class="btn btn-lg btn-warning" @click="addPoint"></button>
+    </div>
+    <div class="col">
+      <button class="btn btn-lg btn-warning" @click="saveAsImage"></button>
+    </div>
+    <div class="col">
+      <button class="btn btn-lg btn-warning" @click="clearData"></button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <p class="fst-italic text-center">Add Point</p>
     </div>
     <div class="col">
       <button class="btn btn-md btn-primary"@click="saveAsImage">Save Chart</button>
@@ -206,7 +209,6 @@ watch(
     </div>
   </div>
 </template>
-
 
 <style>
 .point-info {
