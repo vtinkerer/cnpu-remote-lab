@@ -32,16 +32,16 @@ Chart.register(
 
 const store = useBackendDataStore();
 
-const graphData = ref<{ pwm: number; voltage: number;}[]>([]);
+const graphData = ref<{ pwm: number; voltage: number }[]>([]);
 const chartRef = ref<HTMLCanvasElement | null>(null);
 let chart: Chart | null = null;
 
-// handler for 'Add point' button 
+// handler for 'Add point' button
 const addPoint = () => {
   const indexToInsert = graphData.value.findIndex((element) => element.pwm >= store.realPWMDC);
   // If the point already exists, update it
   if (graphData.value[indexToInsert]?.pwm === store.realPWMDC) {
-    graphData.value[indexToInsert].voltage = store.realVin;
+    graphData.value[indexToInsert].voltage = store.VOut;
     return;
   }
 
@@ -49,33 +49,32 @@ const addPoint = () => {
   if (indexToInsert === -1) {
     return graphData.value.push({
       pwm: store.realPWMDC,
-      voltage: store.realVin,
+      voltage: store.VOut,
     });
   }
 
   // If there's a point bigger than the current one, insert it in the right place and shift all the others
   graphData.value.splice(indexToInsert, 0, {
     pwm: store.realPWMDC,
-    voltage: store.realVin,
+    voltage: store.VOut,
   });
 };
 
-// handler for 'Save chart' button 
+// handler for 'Save chart' button
 const saveAsImage = () => {
-    if (!chart) {
-      return;
-    }
-    let a = document.createElement('a');
-    a.href = chart.toBase64Image();
-    a.download = "buck_v_vs_pwm.png";
-    a.click();
+  if (!chart) {
+    return;
+  }
+  let a = document.createElement('a');
+  a.href = chart.toBase64Image();
+  a.download = 'buck_v_vs_pwm.png';
+  a.click();
 };
 
-// handler for 'Reset chart' button 
+// handler for 'Reset chart' button
 const clearData = () => {
   graphData.value = [];
 };
-
 
 const renderScope = () => {
   const ctx = chartRef.value?.getContext('2d');
@@ -106,11 +105,11 @@ const renderScope = () => {
     },
     options: {
       parsing: {
-      xAxisKey: 'pwm',
-      yAxisKey: 'voltage',
-    },
+        xAxisKey: 'pwm',
+        yAxisKey: 'voltage',
+      },
       maintainAspectRatio: false,
-      responsive: true, 
+      responsive: true,
       scales: {
         x: {
           beginAtZero: true,
@@ -121,12 +120,12 @@ const renderScope = () => {
             stepSize: 10,
           },
           title: {
-          display: true,
-          text: 'PWM, %',
-          color: '#911',  
-        }
+            display: true,
+            text: 'PWM, %',
+            color: '#911',
+          },
         },
-        y: { 
+        y: {
           beginAtZero: true,
           min: 0,
           max: 22,
@@ -134,11 +133,10 @@ const renderScope = () => {
             stepSize: 2,
           },
           title: {
-          display: true,
-          text: 'Voltage, V',
-          color: '#3062b3',  
-        }
-          
+            display: true,
+            text: 'Voltage, V',
+            color: '#3062b3',
+          },
         },
       },
       datasets: {
@@ -147,13 +145,10 @@ const renderScope = () => {
             duration: 0,
           },
         },
-        
       },
-      
     },
   });
 };
-
 
 onMounted(() => {
   renderScope();
@@ -172,7 +167,7 @@ Chart.register({
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, chart.width, chart.height);
     ctx.restore();
-  }
+  },
 });
 
 watch(
@@ -184,19 +179,16 @@ watch(
 );
 </script>
 
-
 <template>
   <div style="text-align: center">
     <div style="position: relative; height: 40vh; width: 40vw; margin: auto">
       <canvas ref="chartRef"></canvas>
     </div>
-    <div class="point-info">
-      Point: PWM={{ store.realPWMDC }}, Vin={{ store.realVin }}
-    </div>
+    <div class="point-info">Point: PWM={{ store.realPWMDC }}, VOut={{ store.VOut }}</div>
   </div>
   <div class="row" align="center">
     <div class="col">
-      <button class="btn btn-lg btn-warning"@click="addPoint"></button>
+      <button class="btn btn-lg btn-warning" @click="addPoint"></button>
     </div>
     <div class="col">
       <button class="btn btn-lg btn-warning" @click="saveAsImage"></button>
@@ -217,7 +209,6 @@ watch(
     </div>
   </div>
 </template>
-
 
 <style>
 .point-info {

@@ -2,7 +2,11 @@ import EventEmitter from 'node:events';
 import { IMcuReceiver } from '../client-interfaces/mcu/mcu.plugin';
 import { IMcuSender } from '../core/interfaces/mcu-sender.interface';
 import { Logger } from '../logger/logger';
-import { PWMReal, VoltageInputReal } from '@cnpu-remote-lab-nx/shared';
+import {
+  PWMReal,
+  VoltageInputReal,
+  VoltageOutputDto,
+} from '@cnpu-remote-lab-nx/shared';
 
 export function createFakeSerialPort(logger: Logger): {
   receiver: IMcuReceiver;
@@ -13,12 +17,19 @@ export function createFakeSerialPort(logger: Logger): {
   setInterval(() => {
     const PWM = Math.floor(Math.random() * 100);
     const Vin = Math.floor(Math.random() * 24);
+    const Vout = Math.floor(Math.random() * 24);
 
     events.emit('data', new VoltageInputReal({ voltage: Vin }));
     events.emit(
       'data',
       new PWMReal({
         pwmPercentage: PWM,
+      })
+    );
+    events.emit(
+      'data',
+      new VoltageOutputDto({
+        voltage: Vout,
       })
     );
   }, 1500);
