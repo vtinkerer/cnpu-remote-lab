@@ -196,24 +196,13 @@ watch(
   </div>
   <div class="row" align="center">
     <div class="col">
-      <button class="btn btn-lg btn-warning"@click="addPoint"></button>
+      <button class="btn btn-md btn-primary"@click="addPoint">Add Point</button>
     </div>
     <div class="col">
-      <button class="btn btn-lg btn-warning" @click="saveAsImage"></button>
+      <button class="btn btn-md btn-primary" @click="saveAsImage">Save Chart</button>
     </div>
     <div class="col">
-      <button class="btn btn-lg btn-warning" @click="clearData"></button>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col">
-      <p class="fst-italic text-center">Add Point</p>
-    </div>
-    <div class="col">
-      <p class="fst-italic text-center">Save Chart</p>
-    </div>
-    <div class="col">
-      <p class="fst-italic text-center">Reset Chart</p>
+      <button class="btn btn-md btn-primary" @click="clearData">Reset Chart</button>
     </div>
   </div>
 </template>
@@ -223,6 +212,7 @@ watch(
 .point-info {
   width: auto;
   padding: 1px;
+  margin: 5px;
   border: 1px solid black;
   background-color: white;
 }

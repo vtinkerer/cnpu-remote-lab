@@ -1,17 +1,19 @@
 <script setup lang="ts">
 import Section from '../components/Section.vue';
-import ScopeChart from '../components/ScopeChart.vue';
 import UserInputVIn from '../components/UserInputVIn.vue';
 import UserInputILoad from '../components/UserInputILoad.vue';
 import UserInputPWMType from '../components/UserInputPWMType.vue';
 import UserInputCapacitor from '../components/UserInputCapacitor.vue';
 import UserInputPWM from '../components/UserInputPWM.vue';
+import UserInputVLoad from '../components/UserInputVLoad.vue';
 
 import RealPWM from '../components/RealPWM.vue';
 import RealILoad from '../components/RealILoad.vue';
+import RealVLoad from '../components/RealVLoad.vue';
 import RealVin from '../components/RealVin.vue';
 import RealCapacity from '../components/RealCapacity.vue';
 
+import ScopeChart from '../components/ScopeChart.vue';
 import VoutGraph from '../components/VoutGraph.vue';
 
 import router from '../router';
@@ -21,9 +23,9 @@ import { ref } from 'vue';
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 const session_id = urlParams.get('session_id');
+
 if (!session_id) {
   console.log('before router push');
-
   router.push({ path: '/no-session-id-provided' });
   console.log('after router push');
 }
@@ -31,7 +33,6 @@ const store = useBackendDataStore();
 store.setSessionId(session_id!);
 store.getIsActive();
 store.connectToWebSocket();
-
 const m = ref(0);
 </script>
 
@@ -52,16 +53,20 @@ const m = ref(0);
           <div class="container-overwritten">
         
             <img class="img-fluid" src="../img/buck.svg"/>
-            
+            <div>
               <RealVin class="real-vin"/>
               <RealPWM class="real-pwm"/>
               <RealCapacity class="real-capacity"/>
               <RealILoad class="real-rload"/>
+              <RealVLoad class="real-vload"/>
+
               <UserInputVIn class="btn-vin" />
+              <UserInputVLoad class="btn-vload"/>
               <UserInputPWM class="btn-ipwm" />
               <UserInputCapacitor class="btn-icap" />
               <UserInputILoad class="btn-rload" />
-              <UserInputPWMType class="btn-ipwm-type" />
+              <UserInputPWMType class="btn-ipwm-type"/>
+            </div>
           </div>
         </Section>   
       
@@ -231,6 +236,27 @@ const m = ref(0);
   background-color: white;
 }
 
+.container-overwritten .real-vload {
+  position: absolute;
+  top: 27%;
+  left: 82%;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+  padding: 1px;
+  border: 1px solid black;
+  background-color: white;
+}
 
+.container-overwritten .btn-vload {
+  position: absolute;
+  top: 58%;
+  left: 82%;
+  font-size: 16px;
+  transform: translate(-50%, -50%);
+  padding: 1px 1px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
 
 </style>

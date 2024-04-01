@@ -56,6 +56,8 @@ const renderScope = () => {
         {
           type: 'line',
           label: 'Voltage',
+          borderColor: '#911',
+          backgroundColor: '#911',
           data: scopeData.value.map((val) => val.v),
         },
       ],

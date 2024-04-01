@@ -3,22 +3,31 @@ import { ref, watch } from 'vue';
 import { useBackendDataStore } from '../stores/back-end-data';
 import { PWMType } from '@cnpu-remote-lab-nx/shared';
 
-const value = ref('manual');
 const isChecked = ref(false);
 const store = useBackendDataStore();
 
-watch(value, (newValue) => {
+watch(isChecked, (isChecked) => {
+  console.log(isChecked);
+  if (isChecked) {
+    store.sendToWebSocket(
+    new PWMType({
+      pwmType: 'manual',
+    }), 
+  );
+
+  } else {
   store.sendToWebSocket(
     new PWMType({
-      pwmType: newValue as any,
+      pwmType: 'auto',
     }),
   );
+  }
 });
 </script>
 
 <template>
   <div>
-    <input type="checkbox" value="" id="check" v-model="value"/>
+    <input name="checkingbox" type="checkbox" id="check" v-model="isChecked"/>
     <label for="check" class="button"></label>    
   </div>
 </template>
