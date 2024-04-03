@@ -8,7 +8,7 @@ import './serializers/input-voltage.serializer';
 import './serializers/pwm-duty-cycle.serializer';
 import './serializers/pwm-type.serializer';
 import './serializers/resistance-load.serializer';
-import './serializers/voltage-output.serializer';
+import './serializers/output-voltage.serializer';
 import './serializers/load-type.serializer';
 
 import { SerialPort } from 'serialport';
