@@ -3,7 +3,7 @@ import { BaseMcuSerializer, McuSerializer } from '../mcu-serializer';
 
 @McuSerializer(VoltageInputDTO)
 export class InputVoltageSerializer extends BaseMcuSerializer {
-  key = 'Vin';
+  key = 'VIN';
 
   extractValue(dto: VoltageInputDTO): string {
     return dto.voltage.toFixed(2);

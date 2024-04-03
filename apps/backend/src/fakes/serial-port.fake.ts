@@ -3,8 +3,8 @@ import { IMcuReceiver } from '../client-interfaces/mcu/mcu.plugin';
 import { IMcuSender } from '../core/interfaces/mcu-sender.interface';
 import { Logger } from '../logger/logger';
 import {
-  PWMReal,
-  VoltageInputReal,
+  PWMDTO,
+  VoltageInputDTO,
   VoltageOutputDto,
 } from '@cnpu-remote-lab-nx/shared';
 
@@ -19,10 +19,10 @@ export function createFakeSerialPort(logger: Logger): {
     const Vin = Math.floor(Math.random() * 24);
     const Vout = Math.floor(Math.random() * 24);
 
-    events.emit('data', new VoltageInputReal({ voltage: Vin }));
+    events.emit('data', new VoltageInputDTO({ voltage: Vin }));
     events.emit(
       'data',
-      new PWMReal({
+      new PWMDTO({
         pwmPercentage: PWM,
       })
     );

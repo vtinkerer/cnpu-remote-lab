@@ -1,11 +1,11 @@
-import { PWMType } from '@cnpu-remote-lab-nx/shared';
+import { PWMTypeDTO } from '@cnpu-remote-lab-nx/shared';
 import { BaseMcuSerializer, McuSerializer } from '../mcu-serializer';
 
-@McuSerializer(PWMType)
+@McuSerializer(PWMTypeDTO)
 export class PwmTypeSerializer extends BaseMcuSerializer {
-  key = 'PWMtype';
+  key = 'MODE';
 
-  extractValue(dto: PWMType): string {
-    return dto.pwmType.toString();
+  extractValue(dto: PWMTypeDTO): string {
+    return dto.type.toString();
   }
 }

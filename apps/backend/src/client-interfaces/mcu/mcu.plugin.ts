@@ -1,8 +1,8 @@
 import fp from 'fastify-plugin';
 import {
-  CapacitorReal,
-  CurrentLoadReal,
-  PWMReal,
+  CapacitorDTO,
+  CurrentLoadDTO,
+  PWMDTO,
   VoltageOutputDto,
 } from '@cnpu-remote-lab-nx/shared';
 import { Logger } from '../../logger/logger';
@@ -15,9 +15,9 @@ import { createFakeSerialPort } from '../../fakes/serial-port.fake';
 
 export type McuMessage =
   | VoltageOutputDto
-  | PWMReal
-  | CapacitorReal
-  | CurrentLoadReal;
+  | PWMDTO
+  | CapacitorDTO
+  | CurrentLoadDTO;
 
 export interface IMcuReceiver {
   on(event: 'data', listener: (data: McuMessage) => void): void;

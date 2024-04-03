@@ -1,5 +1,5 @@
-import { ClientToServerDTO } from '@cnpu-remote-lab-nx/shared';
+import { BaseDto } from '@cnpu-remote-lab-nx/shared';
 
 export interface IMcuSender {
-  send<T extends ClientToServerDTO>(data: T): Promise<void>;
+  send<T extends BaseDto>(data: T): Promise<void>;
 }

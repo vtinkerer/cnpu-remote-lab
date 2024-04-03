@@ -1,4 +1,4 @@
-import { ServerToClientDTO } from '../server-to-client.base';
+import { BaseDto } from '../../dto.base';
 
 export type ScopePoint = {
   t: string;
@@ -10,7 +10,7 @@ export type ScopeData = ScopePoint[];
 export const isScopeDataDto = (dto: unknown): dto is ScopeDataDTO =>
   (dto as any).dtoName && (dto as any).dtoName === ScopeDataDTO.name;
 
-export class ScopeDataDTO implements ServerToClientDTO {
+export class ScopeDataDTO implements BaseDto {
   dtoName = ScopeDataDTO.name;
 
   scopeData: ScopeData;

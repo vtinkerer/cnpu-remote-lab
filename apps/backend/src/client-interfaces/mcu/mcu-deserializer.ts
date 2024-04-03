@@ -1,10 +1,8 @@
 import {
-  CapacitorReal,
-  ClientToServerDTO,
-  CurrentLoadReal,
-  PWMReal,
+  CurrentLoadDTO,
+  PWMDTO,
   ServerToClientDTO,
-  VoltageInputReal,
+  VoltageInputDTO,
   VoltageOutputDto,
 } from '@cnpu-remote-lab-nx/shared';
 import { Logger } from '../../logger/logger';
@@ -21,24 +19,36 @@ export class McuDeserializer {
     const [, key, value] = matches;
 
     // Convert the key-value pair to a DTO here
-    if (key === 'Vout') {
+    if (key === 'VOUT') {
       return new VoltageOutputDto({ voltage: parseFloat(value) });
     }
 
-    if (key === 'Vin') {
-      return new VoltageInputReal({ voltage: parseFloat(value) });
+    if (key === 'VIN') {
+      return new VoltageInputDTO({ voltage: parseFloat(value) });
     }
 
-    if (key === 'Iload') {
-      return new CurrentLoadReal({ mA: parseFloat(value) });
+    if (key === 'IL') {
+      return new CurrentLoadDTO({ mA: parseFloat(value) });
     }
 
-    if (key === 'Cf') {
-      return new CapacitorReal({ capacity: parseFloat(value) });
+    if (key === 'PWM') {
+      return new PWMDTO({ pwmPercentage: parseFloat(value) });
     }
 
-    if (key === 'PWMDC') {
-      return new PWMReal({ pwmPercentage: parseFloat(value) });
+    if (key === 'RL') {
+      return;
+    }
+
+    if (key === 'C') {
+    }
+
+    if (key === 'ERROR') {
+    }
+
+    if (key === 'MODE') {
+    }
+
+    if (key === 'LOAD') {
     }
 
     this.logger.warn(`Unknown key: ${key}`);

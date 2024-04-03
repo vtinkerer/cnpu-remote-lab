@@ -39,52 +39,48 @@ const m = ref(0);
 
 <template>
   <header class="sticky-header">
-    <div> Time left: {{ store.timeLeft }}</div>
+    <div>Time left: {{ store.timeLeft }}</div>
   </header>
-  
+
   <div class="background container-fluid">
-
     <div class="row">
-
       <!-- 1st component (Schematic Diagram) -->
-      <div class="col-lg-6 border border-dark" style="background-color:lavender;">
-
+      <div class="col-lg-6 border border-dark" style="background-color: lavender">
         <Section>
           <h3 class="font-weight-bold text-center">DC-DC Buck Converter - Schematic Diagramm</h3>
           <div class="container-overwritten">
-        
-            <img class="img-fluid" src="../img/buck.svg"/>
+            <img class="img-fluid" src="../img/buck.svg" />
             <div>
-              <RealVin class="real-vin"/>
-              <RealPWM class="real-pwm"/>
-              <RealCapacity class="real-capacity"/>
-              <RealILoad class="real-rload"/>
-              
-              <RealVLoad class="real-vload"/>
-              
+              <RealVin class="real-vin" />
+              <RealPWM class="real-pwm" />
+              <RealCapacity class="real-capacity" />
+              <RealILoad class="real-rload" />
+
+              <RealVLoad class="real-vload" />
+
               <UserInputVIn class="btn-vin" />
-              <div v-if="store.typePWM.pwmType === 'auto'">
-                <UserInputVLoad class="btn-vload"/>
+              <div v-if="store.typePWM.type === 'AUT'">
+                <UserInputVLoad class="btn-vload" />
               </div>
-              <div v-if="store.typePWM.pwmType === 'manual'">
+              <div v-if="store.typePWM.type === 'MAN'">
                 <UserInputPWM class="btn-ipwm" />
               </div>
               <UserInputCapacitor class="btn-icap" />
               <UserInputILoad class="btn-rload" />
-              <UserInputPWMType class="btn-ipwm-type"/>
+              <UserInputPWMType class="btn-ipwm-type" />
             </div>
           </div>
-        </Section>   
-      
+        </Section>
       </div>
-    
-      <div class="col-lg-6 border border-dark" style="background-color:lavender;">
-    
+
+      <div class="col-lg-6 border border-dark" style="background-color: lavender">
         <Section>
           <h3 class="font-weight-bold text-center">Experiment recommendations</h3>
           <div>
             <p class="lead numbered-paragraph">1. Set Manual PWM mode.</p>
-            <p class="lead numbered-paragraph">2. Set desired C<sub>F</sub> and R<sub>Load</sub> values.</p>
+            <p class="lead numbered-paragraph">
+              2. Set desired C<sub>F</sub> and R<sub>Load</sub> values.
+            </p>
             <p class="lead numbered-paragraph">3. Set initial value of PWM duty cycle.</p>
             <p class="lead numbered-paragraph">4. Add point to "Output voltage vs PWM" chart.</p>
             <p class="lead numbered-paragraph">5. Increase the level of PWM duty cycle.</p>
@@ -93,23 +89,20 @@ const m = ref(0);
           </div>
         </Section>
       </div>
-
     </div>
 
     <div class="row">
-      <div class="col-lg-6 border border-dark" style="background-color:lavender;">
+      <div class="col-lg-6 border border-dark" style="background-color: lavender">
         <Section>
           <h3 class="font-weight-bold text-center">Oscilloscope</h3>
           <ScopeChart style="flex: 1"></ScopeChart>
         </Section>
       </div>
 
-      <div class="col-lg-6 border border-dark" style="background-color:lavender;">
-
+      <div class="col-lg-6 border border-dark" style="background-color: lavender">
         <Section>
           <h3 class="font-weight-bold text-center">Output Voltage vs PWM</h3>
           <VoutGraph />
-            
         </Section>
       </div>
     </div>
@@ -117,7 +110,6 @@ const m = ref(0);
 </template>
 
 <style>
-
 .sticky-header {
   position: sticky;
   top: 0px;
@@ -132,7 +124,7 @@ const m = ref(0);
 }
 
 .numbered-paragraph {
-  margin: 0px; 
+  margin: 0px;
   margin-left: 30px;
 }
 
@@ -218,7 +210,7 @@ const m = ref(0);
   padding: 1px;
   border-radius: 5px;
   border: 1px solid black;
-  background-color:#deded9;
+  background-color: #deded9;
 }
 
 .container-overwritten .real-capacity {
@@ -230,7 +222,7 @@ const m = ref(0);
   padding: 1px;
   border-radius: 5px;
   border: 1px solid black;
-  background-color: #deded9;  
+  background-color: #deded9;
 }
 
 .container-overwritten .real-rload {
@@ -268,5 +260,4 @@ const m = ref(0);
   cursor: pointer;
   border-radius: 5px;
 }
-
 </style>

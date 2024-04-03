@@ -1,4 +1,4 @@
-import { ClientToServerDTO } from '@cnpu-remote-lab-nx/shared';
+import { BaseDto } from '@cnpu-remote-lab-nx/shared';
 import { Logger } from '../../logger/logger';
 import { IMcuSender } from '../interfaces/mcu-sender.interface';
 
@@ -7,7 +7,7 @@ export class SendUserDataToMcuUsecase {
 
   constructor(private readonly mcuDataSender: IMcuSender) {}
 
-  async execute(data: ClientToServerDTO): Promise<void> {
+  async execute(data: BaseDto): Promise<void> {
     this.mcuDataSender.send(data);
   }
 }
