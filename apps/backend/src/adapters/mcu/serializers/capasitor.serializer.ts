@@ -6,6 +6,7 @@ export class CapasitorSerializer extends BaseMcuSerializer {
   key = 'C';
 
   extractValue(dto: CapacitorDTO): string {
-    return dto.capacity.toFixed(2);
+    if (dto.capacity > 1000 || dto.capacity < 0) return;
+    return dto.capacity.toFixed(0);
   }
 }

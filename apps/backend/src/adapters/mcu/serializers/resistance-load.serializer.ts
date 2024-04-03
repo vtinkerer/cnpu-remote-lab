@@ -6,6 +6,7 @@ export class ResistanceLoadSerializer extends BaseMcuSerializer {
   key = 'RL';
 
   extractValue(dto: ResistanceLoadDTO): string {
-    return dto.resistance.toString();
+    if (dto.resistance > 10_000_000 || dto.resistance < 0) return;
+    return dto.resistance.toFixed(1);
   }
 }

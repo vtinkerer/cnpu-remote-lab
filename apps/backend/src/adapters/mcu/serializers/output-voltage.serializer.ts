@@ -6,6 +6,7 @@ export class VoltageOutputSerializer extends BaseMcuSerializer {
   key = 'VOUT';
 
   extractValue(dto: VoltageOutputDto): string {
-    return dto.voltage.toString();
+    if (dto.voltage > 100 || dto.voltage < 0) return;
+    return dto.voltage.toFixed(1);
   }
 }

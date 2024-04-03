@@ -6,6 +6,7 @@ export class CurrentSerializer extends BaseMcuSerializer {
   key = 'IL';
 
   extractValue(dto: CurrentLoadDTO): string {
-    return dto.mA.toFixed(0);
+    if (dto.mA > 10_000 || dto.mA < 0) return;
+    return (dto.mA / 1000).toFixed(2);
   }
 }

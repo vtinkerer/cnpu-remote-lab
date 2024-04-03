@@ -6,6 +6,7 @@ export class LoadTypeSerializer extends BaseMcuSerializer {
   key = 'LOAD';
 
   extractValue(dto: LoadTypeDTO): string {
+    if (dto.type !== 'CUR' && dto.type !== 'RES') return;
     return dto.type.toString();
   }
 }
