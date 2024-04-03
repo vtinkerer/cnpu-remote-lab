@@ -2,7 +2,10 @@ import fp from 'fastify-plugin';
 import {
   CapacitorDTO,
   CurrentLoadDTO,
+  LoadTypeDTO,
   PWMDTO,
+  PWMTypeDTO,
+  ResistanceLoadDTO,
   VoltageOutputDto,
 } from '@cnpu-remote-lab-nx/shared';
 import { Logger } from '../../logger/logger';
@@ -17,7 +20,10 @@ export type McuMessage =
   | VoltageOutputDto
   | PWMDTO
   | CapacitorDTO
-  | CurrentLoadDTO;
+  | CurrentLoadDTO
+  | ResistanceLoadDTO
+  | PWMTypeDTO
+  | LoadTypeDTO;
 
 export interface IMcuReceiver {
   on(event: 'data', listener: (data: McuMessage) => void): void;

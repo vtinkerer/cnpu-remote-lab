@@ -16,7 +16,6 @@ export class McuReceiver implements IMcuReceiver {
       const data = buff.toString();
       const deserialized = this.deserializer.deserialize(data);
       if (!deserialized) {
-        this.events.emit('error', new Error(`Invalid data received: ${data}`));
         return;
       }
       this.events.emit('data', deserialized);

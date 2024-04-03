@@ -1,6 +1,10 @@
 import {
+  CapacitorDTO,
   CurrentLoadDTO,
+  LoadTypeDTO,
   PWMDTO,
+  PWMTypeDTO,
+  ResistanceLoadDTO,
   ServerToClientDTO,
   VoltageInputDTO,
   VoltageOutputDto,
@@ -13,6 +17,10 @@ export class McuDeserializer {
 
   private regex = /^([a-zA-Z0-9]+)=([a-zA-Z0-9\.]+)$/;
 
+  /**
+   *
+   * @returns DTO to send or null if there's nothing to send
+   */
   deserialize(data: string): McuMessage {
     const matches = this.regex.exec(data);
     if (!matches) return null;
@@ -36,19 +44,35 @@ export class McuDeserializer {
     }
 
     if (key === 'RL') {
-      return;
+      return new ResistanceLoadDTO({ resistance: parseFloat(value) });
     }
 
     if (key === 'C') {
+      return new CapacitorDTO({ capacity: parseFloat(value) });
     }
 
     if (key === 'ERROR') {
+      this.logger.error({
+        message: 'Error from MCU',
+        error: value,
+      });
+      return null;
     }
 
     if (key === 'MODE') {
+      if (value !== 'MAN' && value !== 'AUT') {
+        this.logger.warn(`Invalid PWM type: ${value}`);
+        return null;
+      }
+      return new PWMTypeDTO({ type: value });
     }
 
     if (key === 'LOAD') {
+      if (value !== 'CUR' && value !== 'RES') {
+        this.logger.warn(`Invalid load type: ${value}`);
+        return null;
+      }
+      return new LoadTypeDTO({ type: value });
     }
 
     this.logger.warn(`Unknown key: ${key}`);
