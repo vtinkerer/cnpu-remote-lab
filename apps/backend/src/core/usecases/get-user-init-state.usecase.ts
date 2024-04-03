@@ -47,6 +47,7 @@ export class GetUserInitState {
     return {
       isActive: true,
       stopDate: user.maxDate.toISO(),
+      url: user.back,
     };
   }
 }
