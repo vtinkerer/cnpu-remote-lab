@@ -1,11 +1,12 @@
-import { PWM } from '@cnpu-remote-lab-nx/shared';
+import { PWMDTO } from '@cnpu-remote-lab-nx/shared';
 import { BaseMcuSerializer, McuSerializer } from '../mcu-serializer';
 
-@McuSerializer(PWM)
+@McuSerializer(PWMDTO)
 export class PwmDutyCycleSerializer extends BaseMcuSerializer {
-  key = 'PWMDC';
+  key = 'PWM';
 
-  extractValue(dto: PWM): string {
-    return dto.pwmPercentage.toString();
+  extractValue(dto: PWMDTO): string {
+    if (dto.pwmPercentage > 100 || dto.pwmPercentage < 0) return;
+    return dto.pwmPercentage.toFixed(2);
   }
 }

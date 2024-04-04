@@ -31,7 +31,7 @@ export const getInitUserState: FastifyPluginAsync = async (fastify, opts) => {
         fastify.userRepository
       ).execute(sessionId);
       if (isActive) {
-        await reply.status(200).send({ isActive: true, stopDate });
+        await reply.status(200).send({ isActive: true, stopDate, url });
         return;
       }
       await reply.status(200).send({ isActive: false, url });

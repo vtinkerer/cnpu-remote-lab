@@ -3,16 +3,16 @@ import { defineStore } from 'pinia';
 import { getInitState } from '../api/get-init-state.api';
 import router from '../router/index';
 import {
-  isCapacitorRealDto,
-  isCurrentLoadRealDto,
-  isPWMRealDto,
   isScopeDataDto,
   isSessionIsOverDto,
-  isVoltageInputRealDto,
-  isVoltageOutputDto,
   isPWMTypeDto,
+  isVoltageInputDto,
+  isCapacitorDto,
+  isCurrentLoadDto,
+  isPWMDto,
+  isVoltageOutputDto,
 } from '@cnpu-remote-lab-nx/shared';
-import type { ClientToServerDTO, ScopeData } from '@cnpu-remote-lab-nx/shared';
+import type { BaseDto, ScopeData } from '@cnpu-remote-lab-nx/shared';
 import { DateTime, Duration } from 'luxon';
 
 export const useBackendDataStore = defineStore('backend-data', () => {
@@ -25,7 +25,7 @@ export const useBackendDataStore = defineStore('backend-data', () => {
   const realCf = ref(0);
   const realPWMDC = ref(0);
   const VOut = ref(0);
-  const typePWM = ref({pwmType: 'auto'});
+  const typePWM = ref({ type: 'AUT' });
 
   function connectToWebSocket() {
     if (!sessionId.value) {
@@ -52,22 +52,22 @@ export const useBackendDataStore = defineStore('backend-data', () => {
         return;
       }
 
-      if (isVoltageInputRealDto(dto)) {
+      if (isVoltageInputDto(dto)) {
         realVin.value = dto.voltage;
         return;
       }
 
-      if (isCapacitorRealDto(dto)) {
+      if (isCapacitorDto(dto)) {
         realCf.value = dto.capacity;
         return;
       }
 
-      if (isCurrentLoadRealDto(dto)) {
+      if (isCurrentLoadDto(dto)) {
         realIload.value = dto.mA;
         return;
       }
 
-      if (isPWMRealDto(dto)) {
+      if (isPWMDto(dto)) {
         realPWMDC.value = dto.pwmPercentage;
         return;
       }
@@ -78,13 +78,12 @@ export const useBackendDataStore = defineStore('backend-data', () => {
       }
 
       if (isPWMTypeDto(dto)) {
-        typePWM.value.pwmType = dto.pwmType;
+        typePWM.value.type = dto.type;
       }
-
     };
   }
 
-  function sendToWebSocket(dto: ClientToServerDTO) {
+  function sendToWebSocket(dto: BaseDto) {
     if (!websocket.value) {
       console.warn('Websocket not connected, but tried to send message.');
       return;

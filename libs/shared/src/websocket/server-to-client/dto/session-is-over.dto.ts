@@ -1,9 +1,9 @@
-import { ServerToClientDTO } from '../server-to-client.base';
+import { BaseDto } from '../../dto.base';
 
 export const isSessionIsOverDto = (dto: unknown): dto is SessionIsOver =>
   (dto as any).dtoName && (dto as any).dtoName === SessionIsOver.name;
 
-export class SessionIsOver implements ServerToClientDTO {
+export class SessionIsOver implements BaseDto {
   dtoName = SessionIsOver.name;
 
   backUrl: string;

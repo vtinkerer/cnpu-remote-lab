@@ -1,8 +1,6 @@
-import { ClientToServerDTO } from '@cnpu-remote-lab-nx/shared';
+import { BaseDto } from '@cnpu-remote-lab-nx/shared';
 
-export abstract class BaseMcuSerializer<
-  T extends ClientToServerDTO = ClientToServerDTO
-> {
+export abstract class BaseMcuSerializer<T extends BaseDto = BaseDto> {
   abstract key: string;
 
   abstract extractValue(dto: T): string;

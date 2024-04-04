@@ -1,11 +1,12 @@
-import { CurrentLoad } from '@cnpu-remote-lab-nx/shared';
+import { CurrentLoadDTO } from '@cnpu-remote-lab-nx/shared';
 import { BaseMcuSerializer, McuSerializer } from '../mcu-serializer';
 
-@McuSerializer(CurrentLoad)
+@McuSerializer(CurrentLoadDTO)
 export class CurrentSerializer extends BaseMcuSerializer {
-  key = 'Iload';
+  key = 'IL';
 
-  extractValue(dto: CurrentLoad): string {
-    return dto.mA.toFixed(0);
+  extractValue(dto: CurrentLoadDTO): string {
+    if (dto.mA > 10_000 || dto.mA < 0) return;
+    return (dto.mA / 1000).toFixed(2);
   }
 }

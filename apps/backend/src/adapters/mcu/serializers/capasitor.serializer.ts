@@ -1,11 +1,12 @@
-import { CapacitorInput } from '@cnpu-remote-lab-nx/shared';
+import { CapacitorDTO } from '@cnpu-remote-lab-nx/shared';
 import { BaseMcuSerializer, McuSerializer } from '../mcu-serializer';
 
-@McuSerializer(CapacitorInput)
+@McuSerializer(CapacitorDTO)
 export class CapasitorSerializer extends BaseMcuSerializer {
-  key = 'Cf';
+  key = 'C';
 
-  extractValue(dto: CapacitorInput): string {
-    return dto.capacity.toFixed(2);
+  extractValue(dto: CapacitorDTO): string {
+    if (dto.capacity > 1000 || dto.capacity < 0) return;
+    return dto.capacity.toFixed(0);
   }
 }

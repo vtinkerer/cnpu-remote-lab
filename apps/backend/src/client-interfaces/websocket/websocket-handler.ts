@@ -3,15 +3,27 @@ import { ClientWebsocketConnectUsecase } from '../../core/usecases/client-websoc
 import { ClientWebsocketDisconnectUsecase } from '../../core/usecases/client-websocket-disconnect.usecase';
 import { Logger } from '../../logger/logger';
 import {
-  CurrentLoad,
-  CapacitorInput,
-  PWM,
-  PWMType,
+  CapacitorDTO,
+  CurrentLoadDTO,
+  LoadTypeDTO,
+  PWMDTO,
+  PWMTypeDTO,
+  ResistanceLoadDTO,
   VoltageInputDTO,
+  VoltageOutputDto,
 } from '@cnpu-remote-lab-nx/shared';
 import { SendUserDataToMcuUsecase } from '../../core/usecases/send-user-data-to-mcu.usecase';
 
-const dtoClasses = [VoltageInputDTO, CurrentLoad, CapacitorInput, PWM, PWMType];
+const dtoClasses = [
+  VoltageInputDTO,
+  VoltageOutputDto,
+  CurrentLoadDTO,
+  CapacitorDTO,
+  PWMDTO,
+  PWMTypeDTO,
+  ResistanceLoadDTO,
+  LoadTypeDTO,
+];
 
 export const wsHandler: WebsocketHandler = (connection, req) => {
   const logger = new Logger(wsHandler.name);
@@ -47,13 +59,6 @@ export const wsHandler: WebsocketHandler = (connection, req) => {
 
       if (!dtoClass) {
         logger.warn('Received a message with an unknown dtoName');
-        return;
-      }
-
-      const dtoInstance = new dtoClass(dto);
-
-      if (!dtoInstance.validate()) {
-        logger.warn('Received a message with invalid data');
         return;
       }
 
