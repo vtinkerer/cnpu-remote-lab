@@ -4,6 +4,7 @@ import $ from 'jquery';
 import 'round-slider';
 
 const randomRoundSliderId = ref(String(Math.random()).replace('.', ''));
+const randomRoundSliderInputId = ref(String(Math.random()).replace('.', ''));
 
 const props = defineProps<{
   step: number;
@@ -13,19 +14,22 @@ const props = defineProps<{
 const model = defineModel();
 
 onMounted(() => {
+
   const id = '#' + randomRoundSliderId.value;
+  const idInput = '#' + randomRoundSliderInputId.value;
+  
   $(id).roundSlider({
-    width: 10,
-    radius: 23,
-    handleSize: 7,
+    width: 6,
+    radius: 24,
+    handleSize: 10,
     sliderType: 'min-range',
-    // circleShape: 'pie',
     value: model.value,
     startAngle: 315,
     endAngle: 225,
     step: 1,
     max: props.max,
     editableTooltip: true,
+    
     stop: (e) => {
       console.log('stop', e);
       model.value = e.value;
@@ -35,6 +39,8 @@ onMounted(() => {
       model.value = e.value;
     },
   });
+
+
 });
 </script>
 
@@ -267,9 +273,9 @@ onMounted(() => {
   top: 50%;
 }
 .rs-tooltip .rs-input {
+  display: inline;
   outline: 0 none;
-  border: none;
-  background: 0 0;
+  border: none; 
 }
 .rs-tooltip-text {
   font-family: verdana;
@@ -387,8 +393,8 @@ onMounted(() => {
 }
 
 .rs-tooltip-text {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 10px;
+  font-weight: 300;
   font-family: Avenir, Tahoma, Verdana, sans-serif;
 }
 
