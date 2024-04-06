@@ -1,24 +1,103 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { useBackendDataStore } from '../stores/back-end-data';
-import MyRoundSlider from '../components/RoundSlider/MyRoundSlider.vue';
 import { CapacitorDTO } from '@cnpu-remote-lab-nx/shared';
 
-const value = ref(0);
+const capacityValues = [44, 66, 91, 113];
+let value = capacityValues[0];
+
+// finds out which button was clicked (firstly 44 mkF is selected)
+const isClickedCapac3 = ref(false);
+const isClickedCapac2 = ref(false);
+const isClickedCapac1 = ref(false);
+const isClickedCapac0 = ref(true);
+
 const store = useBackendDataStore();
 
-watch(value, (newValue) => {
+// save value to send further
+function refreshCapac(clickedId: String) {
+  console.log("clicked id: " + clickedId);
+  if (clickedId === 'capac3') {
+    value = capacityValues[3];
+  } else if (clickedId === 'capac2') {
+    value = capacityValues[2];
+  } else if (clickedId === 'capac1') {
+    value = capacityValues[1];
+  } else {
+    value = capacityValues[0];
+  }
+  console.log("value:" + value);
   store.sendToWebSocket(
     new CapacitorDTO({
-      capacity: Number(newValue),
+      capacity: Number(value),
     }),
   );
-});
+}
+
 </script>
 
 <template>
-  <div class="fst-italic" style="font-size: 12px; text-align: center">
-    C<sub>F</sub> (pF)
-    <MyRoundSlider :max="1000000" v-model="value" :step="5" />
+  <div >
+    <div class="btn-group-vertical center"> 
+      <div class="fw-bold fst-italic" style="font-size: 12px; text-align: center">
+        C<sub>F</sub>(mkF)
+      </div>
+      
+      <div>  
+        <button v-bind:class="{'button-nonclicked': !isClickedCapac3, 'button-clicked': isClickedCapac3}"  
+        v-on:click ="isClickedCapac3 = true, isClickedCapac2 = false, isClickedCapac1 = false, isClickedCapac0 = false" 
+        @click="refreshCapac('capac3')" id="capac3"> {{capacityValues[3]}} </button>
+      </div>
+
+      <div>  
+        <button v-bind:class="{'button-nonclicked': !isClickedCapac2, 'button-clicked': isClickedCapac2}"  
+        v-on:click ="isClickedCapac3 = false, isClickedCapac2 = true, isClickedCapac1 = false, isClickedCapac0 = false" 
+        @click="refreshCapac('capac2')" id="capac2"> {{capacityValues[2]}} </button>
+      </div>
+
+      <div>  
+        <button v-bind:class="{'button-nonclicked': !isClickedCapac1, 'button-clicked': isClickedCapac1}"  
+        v-on:click ="isClickedCapac3 = false, isClickedCapac2 = false, isClickedCapac1 = true, isClickedCapac0 = false" 
+        @click="refreshCapac('capac1')" id="capac1"> {{capacityValues[1]}} </button>
+      </div>
+
+      <div>  
+        <button v-bind:class="{'button-nonclicked': !isClickedCapac0, 'button-clicked': isClickedCapac0}"  
+        v-on:click ="isClickedCapac3 = false, isClickedCapac2 = false, isClickedCapac1 = false, isClickedCapac0 = true" 
+        @click="refreshCapac('capac0')" id="capac0"> {{capacityValues[0]}} </button>
+      </div>
+      
+  </div>
   </div>
 </template>
+
+<style>
+
+.button-nonclicked {
+  font-size: 10px;
+  background-color: white; 
+  border: 1px solid black; 
+  color: black; 
+  cursor: pointer; 
+  padding: 0%;
+  min-width: 40px;
+  display: block; 
+}
+
+button:hover {
+  background-color: #54bbe0;
+  color: white;
+}
+
+.button-clicked {
+  font-size: 10px;
+  background-color: #54bbe0; 
+  border: 1px solid black; 
+  color: black; 
+  cursor: pointer; 
+  padding: 0%;
+  min-width: 40px;
+  display: block; 
+}
+
+</style>

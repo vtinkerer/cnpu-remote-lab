@@ -159,7 +159,7 @@ const m = ref(0);
 
 .container-overwritten .btn-icap {
   position: absolute;
-  top: 58%;
+  top: 53%;
   left: 69%;
   transform: translate(-50%, -50%);
   font-size: 16px;
@@ -192,7 +192,7 @@ const m = ref(0);
 
 .container-overwritten .real-vin {
   position: absolute;
-  top: 27%;
+  top: 24%;
   left: 15%;
   transform: translate(-50%, -50%);
   font-size: 12px;
@@ -204,7 +204,7 @@ const m = ref(0);
 
 .container-overwritten .real-pwm {
   position: absolute;
-  top: 27%;
+  top: 24%;
   left: 36%;
   transform: translate(-50%, -50%);
   font-size: 12px;
@@ -216,7 +216,7 @@ const m = ref(0);
 
 .container-overwritten .real-capacity {
   position: absolute;
-  top: 27%;
+  top: 23%;
   left: 69%;
   transform: translate(-50%, -50%);
   font-size: 12px;
@@ -228,7 +228,7 @@ const m = ref(0);
 
 .container-overwritten .real-rload {
   position: absolute;
-  top: 27%;
+  top: 23%;
   left: 96%;
   transform: translate(-50%, -50%);
   font-size: 12px;
@@ -240,7 +240,7 @@ const m = ref(0);
 
 .container-overwritten .real-vload {
   position: absolute;
-  top: 27%;
+  top: 23%;
   left: 82%;
   transform: translate(-50%, -50%);
   font-size: 12px;

@@ -279,7 +279,7 @@ onMounted(() => {
 }
 .rs-tooltip-text {
   font-family: verdana;
-  font-size: 9px;
+  font-size: 11px;
   border-radius: 7px;
   text-align: center;
   color: inherit;
@@ -376,7 +376,7 @@ onMounted(() => {
   box-shadow: 0px 0px 4px 0px #000;
 }
 .rs-tooltip-text {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 500;
   font-family: Avenir, Tahoma, Verdana, sans-serif;
 }
@@ -393,7 +393,7 @@ onMounted(() => {
 }
 
 .rs-tooltip-text {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 300;
   font-family: Avenir, Tahoma, Verdana, sans-serif;
 }

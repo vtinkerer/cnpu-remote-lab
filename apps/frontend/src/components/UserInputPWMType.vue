@@ -48,7 +48,7 @@ watch(isChecked, (isChecked) => {
 .button::before {
   position: absolute;
   content: '';
-  background-color: blue;
+  background-color: #54bbe0;
   width: 9px;
   height: 9px;
   border-radius: 20px;

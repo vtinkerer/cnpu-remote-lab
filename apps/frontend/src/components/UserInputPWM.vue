@@ -18,7 +18,7 @@ watch(value, (newValue) => {
 
 <template>
   <div
-    class="fst-italic"
+    class="fw-bold fst-italic"
     style="font-size: 12px; text-align: center; display: flex; flex-direction: column"
   >
     PWM (%)
