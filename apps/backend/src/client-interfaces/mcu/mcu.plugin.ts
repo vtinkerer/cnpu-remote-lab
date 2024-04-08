@@ -50,6 +50,24 @@ export const mcuPlugin = () =>
         logger.error(`Error during initializing serialport: ${error.message}`);
         process.exit(1);
       });
+      serialPort.on('finish', () => {
+        logger.warn('Serialport finished');
+      });
+      serialPort.on('close', () => {
+        logger.warn('Serialport closed');
+      });
+      serialPort.on('drain', () => {
+        logger.warn('Serialport drained');
+      });
+      serialPort.on('end', () => {
+        logger.warn('Serialport ended');
+      });
+      serialPort.on('pipe', () => {
+        logger.warn('Serialport piped');
+      });
+      serialPort.on('unpipe', () => {
+        logger.warn('Serialport unpiped');
+      });
       const parser = serialPort.pipe(new DelimiterParser({ delimiter: ';' }));
       mcuReceiver = new McuReceiver(parser);
     } else {
