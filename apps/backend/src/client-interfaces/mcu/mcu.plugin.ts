@@ -54,7 +54,8 @@ export const mcuPlugin = () =>
         logger.warn('Serialport finished');
       });
       serialPort.on('close', () => {
-        logger.warn('Serialport closed');
+        logger.error('Serialport closed');
+        process.exit(1);
       });
       serialPort.on('drain', () => {
         logger.warn('Serialport drained');
