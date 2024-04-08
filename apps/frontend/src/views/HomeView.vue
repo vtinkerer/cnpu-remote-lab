@@ -18,7 +18,7 @@ import VoutGraph from '../components/VoutGraph.vue';
 
 import router from '../router';
 import { useBackendDataStore } from '../stores/back-end-data';
-import { ref } from 'vue';
+//import { ref } from 'vue';
 
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
@@ -34,7 +34,7 @@ store.setSessionId(session_id!);
 store.getIsActive();
 store.connectToWebSocket();
 
-const m = ref(0);
+//const m = ref(0);
 </script>
 
 <template>
@@ -45,9 +45,9 @@ const m = ref(0);
   <div class="background container-fluid">
     <div class="row">
       <!-- 1st component (Schematic Diagram) -->
-      <div class="col-lg-6 border border-dark" style="background-color: lavender">
+      <div class="col-lg-6" style="background-color: lavender">
         <Section>
-          <h3 class="font-weight-bold text-center">DC-DC Buck Converter - Schematic Diagramm</h3>
+          <h3 class="text-center">DC-DC Buck Converter - Schematic Diagramm</h3>
           <div class="container-overwritten">
             <img class="img-fluid" src="../img/buck.svg" />
             <div>
@@ -73,9 +73,9 @@ const m = ref(0);
         </Section>
       </div>
 
-      <div class="col-lg-6 border border-dark" style="background-color: lavender">
+      <div class="col-lg-6" style="background-color: lavender">
         <Section>
-          <h3 class="font-weight-bold text-center">Experiment recommendations</h3>
+          <h3 class="text-center">Experiment recommendations</h3>
           <div>
             <p class="lead numbered-paragraph">1. Set Manual PWM mode.</p>
             <p class="lead numbered-paragraph">
@@ -92,16 +92,16 @@ const m = ref(0);
     </div>
 
     <div class="row">
-      <div class="col-lg-6 border border-dark" style="background-color: lavender">
+      <div class="col-lg-6" style="background-color: lavender">
         <Section>
-          <h3 class="font-weight-bold text-center">Oscilloscope</h3>
+          <h3 class="text-center">Oscilloscope</h3>
           <ScopeChart style="flex: 1"></ScopeChart>
         </Section>
       </div>
 
-      <div class="col-lg-6 border border-dark" style="background-color: lavender">
+      <div class="col-lg-6" style="background-color: lavender">
         <Section>
-          <h3 class="font-weight-bold text-center">Output Voltage vs PWM</h3>
+          <h3 class="text-center">Output Voltage vs PWM</h3>
           <VoutGraph />
         </Section>
       </div>
@@ -241,7 +241,7 @@ const m = ref(0);
 .container-overwritten .real-vload {
   position: absolute;
   top: 23%;
-  left: 82%;
+  left: 81%;
   transform: translate(-50%, -50%);
   font-size: 12px;
   padding: 1px;
@@ -253,7 +253,7 @@ const m = ref(0);
 .container-overwritten .btn-vload {
   position: absolute;
   top: 58%;
-  left: 82%;
+  left: 81%;
   font-size: 16px;
   transform: translate(-50%, -50%);
   padding: 1px 1px;

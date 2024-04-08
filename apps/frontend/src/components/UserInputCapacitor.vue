@@ -40,7 +40,7 @@ function refreshCapac(clickedId: String) {
   <div >
     <div class="btn-group-vertical center"> 
       <div class="fw-bold fst-italic" style="font-size: 12px; text-align: center">
-        C<sub>F</sub>(mkF)
+        C<sub>F</sub>(&micro;F)
       </div>
       
       <div>  
