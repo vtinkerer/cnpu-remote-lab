@@ -172,7 +172,7 @@ store.connectToWebSocket();
 .btn-ipwm-type {
   position: absolute;
   top: 90%;
-  left: 48%;
+  left: 34.5%;
   transform: translate(-50%, -50%);
   padding: 1px 1px;
   border-radius: 5px;

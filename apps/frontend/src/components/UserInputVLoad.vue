@@ -2,15 +2,15 @@
 import { ref, watch } from 'vue';
 import { useBackendDataStore } from '../stores/back-end-data';
 import MyRoundSlider from '../components/RoundSlider/MyRoundSlider.vue';
-import { CurrentLoadDTO } from '@cnpu-remote-lab-nx/shared';
+import { VoltageOutputDto } from '@cnpu-remote-lab-nx/shared';
 
 const value = ref(0);
 const store = useBackendDataStore();
 
 watch(value, (newValue) => {
   store.sendToWebSocket(
-    new CurrentLoadDTO({
-      mA: Number(newValue),
+    new VoltageOutputDto({
+      voltage: Number(newValue),
     }),
   );
 });
