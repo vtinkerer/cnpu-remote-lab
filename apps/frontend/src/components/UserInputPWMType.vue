@@ -1,36 +1,27 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { computed } from 'vue';
 import { useBackendDataStore } from '../stores/back-end-data';
 import { PWMTypeDTO } from '@cnpu-remote-lab-nx/shared';
+import { storeToRefs } from 'pinia';
 
 const store = useBackendDataStore();
-const isChecked = ref('false');
+const { typePWM } = storeToRefs(store);
+const isChecked = computed(() => typePWM.value.type === 'MAN');
 
-watch(isChecked, (isChecked) => {
-  console.log(isChecked);
-  if (isChecked) {
-    console.log('typePWM:' + store.typePWM.type);
-    store.sendToWebSocket(
-      new PWMTypeDTO({
-        type: 'MAN',
-      }),
-    );
-    store.typePWM.type = 'MAN';
-  } else {
-    console.log('typePWM:' + store.typePWM.type);
-    store.sendToWebSocket(
-      new PWMTypeDTO({
-        type: 'AUT',
-      }),
-    );
-    store.typePWM.type = 'AUT';
-  }
-});
+const handleUserClick = (isChecked: boolean) => {
+  store.sendToWebSocket(new PWMTypeDTO({ type: isChecked ? 'MAN' : 'AUT' }));
+};
 </script>
 
 <template>
   <div>
-    <input name="checkingbox" type="checkbox" id="check" v-model="isChecked" />
+    <input
+      name="checkingbox"
+      type="checkbox"
+      id="check"
+      v-model="isChecked"
+      @click="(event) => handleUserClick(event.target.checked)"
+    />
     <label for="check" class="button"></label>
   </div>
 </template>
