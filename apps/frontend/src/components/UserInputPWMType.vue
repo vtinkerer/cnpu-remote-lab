@@ -3,8 +3,8 @@ import { ref, watch } from 'vue';
 import { useBackendDataStore } from '../stores/back-end-data';
 import { PWMTypeDTO } from '@cnpu-remote-lab-nx/shared';
 
-const isChecked = ref(false);
 const store = useBackendDataStore();
+const isChecked = ref('false');
 
 watch(isChecked, (isChecked) => {
   console.log(isChecked);

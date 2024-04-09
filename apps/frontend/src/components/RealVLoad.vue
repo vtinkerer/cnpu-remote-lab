@@ -5,5 +5,5 @@ const store = useBackendDataStore();
 </script>
 
 <template>
-  <div>{{ 0 }} V</div>
+  <div>{{ store.VOut }} V</div>
 </template>
