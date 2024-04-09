@@ -7,6 +7,6 @@ export class PwmDutyCycleSerializer extends BaseMcuSerializer {
 
   extractValue(dto: PWMDTO): string {
     if (dto.pwmPercentage > 100 || dto.pwmPercentage < 0) return;
-    return dto.pwmPercentage.toFixed(2);
+    return Math.round(dto.pwmPercentage).toString();
   }
 }

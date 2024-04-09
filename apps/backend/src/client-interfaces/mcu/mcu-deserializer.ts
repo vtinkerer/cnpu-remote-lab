@@ -51,10 +51,11 @@ export class McuDeserializer {
       return new CapacitorDTO({ capacity: parseFloat(value) });
     }
 
-    if (key === 'ERROR') {
+    if (key === 'ERR') {
       this.logger.error({
         message: 'Error from MCU',
         error: value,
+        original: data,
       });
       return null;
     }
@@ -75,7 +76,7 @@ export class McuDeserializer {
       return new LoadTypeDTO({ type: value });
     }
 
-    this.logger.warn(`Unknown key: ${key}`);
+    this.logger.warn(`Unknown key: ${key} with data: ${data}`);
     return null;
   }
 }
