@@ -17,7 +17,7 @@ export const StartSessionPayloadValidationSchema = Type.Object({
   }),
   laboratory: Type.Object({
     name: Type.String(),
-    category: Type.String(),
+    category: Type.Union([Type.Null(), Type.String()]),
   }),
   user: Type.Object({
     username: Type.String(),
