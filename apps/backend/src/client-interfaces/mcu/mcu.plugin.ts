@@ -78,7 +78,8 @@ export const mcuPlugin = () =>
     }
 
     mcuReceiver.on('data', (data) => {
-      logger.info(`Received data from MCU: ${JSON.stringify(data)}`);
+      if (fastify.config.log_messages_from_mcu)
+        logger.info(`Received data from MCU: ${JSON.stringify(data)}`);
       new SendMcuDataToUserUsecase(fastify.clientWebsocketAdapter).execute(
         data
       );
