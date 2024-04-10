@@ -30,8 +30,9 @@ try:
                 if sys.stdin in select.select([sys.stdin], [], [], 0)[0]: 
                     try: user_inputs.append(input()) 
                     except EOFError: break 
-                else: break 
-            last_input_voltage = float(user_inputs[-1])
+                else: break
+            if (len(user_inputs) > 0):
+                last_input_voltage = float(user_inputs[-1])
 
             scope.trigger(device_data, enable=True, source=scope.trigger_source.analog, channel=1, level=last_input_voltage)
             # wavegen.generate(device_data, channel=1, function=wavegen.function.triangle, offset=0, frequency=sig_frequency, amplitude=2)
