@@ -141,8 +141,7 @@ watch(scopeData, (n) => {
       <canvas ref="chartRef"></canvas>
     </div>
 
-    <div class="row" align="center">
-
+    <div class="row" style="padding: 7px" align="center">
       <div class="col">
         <button class="btn btn-md btn-primary"
           @click="
