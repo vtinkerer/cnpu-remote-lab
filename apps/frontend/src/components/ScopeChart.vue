@@ -39,6 +39,17 @@ const { scopeData } = storeToRefs(store);
 const chartRef = ref<HTMLCanvasElement | null>(null);
 let chart: Chart | null = null;
 
+// handler for 'Save Waveform' button
+const saveAsImage = () => {
+  if (!chart) {
+    return;
+  }
+  let a = document.createElement('a');
+  a.href = chart.toBase64Image();
+  a.download = 'oscilloscope.png';
+  a.click();
+};
+
 const renderScope = () => {
   const ctx = chartRef.value?.getContext('2d');
   if (!ctx) {
@@ -63,8 +74,33 @@ const renderScope = () => {
       ],
     },
     options: {
+
+      elements: {
+        point: {
+          radius: 0,
+        },
+      },
+
       maintainAspectRatio: false,
       responsive: true,
+
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: 'Time, us',
+            color: '#3062b3',
+          },
+        },
+        y: {
+          title: {
+            display: true,
+            text: 'Voltage, V',
+            color: '#911',
+          },
+        },
+      },
+
       datasets: {
         line: {
           animation: {
@@ -75,6 +111,22 @@ const renderScope = () => {
     },
   });
 };
+
+// needed for making output image non-transparent
+Chart.register({
+  id: 'customBckgnd',
+  beforeDraw: (chart, args, opts) => {
+    const ctx = chart.canvas.getContext('2d');
+    if (!ctx) {
+      return;
+    }
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-over';
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, chart.width, chart.height);
+    ctx.restore();
+  },
+});
 
 watch(scopeData, (n) => {
   if (isRender.value) {
@@ -88,15 +140,24 @@ watch(scopeData, (n) => {
     <div style="position: relative; height: 40vh; width: 40vw; margin: auto">
       <canvas ref="chartRef"></canvas>
     </div>
-    <button
-      @click="
-        () => {
-          isRender = !isRender;
-          buttonName = isRender ? 'Pause' : 'Start';
-        }
-      "
-    >
-      {{ buttonName }}
-    </button>
+
+    <div class="row" align="center">
+
+      <div class="col">
+        <button class="btn btn-md btn-primary"
+          @click="
+            () => {
+              isRender = !isRender;
+              buttonName = isRender ? 'Pause' : 'Start';
+            }">
+          {{ buttonName }}
+        </button>
+      </div>
+      <div class="col">
+        <button class="btn btn-md btn-primary"@click="saveAsImage">Save Waveform</button>
+      </div>
+    </div>
+
   </div>
+
 </template>
