@@ -4,6 +4,7 @@ import { IClientDataSender } from '../core/interfaces/client-data-sender.interfa
 import { IClientDisconnectTimeoutManager } from '../core/interfaces/client-disconnect-timeout-manager.interface';
 import { IClientWebsocketSetter } from '../core/interfaces/client-websocket-setter.interface';
 import { IMcuSender } from '../core/interfaces/mcu-sender.interface';
+import { IScopeSender } from '../core/interfaces/scope-sender.interface';
 import { IUserRepository } from '../core/interfaces/user-repository.interface';
 
 declare module 'fastify' {
@@ -14,5 +15,6 @@ declare module 'fastify' {
     clientConnectTimeoutAdapter: IClientConnectTimeoutManager;
     clientDisconnectTimeoutAdapter: IClientDisconnectTimeoutManager;
     mcuSender: IMcuSender;
+    scopeSender: IScopeSender;
   }
 }

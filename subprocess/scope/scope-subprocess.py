@@ -2,6 +2,7 @@ from WF_SDK import device, scope, wavegen, error
 import sys 
 from time import sleep
 import json
+import select
 
 sig_frequency = 300e03
 
@@ -16,13 +17,23 @@ def read_from_stdin():
     json_message = json.loads(message)
     return json_message
 
+last_input_voltage = 0
+
 try:
     
     device_data = device.open()
     scope.open(device_data, sampling_frequency=100e6, buffer_size=600)
     while True: 
         if device_data.name != "Digital Discovery":
-            scope.trigger(device_data, enable=True, source=scope.trigger_source.analog, channel=1, level=0.01)
+            user_inputs = [] 
+            while True: 
+                if sys.stdin in select.select([sys.stdin], [], [], 0)[0]: 
+                    try: user_inputs.append(input()) 
+                    except EOFError: break 
+                else: break 
+            last_input_voltage = float(user_inputs[-1])
+
+            scope.trigger(device_data, enable=True, source=scope.trigger_source.analog, channel=1, level=last_input_voltage)
             # wavegen.generate(device_data, channel=1, function=wavegen.function.triangle, offset=0, frequency=sig_frequency, amplitude=2)
             buffer = scope.record(device_data, channel=1)
 

@@ -6,6 +6,8 @@ import { ScopeData } from '@cnpu-remote-lab-nx/shared';
 import * as child_process from 'child_process';
 import { ScopeReader } from './scope-reader';
 import { createFakeScope } from '../../fakes/scope.fake';
+import { IScopeSender } from '../../core/interfaces/scope-sender.interface';
+import { ScopeSender } from '../../adapters/scope-sender';
 
 export interface IScopeReader {
   on(event: 'scope-data', listener: (data: ScopeData) => void): void;
@@ -19,6 +21,7 @@ export const scopePlugin = () =>
     const logger = new Logger('scopePlugin');
 
     let scopeReader: IScopeReader;
+    let scopeSender: IScopeSender;
 
     if (!fastify.config.is_fake_scope) {
       const pythonProcess = child_process.spawn('python3', [
@@ -28,8 +31,10 @@ export const scopePlugin = () =>
         pythonProcess,
         fastify.config.scope_script_delimiter
       );
+      scopeSender = new ScopeSender(pythonProcess);
     } else {
       scopeReader = createFakeScope();
+      scopeSender = null;
     }
 
     scopeReader.on('scope-data', async (scopeData) => {
@@ -46,6 +51,12 @@ export const scopePlugin = () =>
         logger.error(new ScopeError(errorData.join('*********\n')));
         process.exit(1);
       }, 2000);
+    });
+
+    fastify.decorate('scopeSender', {
+      getter() {
+        return scopeSender;
+      },
     });
 
     // Pause until the python process is ready

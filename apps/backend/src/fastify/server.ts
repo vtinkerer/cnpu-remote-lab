@@ -121,8 +121,8 @@ export function buildApp() {
 
   // Interfaces
   server.register(WebSocket);
-  server.register(mcuPlugin());
   server.register(scopePlugin());
+  server.register(mcuPlugin());
 
   server.register(universalRoutes);
 
