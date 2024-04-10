@@ -1,11 +1,12 @@
 import fp from 'fastify-plugin';
-import { StartSessionsUsecase } from '../core/usecases/start-session.usecase';
 import { Logger } from '../logger/logger';
 import { CurrentUser } from '../core/entities/user.entity';
 import { DateTime } from 'luxon';
 
 export const createFakeUserSessionPlugin = () =>
   fp(async (fastify, ops) => {
+    if (!fastify.config.is_fake_user_session) return;
+
     const logger = new Logger('createFakeUserSessionPlugin');
     const fakeUser = new CurrentUser({
       back: 'http://fake-back-url:8080',
