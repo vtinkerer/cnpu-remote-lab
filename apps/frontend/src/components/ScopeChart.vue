@@ -62,14 +62,14 @@ const renderScope = () => {
 
   chart = new Chart(ctx, {
     data: {
-      labels: scopeData.value.voltage.map((val) => val.t),
+      labels: scopeData.value.time,
       datasets: [
         {
           type: 'line',
           label: 'Voltage',
           borderColor: '#911',
           backgroundColor: '#911',
-          data: scopeData.value.voltage.map((val) => val.v),
+          data: scopeData.value.voltage,
         },
       ],
     },
