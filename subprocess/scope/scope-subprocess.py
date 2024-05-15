@@ -24,7 +24,7 @@ try:
     device_data = device.open()
     scope.open(device_data, sampling_frequency=100e6, buffer_size=600)
     logic.open(device_data)
-    logic.trigger(device_data, enable=True, channel=0, rising_edge=False, buffer_size=600)
+    logic.trigger(device_data, enable=True, channel=0, rising_edge=False)
     while True: 
         if device_data.name != "Digital Discovery":
             user_inputs = [] 
