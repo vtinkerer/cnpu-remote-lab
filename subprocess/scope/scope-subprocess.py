@@ -1,4 +1,4 @@
-from WF_SDK import device, scope, wavegen, error
+from WF_SDK import device, scope, wavegen, error, logic
 import sys 
 from time import sleep
 import json
@@ -23,6 +23,8 @@ try:
     
     device_data = device.open()
     scope.open(device_data, sampling_frequency=100e6, buffer_size=600)
+    logic.open(device_data)
+    logic.trigger(device_data, enable=True, channel=0, rising_edge=False, buffer_size=600)
     while True: 
         if device_data.name != "Digital Discovery":
             user_inputs = [] 
@@ -38,6 +40,7 @@ try:
             # wavegen.generate(device_data, channel=1, function=wavegen.function.triangle, offset=0, frequency=sig_frequency, amplitude=2)
             buffer_voltage = scope.record(device_data, channel=1)
             buffer_current = scope.record(device_data, channel=2)
+            buffer_pwm = logic.record(device_data, channel=0)
 
             time = []
             for index in range(len(buffer_voltage)):
@@ -46,7 +49,7 @@ try:
             for i in range(len(buffer_current)):
                 buffer_current[i] = (buffer_current[i] - 0.65) * 10 # Amperes
 
-            write_to_stdout(str(json.dumps({"voltage": buffer_voltage, "time": time, "current": buffer_current})))
+            write_to_stdout(str(json.dumps({"voltage": buffer_voltage, "time": time, "current": buffer_current, "pwm": buffer_pwm})))
 
             sleep(0.2)
 
