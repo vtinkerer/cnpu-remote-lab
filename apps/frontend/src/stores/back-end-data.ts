@@ -19,7 +19,7 @@ export const useBackendDataStore = defineStore('backend-data', () => {
   const websocket = ref<WebSocket | null>(null);
   const sessionId = ref('');
 
-  const scopeData = ref<ScopeData>({ voltage: [], time: [] });
+  const scopeData = ref<ScopeData>({ voltage: [], time: [], current: [] });
   const realVin = ref(0);
   const realIload = ref(0);
   const realCf = ref(0);

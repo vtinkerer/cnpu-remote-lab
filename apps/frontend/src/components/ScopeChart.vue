@@ -71,6 +71,13 @@ const renderScope = () => {
           backgroundColor: '#911',
           data: scopeData.value.voltage,
         },
+        {
+          type: 'line',
+          label: 'Current',
+          borderColor: '#3062b3',
+          backgroundColor: '#3062b3',
+          data: scopeData.value.current,
+        },
       ],
     },
     options: {

@@ -43,6 +43,9 @@ try:
             for index in range(len(buffer_voltage)):
                 time.append(index * 1e06 / scope.data.sampling_frequency)   # convert time to us
 
+            for i in range(len(buffer_current)):
+                buffer_current[i] = (buffer_current[i] - 0.65) * 10 # Amperes
+
             write_to_stdout(str(json.dumps({"voltage": buffer_voltage, "time": time, "current": buffer_current})))
 
             sleep(0.2)
