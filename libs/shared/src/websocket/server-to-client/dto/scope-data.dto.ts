@@ -1,11 +1,11 @@
 import { BaseDto } from '../../dto.base';
 
-export type ScopePoint = {
-  t: string;
-  v: number;
+export type ScopeData = {
+  voltage: number[];
+  time: string[];
+  current: number[];
+  pwm: number[]; // 0 or 1
 };
-
-export type ScopeData = ScopePoint[];
 
 export const isScopeDataDto = (dto: unknown): dto is ScopeDataDTO =>
   (dto as any).dtoName && (dto as any).dtoName === ScopeDataDTO.name;

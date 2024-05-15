@@ -62,19 +62,34 @@ const renderScope = () => {
 
   chart = new Chart(ctx, {
     data: {
-      labels: scopeData.value.map((val) => val.t),
+      labels: scopeData.value.time,
       datasets: [
         {
           type: 'line',
           label: 'Voltage',
           borderColor: '#911',
           backgroundColor: '#911',
-          data: scopeData.value.map((val) => val.v),
+          data: scopeData.value.voltage,
+        },
+        {
+          type: 'line',
+          label: 'Current',
+          borderColor: '#3062b3',
+          backgroundColor: '#3062b3',
+          data: scopeData.value.current,
+          yAxisID: 'yRight',
+        },
+        {
+          type: 'line',
+          label: 'PWM',
+          borderColor: '#107223',
+          backgroundColor: '#107223',
+          data: scopeData.value.pwm,
+          yAxisID: 'yRight2',
         },
       ],
     },
     options: {
-
       elements: {
         point: {
           radius: 0,
@@ -97,6 +112,22 @@ const renderScope = () => {
             display: true,
             text: 'Voltage, V',
             color: '#911',
+          },
+        },
+        yRight: {
+          title: {
+            display: true,
+            text: 'Current, A',
+            color: '#3062b3',
+          },
+          position: 'right',
+        },
+        yRight2: {
+          position: 'right',
+          title: {
+            display: true,
+            text: 'PWM',
+            color: '#107223',
           },
         },
       },
@@ -143,20 +174,21 @@ watch(scopeData, (n) => {
 
     <div class="row" style="padding: 7px" align="center">
       <div class="col">
-        <button class="btn btn-md btn-primary"
+        <button
+          class="btn btn-md btn-primary"
           @click="
             () => {
               isRender = !isRender;
               buttonName = isRender ? 'Pause' : 'Start';
-            }">
+            }
+          "
+        >
           {{ buttonName }}
         </button>
       </div>
       <div class="col">
-        <button class="btn btn-md btn-primary"@click="saveAsImage">Save Waveform</button>
+        <button class="btn btn-md btn-primary" @click="saveAsImage">Save Waveform</button>
       </div>
     </div>
-
   </div>
-
 </template>
