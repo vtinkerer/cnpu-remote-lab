@@ -37,15 +37,13 @@ try:
             scope.trigger(device_data, enable=True, source=scope.trigger_source.analog, channel=1, level=last_input_voltage, timeout=0.1)
             # wavegen.generate(device_data, channel=1, function=wavegen.function.triangle, offset=0, frequency=sig_frequency, amplitude=2)
             buffer_voltage = scope.record(device_data, channel=1)
-            # buffer_current = scope.record(device_data, channel=2)
+            buffer_current = scope.record(device_data, channel=2)
 
             time = []
             for index in range(len(buffer_voltage)):
                 time.append(index * 1e06 / scope.data.sampling_frequency)   # convert time to us
 
-            voltage_res = []
-            current_res = []
-            write_to_stdout(str(json.dumps({"voltage": buffer_voltage, "time": time})))
+            write_to_stdout(str(json.dumps({"voltage": buffer_voltage, "time": time, "current": buffer_current})))
 
             sleep(0.2)
 
