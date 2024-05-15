@@ -23,7 +23,7 @@ export class ScopeReader implements IScopeReader {
         return;
       }
 
-      if (scopeData[0].hasOwnProperty('voltage')) {
+      if (scopeData.hasOwnProperty('voltage')) {
         this.eventEmitter.emit('scope-data', scopeData);
         return;
       }
