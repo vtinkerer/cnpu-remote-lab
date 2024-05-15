@@ -77,6 +77,7 @@ const renderScope = () => {
           borderColor: '#3062b3',
           backgroundColor: '#3062b3',
           data: scopeData.value.current,
+          yAxisID: 'yRight',
         },
       ],
     },
@@ -104,6 +105,14 @@ const renderScope = () => {
             text: 'Voltage, V',
             color: '#911',
           },
+        },
+        yRight: {
+          title: {
+            display: true,
+            text: 'Current, A',
+            color: '#3062b3',
+          },
+          position: 'right',
         },
       },
 
