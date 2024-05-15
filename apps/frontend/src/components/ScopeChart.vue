@@ -62,19 +62,18 @@ const renderScope = () => {
 
   chart = new Chart(ctx, {
     data: {
-      labels: scopeData.value.map((val) => val.t),
+      labels: scopeData.value.voltage.map((val) => val.t),
       datasets: [
         {
           type: 'line',
           label: 'Voltage',
           borderColor: '#911',
           backgroundColor: '#911',
-          data: scopeData.value.map((val) => val.v),
+          data: scopeData.value.voltage.map((val) => val.v),
         },
       ],
     },
     options: {
-
       elements: {
         point: {
           radius: 0,
@@ -143,20 +142,21 @@ watch(scopeData, (n) => {
 
     <div class="row" style="padding: 7px" align="center">
       <div class="col">
-        <button class="btn btn-md btn-primary"
+        <button
+          class="btn btn-md btn-primary"
           @click="
             () => {
               isRender = !isRender;
               buttonName = isRender ? 'Pause' : 'Start';
-            }">
+            }
+          "
+        >
           {{ buttonName }}
         </button>
       </div>
       <div class="col">
-        <button class="btn btn-md btn-primary"@click="saveAsImage">Save Waveform</button>
+        <button class="btn btn-md btn-primary" @click="saveAsImage">Save Waveform</button>
       </div>
     </div>
-
   </div>
-
 </template>

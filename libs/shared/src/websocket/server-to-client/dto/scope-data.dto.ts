@@ -5,7 +5,7 @@ export type ScopePoint = {
   v: number;
 };
 
-export type ScopeData = ScopePoint[];
+export type ScopeData = { voltage: ScopePoint[] };
 
 export const isScopeDataDto = (dto: unknown): dto is ScopeDataDTO =>
   (dto as any).dtoName && (dto as any).dtoName === ScopeDataDTO.name;

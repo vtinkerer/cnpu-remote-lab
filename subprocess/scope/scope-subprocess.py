@@ -45,7 +45,7 @@ try:
             res = []
             for i in range(len(buffer)):
                 res.append({'t': f'{time[i]}us', 'v': round(buffer[i], 2)})
-            write_to_stdout(str(json.dumps(res)))
+            write_to_stdout(str(json.dumps({"voltage": res})))
 
             sleep(0.2)
 
