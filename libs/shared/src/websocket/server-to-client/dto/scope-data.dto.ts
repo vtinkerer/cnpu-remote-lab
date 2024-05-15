@@ -4,6 +4,7 @@ export type ScopeData = {
   voltage: number[];
   time: string[];
   current: number[];
+  pwm: number[]; // 0 or 1
 };
 
 export const isScopeDataDto = (dto: unknown): dto is ScopeDataDTO =>

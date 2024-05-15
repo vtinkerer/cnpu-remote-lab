@@ -79,6 +79,14 @@ const renderScope = () => {
           data: scopeData.value.current,
           yAxisID: 'yRight',
         },
+        {
+          type: 'line',
+          label: 'PWM',
+          borderColor: '#107223',
+          backgroundColor: '#107223',
+          data: scopeData.value.pwm,
+          yAxisID: 'yRight2',
+        },
       ],
     },
     options: {
@@ -113,6 +121,14 @@ const renderScope = () => {
             color: '#3062b3',
           },
           position: 'right',
+        },
+        yRight2: {
+          position: 'right',
+          title: {
+            display: true,
+            text: 'PWM',
+            color: '#107223',
+          },
         },
       },
 

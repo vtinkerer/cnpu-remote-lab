@@ -73,6 +73,7 @@ export function createFakeScope(): IScopeReader {
         '19s',
         '20s',
       ],
+      pwm: [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     };
     fakeScopeEvents.emit('scope-data', data);
   }, 1000);
