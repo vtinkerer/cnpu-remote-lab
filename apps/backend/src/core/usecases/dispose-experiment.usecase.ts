@@ -20,6 +20,7 @@ import {
 import { IClientConnectTimeoutManager } from '../interfaces/client-connect-timeout-manager.interface';
 import { IClientDisconnectTimeoutManager } from '../interfaces/client-disconnect-timeout-manager.interface';
 import { IMcuSender } from '../interfaces/mcu-sender.interface';
+import { sleep } from '../../utils/sleep';
 
 export const DisposeExperimentPayloadValidationSchema = Type.Object({
   sessionId: Type.String(),
@@ -71,41 +72,62 @@ export class DisposeExperimentUsecase {
         this.clientWebsocketHandler.clearWebsocket();
         this.clientConnectTimeoutAdapter.clearTimeoutIfExists();
         this.clientDisconnectTimeoutAdapter.clearTimeoutIfExists();
+
+        this.logger.info({
+          message: 'The session is over, reseting the MCU.',
+          username: user.username,
+          usernameUnique: user.usernameUnique,
+        });
+
         await this.mcuSender.send(
           new PWMDTO({
             pwmPercentage: 0,
           })
         );
+        await sleep(10);
+
         await this.mcuSender.send(
           new VoltageInputDTO({
             voltage: 3,
           })
         );
+        await sleep(10);
+
         await this.mcuSender.send(
           new VoltageOutputDto({
             voltage: 0,
           })
         );
+        await sleep(10);
+
         await this.mcuSender.send(
           new CurrentLoadDTO({
             mA: 0,
           })
         );
+        await sleep(10);
+
         await this.mcuSender.send(
           new LoadTypeDTO({
             type: 'CUR',
           })
         );
+        await sleep(10);
+
         await this.mcuSender.send(
           new PWMTypeDTO({
             type: 'MAN',
           })
         );
+        await sleep(10);
+
         await this.mcuSender.send(
           new CapacitorDTO({
             capacity: 44,
           })
         );
+        await sleep(10);
+
         await this.mcuSender.send(
           new ResistanceLoadDTO({
             resistance: 9999.9,
