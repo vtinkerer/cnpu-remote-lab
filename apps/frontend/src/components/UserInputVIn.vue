@@ -19,6 +19,6 @@ watch(value, (newValue) => {
 <template>
   <div class="fw-bold fst-italic" style="font-size: 12px; text-align: center;">
     V<sub>in</sub> (V)
-    <MyRoundSlider :max="12" v-model="value" :step="1" />
+    <MyRoundSlider :min="3" :max="21" v-model="value" :step="1" />
   </div>
 </template>

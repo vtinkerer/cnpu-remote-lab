@@ -7,6 +7,7 @@ const randomRoundSliderId = ref(String(Math.random()).replace('.', ''));
 const randomRoundSliderInputId = ref(String(Math.random()).replace('.', ''));
 
 const props = defineProps<{
+  min: number;
   step: number;
   max: number;
 }>();
@@ -27,6 +28,7 @@ onMounted(() => {
     startAngle: 315,
     endAngle: 225,
     step: 1,
+    min: props.min,
     max: props.max,
     editableTooltip: true,
     
