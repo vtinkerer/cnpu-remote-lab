@@ -6,6 +6,7 @@ import { IUserRepository } from '../interfaces/user-repository.interface.js';
 import { Logger } from '../../logger/logger.js';
 import { CurrentUser } from '../entities/user.entity.js';
 import { IClientConnectTimeoutManager } from '../interfaces/client-connect-timeout-manager.interface.js';
+import { IMcuResetter } from '../interfaces/mcu-resetter.interface.js';
 
 export const StartSessionPayloadValidationSchema = Type.Object({
   request: Type.Object({
@@ -40,7 +41,8 @@ export class StartSessionsUsecase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly clientConnectTimeoutAdapter: IClientConnectTimeoutManager,
-    private readonly callbackUrl: string
+    private readonly callbackUrl: string,
+    private readonly mcuResetter: IMcuResetter
   ) {}
 
   @WithSchemaDecorator(StartSessionPayloadValidationSchema)
@@ -79,6 +81,8 @@ export class StartSessionsUsecase {
     this.clientConnectTimeoutAdapter.startTimeout();
 
     this.logger.info(`Session started: ${sessionId}`);
+
+    await this.mcuResetter.reset();
 
     return {
       url: `${this.callbackUrl}?session_id=${sessionId}`,

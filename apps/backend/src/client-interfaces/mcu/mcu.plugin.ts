@@ -15,6 +15,8 @@ import { McuSender } from '../../adapters/mcu/mcu.adapter';
 import { DelimiterParser, SerialPort } from 'serialport';
 import { SendMcuDataToUserUsecase } from '../../core/usecases/send-mcu-data-to-user.usecase';
 import { createFakeSerialPort } from '../../fakes/serial-port.fake';
+import { McuResetter } from '../../core/shared/mcu-resetter';
+import { IMcuResetter } from '../../core/interfaces/mcu-resetter.interface';
 
 export type McuMessage =
   | VoltageOutputDto
@@ -36,6 +38,7 @@ export const mcuPlugin = () =>
 
     let mcuReceiver: IMcuReceiver;
     let mcuSender: IMcuSender;
+    let mcuResetter: IMcuResetter;
 
     if (!fastify.config.is_fake_serial_port) {
       // TODO: Create SerialPort connection here
@@ -71,10 +74,12 @@ export const mcuPlugin = () =>
       });
       const parser = serialPort.pipe(new DelimiterParser({ delimiter: ';' }));
       mcuReceiver = new McuReceiver(parser);
+      mcuResetter = new McuResetter(mcuSender);
     } else {
       const fakes = createFakeSerialPort(logger);
       mcuReceiver = fakes.receiver;
       mcuSender = fakes.sender;
+      mcuResetter = fakes.resetter;
     }
 
     mcuReceiver.on('data', (data) => {
@@ -93,6 +98,12 @@ export const mcuPlugin = () =>
     fastify.decorate('mcuSender', {
       getter() {
         return mcuSender;
+      },
+    });
+
+    fastify.decorate('mcuResetter', {
+      getter() {
+        return mcuResetter;
       },
     });
   });

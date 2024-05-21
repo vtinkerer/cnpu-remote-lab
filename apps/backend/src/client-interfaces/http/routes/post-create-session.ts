@@ -37,7 +37,8 @@ export const postCreateSessionRoute: FastifyPluginAsync = async (
       const usecase = new StartSessionsUsecase(
         fastify.userRepository,
         fastify.clientConnectTimeoutAdapter,
-        fastify.config.frontend_url
+        fastify.config.frontend_url,
+        fastify.mcuResetter
       );
 
       fastify.log.info(`Creating session for ${request.body.user.username}`);

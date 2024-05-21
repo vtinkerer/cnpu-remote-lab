@@ -19,14 +19,24 @@ export class McuSender implements IMcuSender {
 
   constructor(private readonly serialport: SerialPort) {}
 
-  send<T extends BaseDto>(data: T): Promise<void> {
+  async send<T extends BaseDto>(data: T | T[]): Promise<void> {
+    if (!Array.isArray(data)) {
+      data = [data];
+    }
+    const serializedData = data
+      .map((d) => this.getOneSerialized(d))
+      .filter((str) => !!str)
+      .join(';');
+    this.serialport.write(serializedData + '\n');
+    this.logger.info(`Send serialized data: ${serializedData}`);
+  }
+
+  private getOneSerialized<T extends BaseDto>(data: T): string {
     const serializer = serializers[data.dtoName];
     if (!serializer) {
-      this.logger.warn('No serializer found for the given DTO');
-      return;
+      this.logger.warn({ message: 'Serializer not found for dto', dto: data });
+      return '';
     }
-    const serializedData = serializer.serialize(data);
-    this.serialport.write(serializedData);
-    this.logger.info(`Send serialized data: ${serializedData}`);
+    return serializer.serialize(data);
   }
 }

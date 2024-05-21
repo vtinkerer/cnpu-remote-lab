@@ -6,7 +6,7 @@ export abstract class BaseMcuSerializer<T extends BaseDto = BaseDto> {
   abstract extractValue(dto: T): string;
 
   serialize(dto: T) {
-    return `${this.key}=${this.extractValue(dto)};\n`;
+    return `${this.key}=${this.extractValue(dto)}`;
   }
 }
 

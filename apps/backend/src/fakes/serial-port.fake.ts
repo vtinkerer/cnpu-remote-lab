@@ -7,10 +7,12 @@ import {
   VoltageInputDTO,
   VoltageOutputDto,
 } from '@cnpu-remote-lab-nx/shared';
+import { IMcuResetter } from '../core/interfaces/mcu-resetter.interface';
 
 export function createFakeSerialPort(logger: Logger): {
   receiver: IMcuReceiver;
   sender: IMcuSender;
+  resetter: IMcuResetter;
 } {
   const events = new EventEmitter();
 
@@ -43,6 +45,13 @@ export function createFakeSerialPort(logger: Logger): {
         logger.info({
           message: 'Fake serialport send data',
           data,
+        });
+      },
+    },
+    resetter: {
+      reset: async () => {
+        logger.info({
+          message: 'Fake serialport reset',
         });
       },
     },
