@@ -22,9 +22,9 @@ last_input_voltage = 0
 try:
     
     device_data = device.open()
-    scope.open(device_data, sampling_frequency=100e6, buffer_size=600)
+    scope.open(device_data, sampling_frequency=100e6, buffer_size=600, amplitude_range=6)
     logic.open(device_data)
-    logic.trigger(device_data, enable=True, channel=0, rising_edge=True, timeout=0.1)
+    logic.trigger(device_data, enable=True, channel=0, rising_edge=True, timeout=5)
     while True: 
         if device_data.name != "Digital Discovery":
             user_inputs = [] 
@@ -35,10 +35,15 @@ try:
                 else: break
             if (len(user_inputs) > 0):
                 last_input_voltage = float(user_inputs[-1])
-
-            scope.trigger(device_data, enable=True, source=scope.trigger_source.digital, channel=0, edge_rising=True, timeout=0.1)
-            # wavegen.generate(device_data, channel=1, function=wavegen.function.triangle, offset=0, frequency=sig_frequency, amplitude=2)
+            if last_input_voltage > 2.5:
+                scope.open(device_data, sampling_frequency=100e6, buffer_size=600, amplitude_range=20)
+            else:
+                scope.open(device_data, sampling_frequency=100e6, buffer_size=600)
+            #scope.open(device_data, sampling_frequency=100e6, buffer_size=600, amplitude_range=last_input_voltage)
+            scope.trigger(device_data, enable=True, source=scope.trigger_source.digital, channel=0, edge_rising=True, timeout=5)
+            #wavegen.generate(device_data, channel=1, function=wavegen.function.triangle, offset=0, frequency=sig_frequency, amplitude=2)
             buffer_voltage = scope.record(device_data, channel=1)
+            #scope.trigger(device_data, enable=True, source=scope.trigger_source.digital, channel=0, edge_rising=True, timeout=0.1)
             buffer_current = scope.record(device_data, channel=2)
             buffer_pwm = logic.record(device_data, channel=0)
 
@@ -49,7 +54,7 @@ try:
             for i in range(len(buffer_current)):
                 buffer_current[i] = (buffer_current[i] - 0.65) * 10 # Amperes
 
-            write_to_stdout(str(json.dumps({"voltage": buffer_voltage, "time": time, "current": buffer_current, "pwm": buffer_pwm})))
+            write_to_stdout(str(json.dumps({"voltage": buffer_voltage, "time": time, "pwm": buffer_pwm, "current": buffer_current})))
 
             sleep(0.2)
 
