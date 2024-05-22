@@ -10,6 +10,7 @@ import './serializers/pwm-type.serializer';
 import './serializers/resistance-load.serializer';
 import './serializers/output-voltage.serializer';
 import './serializers/load-type.serializer';
+import './serializers/reset.serializer';
 
 import { SerialPort } from 'serialport';
 import { BaseDto } from '@cnpu-remote-lab-nx/shared';
