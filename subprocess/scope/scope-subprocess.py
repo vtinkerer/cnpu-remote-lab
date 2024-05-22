@@ -22,9 +22,9 @@ last_input_voltage = 0
 try:
     
     device_data = device.open()
-    scope.open(device_data, sampling_frequency=100e6, buffer_size=600, amplitude_range=6)
+    scope.open(device_data, sampling_frequency=100e6, buffer_size=600)
     logic.open(device_data)
-    logic.trigger(device_data, enable=True, channel=0, rising_edge=True, timeout=5)
+    logic.trigger(device_data, enable=True, channel=0, rising_edge=True, timeout=0.2)
     while True: 
         if device_data.name != "Digital Discovery":
             user_inputs = [] 
@@ -40,7 +40,7 @@ try:
             else:
                 scope.open(device_data, sampling_frequency=100e6, buffer_size=600)
             #scope.open(device_data, sampling_frequency=100e6, buffer_size=600, amplitude_range=last_input_voltage)
-            scope.trigger(device_data, enable=True, source=scope.trigger_source.digital, channel=0, edge_rising=True, timeout=5)
+            scope.trigger(device_data, enable=True, source=scope.trigger_source.digital, channel=0, edge_rising=True, timeout=0.2)
             #wavegen.generate(device_data, channel=1, function=wavegen.function.triangle, offset=0, frequency=sig_frequency, amplitude=2)
             buffer_voltage = scope.record(device_data, channel=1)
             #scope.trigger(device_data, enable=True, source=scope.trigger_source.digital, channel=0, edge_rising=True, timeout=0.1)
