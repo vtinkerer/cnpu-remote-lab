@@ -24,10 +24,10 @@ export class McuSender implements IMcuSender {
       data = [data];
     }
     const serializedData =
-      data
-        .map((d) => this.getOneSerialized(d))
-        .filter((str) => !!str)
-        .join(';') + '\n';
+      [
+        ...data.map((d) => this.getOneSerialized(d)).filter((str) => !!str),
+        '',
+      ].join(';') + '\n';
     this.serialport.write(serializedData);
     this.logger.info(`Send serialized data: ${serializedData}`);
   }
