@@ -18,6 +18,7 @@ export const configSchema = Type.Object({
   is_fake_scope: Type.Boolean(),
   is_fake_serial_port: Type.Boolean(),
   log_messages_from_mcu: Type.Boolean(),
+  use_reset_command: Type.Boolean(),
 });
 
 export type ConfigType = Static<typeof configSchema>;

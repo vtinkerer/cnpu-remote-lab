@@ -74,7 +74,10 @@ export const mcuPlugin = () =>
       });
       const parser = serialPort.pipe(new DelimiterParser({ delimiter: ';' }));
       mcuReceiver = new McuReceiver(parser);
-      mcuResetter = new McuResetter(mcuSender);
+      mcuResetter = new McuResetter(
+        mcuSender,
+        fastify.config.use_reset_command
+      );
     } else {
       const fakes = createFakeSerialPort(logger);
       mcuReceiver = fakes.receiver;
