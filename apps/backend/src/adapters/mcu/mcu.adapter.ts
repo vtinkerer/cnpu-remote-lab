@@ -23,11 +23,12 @@ export class McuSender implements IMcuSender {
     if (!Array.isArray(data)) {
       data = [data];
     }
-    const serializedData = data
-      .map((d) => this.getOneSerialized(d))
-      .filter((str) => !!str)
-      .join(';');
-    this.serialport.write(serializedData + '\n');
+    const serializedData =
+      data
+        .map((d) => this.getOneSerialized(d))
+        .filter((str) => !!str)
+        .join(';') + '\n';
+    this.serialport.write(serializedData);
     this.logger.info(`Send serialized data: ${serializedData}`);
   }
 
