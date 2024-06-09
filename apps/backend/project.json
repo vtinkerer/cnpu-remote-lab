@@ -56,7 +56,7 @@
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/backend-test",
-        "main": "apps/backend/test/index.test.ts",
+        "main": "",
         "tsConfig": "apps/backend/tsconfig.spec.json"
       }
     }

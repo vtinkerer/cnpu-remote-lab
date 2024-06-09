@@ -5,5 +5,10 @@
     "module": "commonjs",
     "types": ["node"]
   },
-  "include": ["test/**/*.test.ts", "test/**/*.spec.ts", "test/**/*.d.ts"]
+  "include": [
+    "test/**/*.test.ts",
+    "test/**/*.spec.ts",
+    "test/**/*.d.ts",
+    "test/index-test.ts"
+  ]
 }
