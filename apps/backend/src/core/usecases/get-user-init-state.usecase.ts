@@ -1,4 +1,7 @@
-import { GetUserInitStateResponse } from '@cnpu-remote-lab-nx/shared';
+import {
+  GetUserInitStateResponse,
+  LaboratoryType,
+} from '@cnpu-remote-lab-nx/shared';
 import { Logger } from '../../logger/logger';
 import {
   AnonymousUser,
@@ -48,6 +51,7 @@ export class GetUserInitState {
       isActive: true,
       stopDate: user.maxDate.toISO(),
       url: user.back,
+      laboratoryType: user.categoryName as LaboratoryType,
     };
   }
 }

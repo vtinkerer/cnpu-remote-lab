@@ -12,3 +12,4 @@ export * from './websocket/common/current-load.dto';
 export * from './websocket/common/load-type.dto';
 export * from './websocket/common/resistance-load.dto';
 export * from './websocket/common/current-load.dto';
+export * from './laboratory-type';

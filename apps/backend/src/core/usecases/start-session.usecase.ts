@@ -7,6 +7,7 @@ import { Logger } from '../../logger/logger.js';
 import { CurrentUser } from '../entities/user.entity.js';
 import { IClientConnectTimeoutManager } from '../interfaces/client-connect-timeout-manager.interface.js';
 import { IMcuResetter } from '../interfaces/mcu-resetter.interface.js';
+import { LaboratoryType } from '@cnpu-remote-lab-nx/shared';
 
 export const StartSessionPayloadValidationSchema = Type.Object({
   request: Type.Object({
@@ -18,7 +19,7 @@ export const StartSessionPayloadValidationSchema = Type.Object({
   }),
   laboratory: Type.Object({
     name: Type.String(),
-    category: Type.Union([Type.Null(), Type.String()]),
+    category: Type.Enum(LaboratoryType),
   }),
   user: Type.Object({
     username: Type.String(),
@@ -47,6 +48,10 @@ export class StartSessionsUsecase {
 
   @WithSchemaDecorator(StartSessionPayloadValidationSchema)
   async execute(payload: SessionsPostBodyType) {
+    this.logger.info({
+      payload,
+    });
+
     const experimentId = payload.laboratory.category
       ? `${payload.laboratory.name}@${payload.laboratory.category}`
       : payload.laboratory.name;
