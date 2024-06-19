@@ -1,6 +1,7 @@
 import { ScopeData } from '@cnpu-remote-lab-nx/shared';
 import EventEmitter from 'node:events';
 import { IScopeReader } from '../client-interfaces/scope/scope.plugin';
+import { IScopeSender } from '../core/interfaces/scope-sender.interface';
 
 export function createFakeScope(): IScopeReader {
   const fakeScopeEvents = new EventEmitter();
@@ -81,5 +82,13 @@ export function createFakeScope(): IScopeReader {
   return {
     on: fakeScopeEvents.on.bind(fakeScopeEvents),
     once: fakeScopeEvents.once.bind(fakeScopeEvents),
+  };
+}
+
+export function createFakeScopeSender(): IScopeSender {
+  return {
+    sendOutVoltage: (voltage: number) => {
+      console.log(`[FAKE] Sending out voltage: ${voltage}`);
+    },
   };
 }

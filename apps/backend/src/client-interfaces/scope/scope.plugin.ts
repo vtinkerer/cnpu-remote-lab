@@ -5,7 +5,7 @@ import { SendScopeDataToUserUsecase } from '../../core/usecases/send-scope-data-
 import { ScopeData } from '@cnpu-remote-lab-nx/shared';
 import * as child_process from 'child_process';
 import { ScopeReader } from './scope-reader';
-import { createFakeScope } from '../../fakes/scope.fake';
+import { createFakeScope, createFakeScopeSender } from '../../fakes/scope.fake';
 import { IScopeSender } from '../../core/interfaces/scope-sender.interface';
 import { ScopeSender } from '../../adapters/scope-sender';
 
@@ -34,7 +34,7 @@ export const scopePlugin = () =>
       scopeSender = new ScopeSender(pythonProcess);
     } else {
       scopeReader = createFakeScope();
-      scopeSender = null;
+      scopeSender = createFakeScopeSender();
     }
 
     scopeReader.on('scope-data', async (scopeData) => {
