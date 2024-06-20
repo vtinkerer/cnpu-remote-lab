@@ -6,6 +6,7 @@ import {
   isScopeDataDto,
   isSessionIsOverDto,
   isPWMTypeDto,
+  isSchemaTypeDto,
   isVoltageInputDto,
   isCapacitorDto,
   isCurrentLoadDto,
@@ -26,6 +27,7 @@ export const useBackendDataStore = defineStore('backend-data', () => {
   const realPWMDC = ref(0);
   const VOut = ref(0);
   const typePWM = ref({ type: 'AUT' });
+  const typeSchema = ref({type: 'BST'});
 
   function connectToWebSocket() {
     if (!sessionId.value) {
@@ -80,6 +82,11 @@ export const useBackendDataStore = defineStore('backend-data', () => {
       if (isPWMTypeDto(dto)) {
         typePWM.value.type = dto.type;
       }
+
+      if (isSchemaTypeDto(dto)) {
+        typeSchema.value.type = dto.type;
+      }
+
     };
   }
 
@@ -127,5 +134,6 @@ export const useBackendDataStore = defineStore('backend-data', () => {
     timeLeft,
     VOut,
     typePWM,
+    typeSchema,
   };
 });

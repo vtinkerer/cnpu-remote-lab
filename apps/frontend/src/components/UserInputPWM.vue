@@ -17,10 +17,12 @@ watch(value, (newValue) => {
 </script>
 
 <template>
-  <div
-    class="fw-bold fst-italic"
-    style="font-size: 12px; text-align: center; display: flex; flex-direction: column">
+  <div class="fw-bold fst-italic input-pwm-label">
     PWM (%)
-    <MyRoundSlider :max="97" v-model="value" :step="1" />
+    <MyRoundSlider :min="0" :max="97" :step="1" v-model="value" />
   </div>
 </template>
+
+<style>
+@import '../style/styles.css';
+</style>

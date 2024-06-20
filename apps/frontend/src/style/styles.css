@@ -1,0 +1,266 @@
+.sticky-header {
+    position: sticky;
+    top: 0px;
+    z-index: 1000;
+    height: 6vh;
+    background-color: #e3e3e3;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15), 0 2px 2px rgba(0, 0, 0, 0.15),
+      0 4px 4px rgba(0, 0, 0, 0.15), 0 8px 8px rgba(0, 0, 0, 0.15);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .numbered-paragraph {
+    margin: 0px;
+    margin-left: 30px;
+  }
+  
+  .container-overwritten {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .container-overwritten .btn-vin {
+    position: absolute;
+    top: 58%;
+    left: 15%;
+    transform: translate(-50%, -50%);
+    padding: 1px 1px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .background {
+    background-color: lavender;
+  }
+  
+  .container-overwritten .btn-ipwm {
+    position: absolute;
+    top: 58%;
+    left: 35%;
+    transform: translate(-50%, -50%);
+    padding: 1px 1px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .container-overwritten .btn-icap {
+    position: absolute;
+    top: 53%;
+    left: 69%;
+    transform: translate(-50%, -50%);
+    padding: 1px 1px;
+    border: none;
+    cursor: pointer;
+    border-radius: 1px;
+  }
+  
+  .btn-ipwm-type {
+    position: absolute;
+    top: 90%;
+    left: 34.5%;
+    transform: translate(-50%, -50%);
+    padding: 1px 1px;
+    border-radius: 5px;
+  }
+  
+  .container-overwritten .btn-rload {
+    position: absolute;
+    top: 58%;
+    left: 96%;
+    transform: translate(-50%, -50%);
+    padding: 1px 1px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .container-overwritten .real-vin {
+    position: absolute;
+    top: 24%;
+    left: 15%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    padding: 1px;
+    border-radius: 5px;
+    border: 1px solid black;
+    background-color: #deded9;
+  }
+  
+  .container-overwritten .real-pwm {
+    position: absolute;
+    top: 24%;
+    left: 36%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    padding: 1px;
+    border-radius: 5px;
+    border: 1px solid black;
+    background-color: #deded9;
+  }
+  
+  .container-overwritten .real-capacity {
+    position: absolute;
+    top: 23%;
+    left: 69%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    padding: 1px;
+    border-radius: 5px;
+    border: 1px solid black;
+    background-color: #deded9;
+  }
+  
+  .container-overwritten .real-rload {
+    position: absolute;
+    top: 23%;
+    left: 96%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    padding: 1px;
+    border-radius: 5px;
+    border: 1px solid black;
+    background-color: #deded9;
+  }
+  
+  .container-overwritten .real-vload {
+    position: absolute;
+    top: 23%;
+    left: 81%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    padding: 1px;
+    border-radius: 5px;
+    border: 1px solid black;
+    background-color: #deded9;
+  }
+  
+  .container-overwritten .btn-vload {
+    position: absolute;
+    top: 58%;
+    left: 81%;
+    transform: translate(-50%, -50%);
+    padding: 1px 1px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+
+  .button {
+    background-color: #d2d2d2;
+    width: 20px;
+    height: 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    position: relative;
+    transition: 0.2s;
+  }
+  
+  .button::before {
+    position: absolute;
+    content: '';
+    background-color: #54bbe0;
+    width: 9px;
+    height: 9px;
+    border-radius: 20px;
+    margin: 0.5px;
+    transition: 0.2s;
+  }
+  
+  input:checked + .button {
+    background-color: #d2d2d2;
+  }
+  
+  input:checked + .button::before {
+    transform: translateX(10px);
+  }
+  
+  input {
+    display: none;
+  }
+  
+  .input-pwm-label {
+    font-size: 12px; 
+    text-align: center; 
+    display: flex; 
+    flex-direction: column;
+  }
+
+  .input-roundslider-label {
+    font-size: 12px; 
+    text-align: center;
+  }
+
+  .scope-chart {
+    flex: 1;
+  }
+
+  .row {
+    padding: 7px;
+  }
+
+  .text-scope-chart {
+    text-align: center;
+  }
+
+  .relative-scope-chart {
+    position: relative; 
+    height: 40vh; 
+    width: 40vw; 
+    margin: auto
+  }
+
+  .button-nonclicked {
+    font-size: 10px;
+    background-color: white; 
+    border: 1px solid black; 
+    color: black; 
+    cursor: pointer; 
+    padding: 0%;
+    min-width: 40px;
+    display: block; 
+  }
+  
+  button:hover {
+    background-color: #54bbe0;
+    color: white;
+  }
+  
+  .button-clicked {
+    font-size: 10px;
+    background-color: #54bbe0; 
+    border: 1px solid black; 
+    color: black; 
+    cursor: pointer; 
+    padding: 0%;
+    min-width: 40px;
+    display: block; 
+  }
+
+  .input-roundslider-label {
+    font-size: 12px; 
+    text-align: center;
+  }
+
+  .point-info {
+    width: auto;
+    padding: 1px;
+    margin: 5px;
+    border: 1px solid black;
+    border-radius: 10px;
+    background-color: white;
+  }
+  
+  .vout-graph-center {
+    text-align: center;
+  }
+  
+  .vout-graph-position {
+    position: relative; 
+    height: 40vh; 
+    width: 40vw; 
+    margin: auto
+  }

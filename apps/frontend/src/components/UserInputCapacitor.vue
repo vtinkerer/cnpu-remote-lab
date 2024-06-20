@@ -67,37 +67,10 @@ function refreshCapac(clickedId: String) {
         @click="refreshCapac('capac0')" id="capac0"> {{capacityValues[0]}} </button>
       </div>
       
-  </div>
+    </div>
   </div>
 </template>
 
 <style>
-
-.button-nonclicked {
-  font-size: 10px;
-  background-color: white; 
-  border: 1px solid black; 
-  color: black; 
-  cursor: pointer; 
-  padding: 0%;
-  min-width: 40px;
-  display: block; 
-}
-
-button:hover {
-  background-color: #54bbe0;
-  color: white;
-}
-
-.button-clicked {
-  font-size: 10px;
-  background-color: #54bbe0; 
-  border: 1px solid black; 
-  color: black; 
-  cursor: pointer; 
-  padding: 0%;
-  min-width: 40px;
-  display: block; 
-}
-
+@import '../style/styles.css';
 </style>

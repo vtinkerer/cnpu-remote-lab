@@ -180,8 +180,8 @@ watch(
 </script>
 
 <template>
-  <div style="text-align: center">
-    <div style="position: relative; height: 40vh; width: 40vw; margin: auto">
+  <div class="vout-graph-center">
+    <div class="vout-graph-position">
       <canvas ref="chartRef"></canvas>
     </div>
     <div class="point-info">Point: PWM={{ store.realPWMDC }}, VOut={{ store.VOut }}</div>
@@ -200,12 +200,5 @@ watch(
 </template>
 
 <style>
-.point-info {
-  width: auto;
-  padding: 1px;
-  margin: 5px;
-  border: 1px solid black;
-  border-radius: 10px;
-  background-color: white;
-}
+@import '../style/styles.css';
 </style>

@@ -33,7 +33,6 @@ const store = useBackendDataStore();
 store.setSessionId(session_id!);
 store.getIsActive();
 store.connectToWebSocket();
-
 //const m = ref(0);
 </script>
 
@@ -45,11 +44,27 @@ store.connectToWebSocket();
   <div class="background container-fluid">
     <div class="row">
       <!-- 1st component (Schematic Diagram) -->
-      <div class="col-lg-6" style="background-color: lavender">
+      <div class="col-lg-6">
         <Section>
-          <h3 class="text-center">DC-DC Buck Converter - Schematic Diagramm</h3>
+
+          <div v-if="store.typeSchema.type === 'BCK'">
+            <h3 class="text-center">DC-DC Buck Converter - Schematic Diagramm</h3>
+          </div>
+          
+          <div v-if="store.typeSchema.type === 'BST'">
+            <h3 class="text-center">DC-DC Boost Converter - Schematic Diagramm</h3>
+          </div>
+
           <div class="container-overwritten">
-            <img class="img-fluid" src="../img/buck.svg" />
+
+            <div v-if="store.typeSchema.type === 'BCK'">
+              <img class="img-fluid" src="../img/buck.svg" />
+            </div>
+            
+            <div v-if="store.typeSchema.type === 'BST'">
+              <img class="img-fluid" src="../img/boost.svg" />
+            </div>
+
             <div>
               <RealVin class="real-vin" />
               <RealPWM class="real-pwm" />
@@ -73,7 +88,7 @@ store.connectToWebSocket();
         </Section>
       </div>
 
-      <div class="col-lg-6" style="background-color: lavender">
+      <div class="col-lg-6">
         <Section>
           <h3 class="text-center">Experiment recommendations</h3>
           <div>
@@ -92,14 +107,14 @@ store.connectToWebSocket();
     </div>
 
     <div class="row">
-      <div class="col-lg-6" style="background-color: lavender">
+      <div class="col-lg-6">
         <Section>
           <h3 class="text-center">Oscilloscope</h3>
-          <ScopeChart style="flex: 1"></ScopeChart>
+          <ScopeChart />
         </Section>
       </div>
 
-      <div class="col-lg-6" style="background-color: lavender">
+      <div class="col-lg-6">
         <Section>
           <h3 class="text-center">Output Voltage vs PWM</h3>
           <VoutGraph />
@@ -110,155 +125,5 @@ store.connectToWebSocket();
 </template>
 
 <style>
-.sticky-header {
-  position: sticky;
-  top: 0px;
-  z-index: 1000;
-  height: 6vh;
-  background-color: #e3e3e3;
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15), 0 2px 2px rgba(0, 0, 0, 0.15),
-    0 4px 4px rgba(0, 0, 0, 0.15), 0 8px 8px rgba(0, 0, 0, 0.15);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.numbered-paragraph {
-  margin: 0px;
-  margin-left: 30px;
-}
-
-.container-overwritten {
-  position: relative;
-  display: inline-block;
-}
-
-.container-overwritten .btn-vin {
-  position: absolute;
-  top: 58%;
-  left: 15%;
-  transform: translate(-50%, -50%);
-  font-size: 16px;
-  padding: 1px 1px;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-.container-overwritten .btn-ipwm {
-  position: absolute;
-  top: 58%;
-  left: 36%;
-  transform: translate(-50%, -50%);
-  font-size: 16px;
-  padding: 1px 1px;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-.container-overwritten .btn-icap {
-  position: absolute;
-  top: 53%;
-  left: 69%;
-  transform: translate(-50%, -50%);
-  font-size: 16px;
-  padding: 1px 1px;
-  border: none;
-  cursor: pointer;
-  border-radius: 1px;
-}
-
-.btn-ipwm-type {
-  position: absolute;
-  top: 90%;
-  left: 34.5%;
-  transform: translate(-50%, -50%);
-  padding: 1px 1px;
-  border-radius: 5px;
-}
-
-.container-overwritten .btn-rload {
-  position: absolute;
-  top: 58%;
-  left: 96%;
-  font-size: 16px;
-  transform: translate(-50%, -50%);
-  padding: 1px 1px;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-.container-overwritten .real-vin {
-  position: absolute;
-  top: 24%;
-  left: 15%;
-  transform: translate(-50%, -50%);
-  font-size: 12px;
-  padding: 1px;
-  border-radius: 5px;
-  border: 1px solid black;
-  background-color: #deded9;
-}
-
-.container-overwritten .real-pwm {
-  position: absolute;
-  top: 24%;
-  left: 36%;
-  transform: translate(-50%, -50%);
-  font-size: 12px;
-  padding: 1px;
-  border-radius: 5px;
-  border: 1px solid black;
-  background-color: #deded9;
-}
-
-.container-overwritten .real-capacity {
-  position: absolute;
-  top: 23%;
-  left: 69%;
-  transform: translate(-50%, -50%);
-  font-size: 12px;
-  padding: 1px;
-  border-radius: 5px;
-  border: 1px solid black;
-  background-color: #deded9;
-}
-
-.container-overwritten .real-rload {
-  position: absolute;
-  top: 23%;
-  left: 96%;
-  transform: translate(-50%, -50%);
-  font-size: 12px;
-  padding: 1px;
-  border-radius: 5px;
-  border: 1px solid black;
-  background-color: #deded9;
-}
-
-.container-overwritten .real-vload {
-  position: absolute;
-  top: 23%;
-  left: 81%;
-  transform: translate(-50%, -50%);
-  font-size: 12px;
-  padding: 1px;
-  border-radius: 5px;
-  border: 1px solid black;
-  background-color: #deded9;
-}
-
-.container-overwritten .btn-vload {
-  position: absolute;
-  top: 58%;
-  left: 81%;
-  font-size: 16px;
-  transform: translate(-50%, -50%);
-  padding: 1px 1px;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-}
+@import '../style/styles.css';
 </style>

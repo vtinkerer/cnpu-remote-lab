@@ -27,35 +27,5 @@ const handleUserClick = (isChecked: boolean) => {
 </template>
 
 <style>
-.button {
-  background-color: #d2d2d2;
-  width: 20px;
-  height: 10px;
-  border-radius: 20px;
-  cursor: pointer;
-  position: relative;
-  transition: 0.2s;
-}
-.button::before {
-  position: absolute;
-  content: '';
-  background-color: #54bbe0;
-  width: 9px;
-  height: 9px;
-  border-radius: 20px;
-  margin: 0.5px;
-  transition: 0.2s;
-}
-
-input:checked + .button {
-  background-color: #d2d2d2;
-}
-
-input:checked + .button::before {
-  transform: translateX(10px);
-}
-
-input {
-  display: none;
-}
+@import '../style/styles.css';
 </style>

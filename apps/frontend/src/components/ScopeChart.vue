@@ -167,12 +167,13 @@ watch(scopeData, (n) => {
 </script>
 
 <template>
-  <div style="text-align: center">
-    <div style="position: relative; height: 40vh; width: 40vw; margin: auto">
+  <div class="scope-chart">
+  <div class="text-scope-chart">
+    <div class="relative-scope-chart">
       <canvas ref="chartRef"></canvas>
     </div>
 
-    <div class="row" style="padding: 7px" align="center">
+    <div class="row" align="center">
       <div class="col">
         <button
           class="btn btn-md btn-primary"
@@ -191,4 +192,9 @@ watch(scopeData, (n) => {
       </div>
     </div>
   </div>
+  </div>
 </template>
+
+<style>
+@import '../style/styles.css';
+</style>
