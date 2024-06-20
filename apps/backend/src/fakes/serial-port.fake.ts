@@ -3,7 +3,9 @@ import { IMcuReceiver } from '../client-interfaces/mcu/mcu.plugin';
 import { IMcuSender } from '../core/interfaces/mcu-sender.interface';
 import { Logger } from '../logger/logger';
 import {
+  isPWMTypeDto,
   PWMDTO,
+  PWMTypeDTO,
   VoltageInputDTO,
   VoltageOutputDto,
 } from '@cnpu-remote-lab-nx/shared';
@@ -42,6 +44,14 @@ export function createFakeSerialPort(logger: Logger): {
     },
     sender: {
       send: async (data: any) => {
+        if (isPWMTypeDto(data)) {
+          events.emit(
+            'data',
+            new PWMTypeDTO({
+              type: data.type,
+            })
+          );
+        }
         logger.info({
           message: 'Fake serialport send data',
           data,
