@@ -6,6 +6,7 @@ import {
   isScopeDataDto,
   isSessionIsOverDto,
   isPWMTypeDto,
+  isLoadTypeDto,
   isVoltageInputDto,
   isCapacitorDto,
   isCurrentLoadDto,
@@ -26,6 +27,7 @@ export const useBackendDataStore = defineStore('backend-data', () => {
   const realCf = ref(0);
   const realPWMDC = ref(0);
   const VOut = ref(0);
+  const typeLoad = ref({ type: 'CUR' });
   const typePWM = ref({ type: 'AUT' });
   const laboratoryType = ref(LaboratoryType.UP);
 
@@ -83,6 +85,10 @@ export const useBackendDataStore = defineStore('backend-data', () => {
         typePWM.value.type = dto.type;
       }
 
+      if (isLoadTypeDto(dto)) {
+        typeLoad.value.type = dto.type;
+      }
+
     };
   }
 
@@ -137,6 +143,7 @@ export const useBackendDataStore = defineStore('backend-data', () => {
     timeLeft,
     VOut,
     typePWM,
+    typeLoad,
     laboratoryType,
   };
 });

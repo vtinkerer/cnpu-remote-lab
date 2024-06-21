@@ -6,7 +6,7 @@ export const isLoadTypeDto = (dto: unknown): dto is LoadTypeDTO =>
   (dto as any).dtoName && (dto as any).dtoName === LoadTypeDTO.name;
 
 export class LoadTypeDTO implements BaseDto {
-  dtoName = LoadTypeDTO.name;
+  readonly dtoName = LoadTypeDTO.name;
 
   readonly type: LoadType;
 

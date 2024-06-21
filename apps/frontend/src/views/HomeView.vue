@@ -6,10 +6,13 @@ import UserInputPWMType from '../components/UserInputPWMType.vue';
 import UserInputCapacitor from '../components/UserInputCapacitor.vue';
 import UserInputPWM from '../components/UserInputPWM.vue';
 import UserInputVLoad from '../components/UserInputVLoad.vue';
+import UserInputLoadType from '../components/UserInputLoadType.vue';
+import UserInputRLoad from '../components/UserInputRLoad.vue';
 
 import RealPWM from '../components/RealPWM.vue';
 import RealILoad from '../components/RealILoad.vue';
 import RealVLoad from '../components/RealVLoad.vue';
+import RealRLoad from '../components/RealRLoad.vue';
 import RealVin from '../components/RealVin.vue';
 import RealCapacity from '../components/RealCapacity.vue';
 
@@ -69,8 +72,12 @@ store.connectToWebSocket();
               <RealVin class="real-vin" />
               <RealPWM class="real-pwm" />
               <RealCapacity class="real-capacity" />
-              <RealILoad class="real-rload" />
-
+              <div v-if="store.typeLoad.type === 'CUR'">
+                <RealILoad class="real-load" />
+              </div>
+              <div v-if="store.typeLoad.type === 'RES'">
+                <RealRLoad class="real-load" />
+              </div>
               <RealVLoad class="real-vload" />
 
               <UserInputVIn class="btn-vin" />
@@ -81,8 +88,14 @@ store.connectToWebSocket();
                 <UserInputPWM class="btn-ipwm" />
               </div>
               <UserInputCapacitor class="btn-icap" />
-              <UserInputILoad class="btn-rload" />
+              <div v-if="store.typeLoad.type === 'CUR'">
+                <UserInputILoad class="btn-load" />                
+              </div>
+              <div v-if="store.typeLoad.type === 'RES'">
+                <UserInputRLoad class="btn-load" />                
+              </div>
               <UserInputPWMType class="btn-ipwm-type" />
+              <UserInputLoadType class="btn-load-type" />
             </div>
           </div>
         </Section>

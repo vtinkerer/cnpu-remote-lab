@@ -6,6 +6,8 @@ import {
   isPWMTypeDto,
   PWMDTO,
   PWMTypeDTO,
+  isLoadTypeDto,
+  LoadTypeDTO,
   VoltageInputDTO,
   VoltageOutputDto,
 } from '@cnpu-remote-lab-nx/shared';
@@ -48,6 +50,14 @@ export function createFakeSerialPort(logger: Logger): {
           events.emit(
             'data',
             new PWMTypeDTO({
+              type: data.type,
+            })
+          );
+        }
+        if (isLoadTypeDto(data)) {
+          events.emit(
+            'data',
+            new LoadTypeDTO({
               type: data.type,
             })
           );
