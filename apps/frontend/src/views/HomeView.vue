@@ -33,6 +33,7 @@ const store = useBackendDataStore();
 store.setSessionId(session_id!);
 store.getIsActive();
 store.connectToWebSocket();
+
 //const m = ref(0);
 </script>
 
@@ -47,21 +48,20 @@ store.connectToWebSocket();
       <div class="col-lg-6">
         <Section>
 
-          <div v-if="store.typeSchema.type === 'BCK'">
+          <div v-if="store.laboratoryType === 'down'">
             <h3 class="text-center">DC-DC Buck Converter - Schematic Diagramm</h3>
           </div>
-          
-          <div v-if="store.typeSchema.type === 'BST'">
+          <div v-if="store.laboratoryType === 'up'">
             <h3 class="text-center">DC-DC Boost Converter - Schematic Diagramm</h3>
-          </div>
+          </div>        
 
           <div class="container-overwritten">
 
-            <div v-if="store.typeSchema.type === 'BCK'">
+            <div v-if="store.laboratoryType === 'down'">
               <img class="img-fluid" src="../img/buck.svg" />
             </div>
-            
-            <div v-if="store.typeSchema.type === 'BST'">
+              
+            <div v-if="store.laboratoryType === 'up'">
               <img class="img-fluid" src="../img/boost.svg" />
             </div>
 
@@ -88,6 +88,7 @@ store.connectToWebSocket();
         </Section>
       </div>
 
+      <!-- 2nd component (Experiment Recommendations) -->
       <div class="col-lg-6">
         <Section>
           <h3 class="text-center">Experiment recommendations</h3>
@@ -107,6 +108,7 @@ store.connectToWebSocket();
     </div>
 
     <div class="row">
+      <!-- 3rd component (Oscilloscope) -->
       <div class="col-lg-6">
         <Section>
           <h3 class="text-center">Oscilloscope</h3>
@@ -114,6 +116,7 @@ store.connectToWebSocket();
         </Section>
       </div>
 
+      <!-- 4th component (Output Voltage vs PWM) -->
       <div class="col-lg-6">
         <Section>
           <h3 class="text-center">Output Voltage vs PWM</h3>

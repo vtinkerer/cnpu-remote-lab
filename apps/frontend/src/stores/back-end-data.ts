@@ -6,12 +6,12 @@ import {
   isScopeDataDto,
   isSessionIsOverDto,
   isPWMTypeDto,
-  isSchemaTypeDto,
   isVoltageInputDto,
   isCapacitorDto,
   isCurrentLoadDto,
   isPWMDto,
   isVoltageOutputDto,
+  LaboratoryType,
 } from '@cnpu-remote-lab-nx/shared';
 import type { BaseDto, ScopeData } from '@cnpu-remote-lab-nx/shared';
 import { DateTime, Duration } from 'luxon';
@@ -27,7 +27,7 @@ export const useBackendDataStore = defineStore('backend-data', () => {
   const realPWMDC = ref(0);
   const VOut = ref(0);
   const typePWM = ref({ type: 'AUT' });
-  const typeSchema = ref({type: 'BST'});
+  const laboratoryType = ref(LaboratoryType.UP);
 
   function connectToWebSocket() {
     if (!sessionId.value) {
@@ -83,10 +83,6 @@ export const useBackendDataStore = defineStore('backend-data', () => {
         typePWM.value.type = dto.type;
       }
 
-      if (isSchemaTypeDto(dto)) {
-        typeSchema.value.type = dto.type;
-      }
-
     };
   }
 
@@ -111,6 +107,13 @@ export const useBackendDataStore = defineStore('backend-data', () => {
       router.push({ path: '/unknown-user' });
       return;
     }
+
+    if (data.laboratoryType === LaboratoryType.UP) {
+      laboratoryType.value = LaboratoryType.UP;
+    } else {
+      laboratoryType.value = LaboratoryType.DOWN;
+    }
+    
     const stopTimestamp = DateTime.fromISO(data.stopDate!).toMillis();
     const calculateTimeLeft = () => {
       const millisLeft = stopTimestamp - DateTime.now().toMillis();
@@ -134,6 +137,6 @@ export const useBackendDataStore = defineStore('backend-data', () => {
     timeLeft,
     VOut,
     typePWM,
-    typeSchema,
+    laboratoryType,
   };
 });
