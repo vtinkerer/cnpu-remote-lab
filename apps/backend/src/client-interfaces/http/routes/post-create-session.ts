@@ -34,6 +34,8 @@ export const postCreateSessionRoute: FastifyPluginAsync = async (
       },
     },
     async (request, reply) => {
+      fastify.log.info(request.body);
+
       const usecase = new StartSessionsUsecase(
         fastify.userRepository,
         fastify.clientConnectTimeoutAdapter,
