@@ -11,6 +11,7 @@ export const errorHandler: ErrorHandler = async (err, request, reply) => {
     logger.error({
       isCustom: true,
       ...err,
+      stack: err.stack,
     });
     await reply.code(err.statusCode).send({ error: err.message });
     return;
