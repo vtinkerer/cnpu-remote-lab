@@ -12,6 +12,7 @@ import {
   isCurrentLoadDto,
   isPWMDto,
   isVoltageOutputDto,
+  isResistanceLoadDto,
   LaboratoryType,
 } from '@cnpu-remote-lab-nx/shared';
 import type { BaseDto, ScopeData } from '@cnpu-remote-lab-nx/shared';
@@ -26,6 +27,7 @@ export const useBackendDataStore = defineStore('backend-data', () => {
   const realIload = ref(0);
   const realCf = ref(0);
   const realPWMDC = ref(0);
+  const realRload = ref(0);
   const VOut = ref(0);
   const typeLoad = ref({ type: 'CUR' });
   const typePWM = ref({ type: 'AUT' });
@@ -68,6 +70,11 @@ export const useBackendDataStore = defineStore('backend-data', () => {
 
       if (isCurrentLoadDto(dto)) {
         realIload.value = dto.mA;
+        return;
+      }
+
+      if (isResistanceLoadDto(dto)) {
+        realRload.value = dto.resistance;
         return;
       }
 
@@ -138,6 +145,7 @@ export const useBackendDataStore = defineStore('backend-data', () => {
     scopeData,
     realVin,
     realIload,
+    realRload,
     realCf,
     realPWMDC,
     timeLeft,
