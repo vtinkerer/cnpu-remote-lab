@@ -19,7 +19,7 @@ watch(value, (newValue) => {
 <template>
   <div class="fw-bold fst-italic input-roundslider-label">
     R<sub>Load</sub>(&Omega;)
-    <MyRoundSlider :min="0" :max="1000" :step="1" v-model="value" />
+    <MyRoundSlider :min="0" :max="50" :step="1" v-model="value" />
   </div>
 </template>
 
