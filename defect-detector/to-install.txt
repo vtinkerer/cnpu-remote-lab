@@ -1,0 +1,4 @@
+pip install pyspice
+sudo apt install libngspice0 // PROBABLY NOT NEEDED
+sudo apt install libngspice0-dev
+sudo apt install ngspice
