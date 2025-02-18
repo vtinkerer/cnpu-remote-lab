@@ -39,7 +39,8 @@ export const scopePlugin = () =>
 
     scopeReader.on('scope-data', async (scopeData) => {
       const usecase = new SendScopeDataToUserUsecase(
-        fastify.clientWebsocketAdapter
+        fastify.clientWebsocketAdapter,
+        fastify.measurementsRepository
       );
       await usecase.execute(scopeData);
     });

@@ -26,7 +26,9 @@ import {
 import { IMcuSender } from '../core/interfaces/mcu-sender.interface';
 import { ClientDisconnectTimeoutAdapter } from '../adapters/client-disconnect-timeout.adapter';
 import { createFakeUserSessionPlugin } from '../fakes/user-session.fake';
-
+import { MeasurementsRepository } from '../adapters/measurements.repository';
+import { DefectDetectorAdapter } from '../adapters/defect-detector.adapter';
+import { testDefectDetector } from '../client-interfaces/http/routes/test-defect-detector';
 export type AppDependenciesOverrides = {
   mcu?: {
     receiver: IMcuReceiver;
@@ -56,6 +58,24 @@ export function buildApp() {
   });
 
   // Decorators
+  server.register(
+    fp(async (fastify, ops) => {
+      const defectDetectorAdapter = new DefectDetectorAdapter(
+        fastify.measurementsRepository
+      );
+      fastify.decorate('defectDetectorAdapter', {
+        getter() {
+          return defectDetectorAdapter;
+        },
+      });
+      const measurementsRepository = new MeasurementsRepository();
+      fastify.decorate('measurementsRepository', {
+        getter() {
+          return measurementsRepository;
+        },
+      });
+    })
+  );
   server.register(
     fp(async (fastify, ops) => {
       const userRepository = new UserRepository(
@@ -132,6 +152,7 @@ export function buildApp() {
   server.register(getSessionsTest, { prefix: '/ldl' });
   server.register(getSessionStatus, { prefix: '/ldl' });
   server.register(postOrDeleteSessionRoutes, { prefix: '/ldl' });
+  server.register(testDefectDetector, { prefix: '/api' });
 
   // ROUTES for USER
   server.register(createClientWebsocketConnection, { prefix: '/ws' });

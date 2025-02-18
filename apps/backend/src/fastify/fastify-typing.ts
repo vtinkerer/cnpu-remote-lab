@@ -3,8 +3,10 @@ import { IClientConnectTimeoutManager } from '../core/interfaces/client-connect-
 import { IClientDataSender } from '../core/interfaces/client-data-sender.interface';
 import { IClientDisconnectTimeoutManager } from '../core/interfaces/client-disconnect-timeout-manager.interface';
 import { IClientWebsocketSetter } from '../core/interfaces/client-websocket-setter.interface';
+import { IDefectDetectorAdapter } from '../core/interfaces/defect-detector-adapter.interface';
 import { IMcuResetter } from '../core/interfaces/mcu-resetter.interface';
 import { IMcuSender } from '../core/interfaces/mcu-sender.interface';
+import { IMeasurementsRepository } from '../core/interfaces/measurements-repository.interface';
 import { IScopeSender } from '../core/interfaces/scope-sender.interface';
 import { IUserRepository } from '../core/interfaces/user-repository.interface';
 
@@ -18,5 +20,7 @@ declare module 'fastify' {
     mcuSender: IMcuSender;
     scopeSender: IScopeSender;
     mcuResetter: IMcuResetter;
+    measurementsRepository: IMeasurementsRepository;
+    defectDetectorAdapter: IDefectDetectorAdapter;
   }
 }

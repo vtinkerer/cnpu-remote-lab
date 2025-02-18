@@ -2,28 +2,8 @@ import { WebsocketHandler } from '@fastify/websocket';
 import { ClientWebsocketConnectUsecase } from '../../core/usecases/client-websocket-connect.usecase';
 import { ClientWebsocketDisconnectUsecase } from '../../core/usecases/client-websocket-disconnect.usecase';
 import { Logger } from '../../logger/logger';
-import {
-  CapacitorDTO,
-  CurrentLoadDTO,
-  LoadTypeDTO,
-  PWMDTO,
-  PWMTypeDTO,
-  ResistanceLoadDTO,
-  VoltageInputDTO,
-  VoltageOutputDto,
-} from '@cnpu-remote-lab-nx/shared';
 import { SendUserDataToMcuUsecase } from '../../core/usecases/send-user-data-to-mcu.usecase';
-
-const dtoClasses = [
-  VoltageInputDTO,
-  VoltageOutputDto,
-  CurrentLoadDTO,
-  CapacitorDTO,
-  PWMDTO,
-  PWMTypeDTO,
-  ResistanceLoadDTO,
-  LoadTypeDTO,
-];
+import { dtoClasses } from '@cnpu-remote-lab-nx/shared';
 
 export const wsHandler: WebsocketHandler = (connection, req) => {
   const logger = new Logger(wsHandler.name);

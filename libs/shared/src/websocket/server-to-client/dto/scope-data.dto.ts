@@ -2,7 +2,7 @@ import { BaseDto } from '../../dto.base';
 
 export type ScopeData = {
   voltage: number[];
-  time: string[];
+  time: number[];
   current: number[];
   pwm: number[]; // 0 or 1
 };
