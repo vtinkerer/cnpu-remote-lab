@@ -9,7 +9,7 @@
     "frontend:build": "nx run frontend:build",
     "frontend:build:watch": "nx run frontend:build:development",
     "full:build": "nx run backend:build && nx run frontend:build",
-    "full:run": "nx run backend:build && nx run frontend:build && pm2 restart backend"
+    "full:run": "nx run backend:build && nx run frontend:build && pm2 restart all"
   },
   "private": true,
   "dependencies": {

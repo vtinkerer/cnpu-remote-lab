@@ -24,7 +24,13 @@ class ComparisonResult(BaseModel):
     measured_time: List[float]
     voltage_error_rms: float
     current_error_rms: float
+    voltage_error_percentage: float
+    current_error_percentage: float
     is_defective: bool
+    mean_voltage: float
+    mean_current: float
+    model_mean_voltage: float
+    model_mean_current: float
 
 class MeasurementData(BaseModel):
     voltage: List[float]
@@ -186,23 +192,32 @@ async def analyze_measurements(
         voltage_error = calculate_rms_error(measured_voltage, sim_voltage)
         current_error = calculate_rms_error(measured_current, sim_current)
         
+        # Calculate percentage errors
+        voltage_error_percentage = (voltage_error / np.mean(np.abs(measured_voltage))) * 100
+        current_error_percentage = (current_error / np.mean(np.abs(measured_current))) * 100
+        
         # Determine if circuit is defective
-        voltage_threshold = 0.05  
-        current_threshold = 0.15
+        voltage_threshold = 0.1  
+        current_threshold = 0.2
         is_defective = (voltage_error > voltage_threshold * np.mean(np.abs(measured_voltage)) or 
                        current_error > current_threshold * np.mean(np.abs(measured_current)))
         
+        mean_voltage = np.mean(np.abs(measured_voltage))
+        mean_current = np.mean(np.abs(measured_current))
+
+        model_mean_voltage = np.mean(np.abs(sim_voltage))
+        model_mean_current = np.mean(np.abs(sim_current))
 
         # After getting simulation results, visualize the comparison
-        visualize_comparison(
-            measured_time=measured_time,
-            measured_voltage=measured_voltage,
-            measured_current=measured_current,
-            sim_voltage_matched=sim_voltage,
-            sim_current_matched=sim_current,
-            sim_pwm_matched=sim_pwm,
-            measured_pwm=measured_pwm
-        )
+        # visualize_comparison(
+        #     measured_time=measured_time,
+        #     measured_voltage=measured_voltage,
+        #     measured_current=measured_current,
+        #     sim_voltage_matched=sim_voltage,
+        #     sim_current_matched=sim_current,
+        #     sim_pwm_matched=sim_pwm,
+        #     measured_pwm=measured_pwm
+        # )
         
         return ComparisonResult(
             is_defective=is_defective,
@@ -214,6 +229,12 @@ async def analyze_measurements(
             measured_time=measured_time,
             voltage_error_rms=voltage_error,
             current_error_rms=current_error,
+            voltage_error_percentage=voltage_error_percentage,
+            current_error_percentage=current_error_percentage,
+            mean_voltage=mean_voltage,
+            mean_current=mean_current,
+            model_mean_voltage=model_mean_voltage,
+            model_mean_current=model_mean_current
         )
         
     except Exception as e:

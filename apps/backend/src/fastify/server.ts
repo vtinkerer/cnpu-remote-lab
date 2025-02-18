@@ -60,18 +60,19 @@ export function buildApp() {
   // Decorators
   server.register(
     fp(async (fastify, ops) => {
-      const defectDetectorAdapter = new DefectDetectorAdapter(
-        fastify.measurementsRepository
-      );
-      fastify.decorate('defectDetectorAdapter', {
-        getter() {
-          return defectDetectorAdapter;
-        },
-      });
       const measurementsRepository = new MeasurementsRepository();
       fastify.decorate('measurementsRepository', {
         getter() {
           return measurementsRepository;
+        },
+      });
+
+      const defectDetectorAdapter = new DefectDetectorAdapter(
+        measurementsRepository
+      );
+      fastify.decorate('defectDetectorAdapter', {
+        getter() {
+          return defectDetectorAdapter;
         },
       });
     })
@@ -152,6 +153,7 @@ export function buildApp() {
   server.register(getSessionsTest, { prefix: '/ldl' });
   server.register(getSessionStatus, { prefix: '/ldl' });
   server.register(postOrDeleteSessionRoutes, { prefix: '/ldl' });
+
   server.register(testDefectDetector, { prefix: '/api' });
 
   // ROUTES for USER

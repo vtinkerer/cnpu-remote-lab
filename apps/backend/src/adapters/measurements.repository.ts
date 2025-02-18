@@ -10,7 +10,7 @@ import {
 import { IMeasurementsRepository } from '../core/interfaces/measurements-repository.interface';
 
 export class MeasurementsRepository implements IMeasurementsRepository {
-  private Vin: number;
+  private vin: number;
   private duty_cycle: number;
   private c_value: number;
   private current_out: number;
@@ -18,9 +18,9 @@ export class MeasurementsRepository implements IMeasurementsRepository {
 
   saveMeasurements(measurement: BaseDto): void {
     if (isVoltageInputDto(measurement)) {
-      this.Vin = measurement.voltage;
+      this.vin = measurement.voltage;
     } else if (isPWMDto(measurement)) {
-      this.duty_cycle = Math.round(measurement.pwmPercentage / 100);
+      this.duty_cycle = measurement.pwmPercentage / 100;
     } else if (isCapacitorDto(measurement)) {
       this.c_value = measurement.capacity * 1e-6;
     } else if (isCurrentLoadDto(measurement)) {
@@ -33,7 +33,7 @@ export class MeasurementsRepository implements IMeasurementsRepository {
 
   getMeasurements(): {
     circuit_params: {
-      Vin: number;
+      vin: number;
       duty_cycle: number;
       c_value: number;
       current_out: number;
@@ -47,7 +47,7 @@ export class MeasurementsRepository implements IMeasurementsRepository {
   } {
     return {
       circuit_params: {
-        Vin: this.Vin,
+        vin: this.vin,
         duty_cycle: this.duty_cycle,
         c_value: this.c_value,
         current_out: this.current_out,

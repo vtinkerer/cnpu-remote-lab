@@ -4,7 +4,7 @@ export interface IMeasurementsRepository {
   saveMeasurements(measurement: BaseDto): void;
   getMeasurements(): {
     circuit_params: {
-      Vin: number;
+      vin: number;
       duty_cycle: number;
       c_value: number;
       current_out: number;

@@ -12,20 +12,21 @@ export class DefectDetectorAdapter implements IDefectDetectorAdapter {
     voltage_error_rms: number;
     current_error_rms: number;
     is_defective: boolean;
+    voltage_error_percentage: number;
+    current_error_percentage: number;
   }> {
     const measurements = this.measurementsRepository.getMeasurements();
 
     const response = await fetch(this.serviceUrl, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(measurements),
     });
 
     const result = await response.json();
 
-    return {
-      voltage_error_rms: result?.voltage_error_rms,
-      current_error_rms: result?.current_error_rms,
-      is_defective: result?.is_defective,
-    };
+    return result;
   }
 }
