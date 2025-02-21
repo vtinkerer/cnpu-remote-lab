@@ -181,6 +181,16 @@ async def analyze_measurements(
         measured_current = np.asarray(measurements.current)
         measured_time = measurements.time
         
+        # Apply median filter to remove current spikes
+        window_size = 15  # Adjust this value based on your spike width
+        measured_current_filtered = np.median(
+            np.lib.stride_tricks.sliding_window_view(
+                np.pad(measured_current, (window_size//2, window_size//2), mode='edge'),
+                window_size
+            ),
+            axis=1
+        )
+        
         # Run simulation
         buck = BuckConverter(circuit_params)
         analysis = buck.run_simulation(measured_time)
@@ -189,12 +199,12 @@ async def analyze_measurements(
         sim_voltage = analysis['out_c']
         sim_current = analysis['sim_current']
         
-        # Vectorized calculations
+        # Use filtered current for calculations
         mean_measured_voltage = np.mean(np.abs(measured_voltage))
-        mean_measured_current = np.mean(np.abs(measured_current))
+        mean_measured_current = np.mean(np.abs(measured_current_filtered))
         
         voltage_error = calculate_rms_error(measured_voltage, sim_voltage)
-        current_error = calculate_rms_error(measured_current, sim_current)
+        current_error = calculate_rms_error(measured_current_filtered, sim_current)
         
         voltage_error_percentage = (voltage_error / mean_measured_voltage) * 100
         current_error_percentage = (current_error / mean_measured_current) * 100
@@ -207,13 +217,23 @@ async def analyze_measurements(
             current_error > current_threshold * mean_measured_current
         )
         
+        # Visualize comparison
+        # visualize_comparison(
+        #     measured_time, 
+        #     measured_voltage, 
+        #     measured_current_filtered, 
+        #     analysis['pwm'], 
+        #     sim_voltage, 
+        #     sim_current, 
+        #     analysis['pwm'])
+        
         return ComparisonResult(
             is_defective=is_defective,
             simulation_voltage=sim_voltage.tolist(),
             simulation_current=sim_current.tolist(),
             simulation_time=analysis['time'].tolist(),
             measured_voltage=measured_voltage.tolist(),
-            measured_current=measured_current.tolist(),
+            measured_current=measured_current_filtered.tolist(),
             measured_time=measured_time,
             voltage_error_rms=voltage_error,
             current_error_rms=current_error,
@@ -230,4 +250,4 @@ async def analyze_measurements(
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=3801)
+    uvicorn.run(app, host="0.0.0.0", port=3802)

@@ -1,5 +1,6 @@
 import { IDefectDetectorAdapter } from '../core/interfaces/defect-detector-adapter.interface';
 import { IMeasurementsRepository } from '../core/interfaces/measurements-repository.interface';
+import fs from 'node:fs';
 
 export class DefectDetectorAdapter implements IDefectDetectorAdapter {
   private serviceUrl = 'http://localhost:3801/analyze';
@@ -16,6 +17,11 @@ export class DefectDetectorAdapter implements IDefectDetectorAdapter {
     current_error_percentage: number;
   }> {
     const measurements = this.measurementsRepository.getMeasurements();
+
+    fs.writeFileSync(
+      '/home/user1-44/measurements.json',
+      JSON.stringify(measurements, null, 2)
+    );
 
     const response = await fetch(this.serviceUrl, {
       method: 'POST',
