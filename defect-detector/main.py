@@ -81,16 +81,13 @@ class BuckConverter:
                 
         simulator = self.circuit.simulator(temperature=25, nominal_temperature=25)
         
-        # Convert measurement times to seconds
-        time_points = np.array(measurement_time_points) * 1e-6  # Convert μs to seconds
+        # Convert measurement times to seconds and pre-allocate numpy array
+        time_points = np.asarray(measurement_time_points, dtype=np.float64) * 1e-6
         
         delta = self.period * 600
-
-        # Determine simulation parameters
         end_time = delta + time_points[-1]
         step_time = (time_points[1] - time_points[0]) * 0.5
         
-        # Run transient analysis
         analysis = simulator.transient(
             step_time=step_time,
             end_time=end_time,
@@ -98,37 +95,42 @@ class BuckConverter:
             use_initial_condition=False
         )
             
-        # Extract simulation results
-        sim_pwm = np.array([float(v) for v in analysis['g']])
-        sim_voltage = np.array([float(v) for v in analysis['out_c']])
-        sim_out = np.array([float(v) for v in analysis['out']])
-        sim_time = np.array([float(t) - delta for t in analysis.time]) * 1e6  # Convert to μs
+        # Vectorize data extraction
+        sim_data = np.array([
+            [float(v) for v in analysis['g']],
+            [float(v) for v in analysis['out_c']],
+            [float(v) for v in analysis['out']]
+        ])
         
-        v_l_sense = sim_out - sim_voltage
+        sim_time = (np.array([float(t) for t in analysis.time]) - delta) * 1e6
+        
+        # Vectorized calculations
+        v_l_sense = sim_data[2] - sim_data[1]
         sim_current = v_l_sense / self.l_resistance
         
-        # Map each measurement time to the closest simulation time
-        measurement_time = np.array(measurement_time_points)
-
-        # Find the indices of the closest simulation times
-        indices = np.abs(sim_time[:, None] - measurement_time).argmin(axis=0)
-
-        sim_voltage_matched = sim_voltage[indices]
-        sim_current_matched = sim_current[indices]
-        sim_pwm_matched = sim_pwm[indices]
-        sim_time_matched = sim_time[indices]
+        # Optimized time matching using searchsorted
+        measurement_time = np.asarray(measurement_time_points)
+        indices = np.searchsorted(sim_time, measurement_time)
+        indices = np.clip(indices, 0, len(sim_time) - 1)
         
-        return {
-            'out_c': sim_voltage_matched,
-            'sim_current': sim_current_matched,
-            'time': sim_time_matched,
-            'pwm': sim_pwm_matched
+        # Adjust indices to get closest point
+        mask = indices > 0
+        prev_diff = np.abs(sim_time[indices[mask] - 1] - measurement_time[mask])
+        curr_diff = np.abs(sim_time[indices[mask]] - measurement_time[mask])
+        indices[mask][prev_diff < curr_diff] -= 1
+        
+        result = {
+            'out_c': sim_data[1][indices],
+            'sim_current': sim_current[indices],
+            'time': sim_time[indices],
+            'pwm': sim_data[0][indices]
         }
+        
+        return result
 
 def calculate_rms_error(measured: List[float], simulated: List[float]) -> float:
-    measured_array = np.array(measured)
-    simulated_array = np.array(simulated)
-    return np.sqrt(np.mean(np.square(measured_array - simulated_array)))
+    # Vectorized calculation
+    return np.sqrt(np.mean(np.square(np.asarray(measured) - np.asarray(simulated))))
 
 def visualize_comparison(measured_time, measured_voltage, measured_current, measured_pwm,
                         sim_voltage_matched, sim_current_matched, sim_pwm_matched, ):
@@ -174,67 +176,53 @@ async def analyze_measurements(
     circuit_params: CircuitParams
 ):
     try:
-        # Extract measurement data directly from the input format
-        measured_voltage = measurements.voltage
-        measured_current = measurements.current
+        # Convert to numpy arrays once
+        measured_voltage = np.asarray(measurements.voltage)
+        measured_current = np.asarray(measurements.current)
         measured_time = measurements.time
-        measured_pwm = measurements.pwm
+        
         # Run simulation
         buck = BuckConverter(circuit_params)
         analysis = buck.run_simulation(measured_time)
         
-        # Extract matched simulation results
+        # Extract results (already numpy arrays)
         sim_voltage = analysis['out_c']
         sim_current = analysis['sim_current']
-        sim_time = analysis['time']
-        sim_pwm = analysis['pwm']
-        # Calculate errors
+        
+        # Vectorized calculations
+        mean_measured_voltage = np.mean(np.abs(measured_voltage))
+        mean_measured_current = np.mean(np.abs(measured_current))
+        
         voltage_error = calculate_rms_error(measured_voltage, sim_voltage)
         current_error = calculate_rms_error(measured_current, sim_current)
         
-        # Calculate percentage errors
-        voltage_error_percentage = (voltage_error / np.mean(np.abs(measured_voltage))) * 100
-        current_error_percentage = (current_error / np.mean(np.abs(measured_current))) * 100
+        voltage_error_percentage = (voltage_error / mean_measured_voltage) * 100
+        current_error_percentage = (current_error / mean_measured_current) * 100
         
-        # Determine if circuit is defective
-        voltage_threshold = 0.1  
+        # Simplified defective check
+        voltage_threshold = 0.1
         current_threshold = 0.2
-        is_defective = (voltage_error > voltage_threshold * np.mean(np.abs(measured_voltage)) or 
-                       current_error > current_threshold * np.mean(np.abs(measured_current)))
-        
-        mean_voltage = np.mean(np.abs(measured_voltage))
-        mean_current = np.mean(np.abs(measured_current))
-
-        model_mean_voltage = np.mean(np.abs(sim_voltage))
-        model_mean_current = np.mean(np.abs(sim_current))
-
-        # After getting simulation results, visualize the comparison
-        # visualize_comparison(
-        #     measured_time=measured_time,
-        #     measured_voltage=measured_voltage,
-        #     measured_current=measured_current,
-        #     sim_voltage_matched=sim_voltage,
-        #     sim_current_matched=sim_current,
-        #     sim_pwm_matched=sim_pwm,
-        #     measured_pwm=measured_pwm
-        # )
+        is_defective = (
+            voltage_error > voltage_threshold * mean_measured_voltage or 
+            current_error > current_threshold * mean_measured_current
+        )
         
         return ComparisonResult(
             is_defective=is_defective,
             simulation_voltage=sim_voltage.tolist(),
             simulation_current=sim_current.tolist(),
-            simulation_time=sim_time.tolist(),
-            measured_voltage=measured_voltage,
-            measured_current=measured_current,
+            simulation_time=analysis['time'].tolist(),
+            measured_voltage=measured_voltage.tolist(),
+            measured_current=measured_current.tolist(),
             measured_time=measured_time,
             voltage_error_rms=voltage_error,
             current_error_rms=current_error,
             voltage_error_percentage=voltage_error_percentage,
             current_error_percentage=current_error_percentage,
-            mean_voltage=mean_voltage,
-            mean_current=mean_current,
-            model_mean_voltage=model_mean_voltage,
-            model_mean_current=model_mean_current
+            mean_voltage=mean_measured_voltage,
+            mean_current=mean_measured_current,
+            model_mean_voltage=np.mean(np.abs(sim_voltage)),
+            model_mean_current=np.mean(np.abs(sim_current))
         )
         
     except Exception as e:
