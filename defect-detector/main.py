@@ -64,12 +64,17 @@ class BuckConverter:
         
         ton = self.duty_cycle * self.period * 1e6
         period_us = self.period * 1e6
-        circuit.V('gate', 'g', circuit.gnd, f'PULSE(0 10 0 1n 1n {ton}us {period_us}us)')
-        
-        circuit.S('1', 'vin', 'sw', 'g', circuit.gnd, model='SWITCH')
+        # circuit.V('gate', 'g', circuit.gnd, f'PULSE(0 10 0 1n 1n {ton}us {period_us}us)')
+        # circuit.S('1', 'vin', 'sw', 'g', circuit.gnd, model='SWITCH')
+        circuit.PulseVoltageSource('pulse', 'g', circuit.gnd,
+                        initial_value=0, pulsed_value=self.vin,
+                        pulse_width=self.duty_cycle*self.period,
+                        period=self.period)
         # May be set VT to 0?
         # Looks like the roff is not used
-        circuit.model('SWITCH', 'SW', ron=1e-9, roff=1e12, vt=1, vh=0)
+        circuit.VoltageControlledSwitch('sw', 'vin', 'sw', 'g', circuit.gnd, 
+                                  model='switch_model')
+        circuit.model('switch_model', 'SW', ron=1e-9, roff=1e12, vt=1, vh=0)
         
         circuit.D('1', circuit.gnd, 'sw', model='MYDIODE')
         circuit.model('MYDIODE', 'D', is_=1e6)
@@ -271,4 +276,4 @@ async def analyze_measurements(
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=3801)
+    uvicorn.run(app, host="0.0.0.0", port=3802)
