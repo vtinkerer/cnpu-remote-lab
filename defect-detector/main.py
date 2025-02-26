@@ -240,14 +240,14 @@ async def analyze_measurements(
         
 
         # Visualize comparison
-        visualize_comparison(
-            measured_time, 
-            measured_voltage, 
-            measured_current_filtered, 
-            analysis['pwm'], 
-            sim_voltage, 
-            sim_current, 
-            analysis['pwm'])
+        # visualize_comparison(
+        #     measured_time, 
+        #     measured_voltage, 
+        #     measured_current_filtered, 
+        #     analysis['pwm'], 
+        #     sim_voltage, 
+        #     sim_current, 
+        #     analysis['pwm'])
         
         return ComparisonResult(
             is_defective=is_defective,
