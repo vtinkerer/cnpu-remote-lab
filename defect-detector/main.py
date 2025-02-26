@@ -31,6 +31,11 @@ class ComparisonResult(BaseModel):
     mean_current: float
     model_mean_voltage: float
     model_mean_current: float
+    model_min_voltage: float
+    model_max_voltage: float
+    model_min_current: float
+    model_max_current: float
+
 
 class MeasurementData(BaseModel):
     voltage: List[float]
@@ -55,23 +60,29 @@ class BuckConverter:
 
     def build_circuit(self):
         circuit = Circuit('Buck Converter')
-        circuit.V('in', 'vin', 'gnd', self.vin)
+        circuit.V('in', 'vin', circuit.gnd, self.vin)
         
         ton = self.duty_cycle * self.period * 1e6
         period_us = self.period * 1e6
-        circuit.V('gate', 'g', 'gnd', f'PULSE(0 10 0 1n 1n {ton}us {period_us}us)')
+        circuit.V('gate', 'g', circuit.gnd, f'PULSE(0 10 0 1n 1n {ton}us {period_us}us)')
         
-        circuit.S('1', 'vin', 'sw', 'g', 'gnd', model='SWITCH')
+        circuit.S('1', 'vin', 'sw', 'g', circuit.gnd, model='SWITCH')
+        # May be set VT to 0?
+        # Looks like the roff is not used
         circuit.model('SWITCH', 'SW', ron=1e-9, roff=1e12, vt=1, vh=0)
         
-        circuit.D('1', 'gnd', 'sw', model='MYDIODE')
+        circuit.D('1', circuit.gnd, 'sw', model='MYDIODE')
         circuit.model('MYDIODE', 'D', is_=1e6)
 
         circuit.L('1', 'sw', 'out', self.l_value)
         circuit.R('L1', 'out', 'out_c', self.l_resistance)
-        circuit.C('1', 'out_c', 'gnd', self.c_value)
-        circuit.R('load', 'out_c', 'gnd', self.r_load)
+
+        circuit.C('1', 'out_c', 'c_res', self.c_value)
+        circuit.R('C1', 'c_res', circuit.gnd, 0.1)
         
+        circuit.R('load', 'out_c', circuit.gnd, self.r_load)
+        
+
         self.circuit = circuit
         return circuit
 
@@ -203,6 +214,11 @@ async def analyze_measurements(
         mean_measured_voltage = np.mean(np.abs(measured_voltage))
         mean_measured_current = np.mean(np.abs(measured_current_filtered))
         
+        model_min_voltage = np.min(np.abs(sim_voltage))
+        model_max_voltage = np.max(np.abs(sim_voltage))
+        model_min_current = np.min(np.abs(sim_current))
+        model_max_current = np.max(np.abs(sim_current))
+
         voltage_error = calculate_rms_error(measured_voltage, sim_voltage)
         current_error = calculate_rms_error(measured_current_filtered, sim_current)
         
@@ -217,15 +233,16 @@ async def analyze_measurements(
             current_error > current_threshold * mean_measured_current
         )
         
+
         # Visualize comparison
-        # visualize_comparison(
-        #     measured_time, 
-        #     measured_voltage, 
-        #     measured_current_filtered, 
-        #     analysis['pwm'], 
-        #     sim_voltage, 
-        #     sim_current, 
-        #     analysis['pwm'])
+        visualize_comparison(
+            measured_time, 
+            measured_voltage, 
+            measured_current_filtered, 
+            analysis['pwm'], 
+            sim_voltage, 
+            sim_current, 
+            analysis['pwm'])
         
         return ComparisonResult(
             is_defective=is_defective,
@@ -242,7 +259,11 @@ async def analyze_measurements(
             mean_voltage=mean_measured_voltage,
             mean_current=mean_measured_current,
             model_mean_voltage=np.mean(np.abs(sim_voltage)),
-            model_mean_current=np.mean(np.abs(sim_current))
+            model_mean_current=np.mean(np.abs(sim_current)),
+            model_min_voltage=model_min_voltage,
+            model_max_voltage=model_max_voltage,
+            model_min_current=model_min_current,
+            model_max_current=model_max_current
         )
         
     except Exception as e:
