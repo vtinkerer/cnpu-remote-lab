@@ -4,88 +4,86 @@ import csv
 import PySpice.Logging.Logging as Logging
 from PySpice.Spice.Netlist import Circuit
 from PySpice.Unit import *
+import os
 
 # Logging setup
 Logging.setup_logging()
 
 # Define default parameters in one place as a global dictionary
 DEFAULT_PARAMS = {
-    'vin': 12,          # input voltage (V)
-    'duty_cycle': 0.5,  # PWM duty cycle
+    'Vin': 12,          # input voltage (V)
+    'D': 0.5,  # PWM duty cycle
     'frequency': 312500, # PWM frequency (Hz)
-    'inductor': 10e-6,  # inductance (H)
-    'capacitor': 44e-6, # capacitance (F)
-    'load': 20,       # load resistance (Ohm)
-    'esr_cap': 0.1,     # capacitor ESR (Ohm)
-    'esr_ind': 19.5e-3, # inductor ESR (Ohm)
-    'rds_on': 1e-3,     # transistor RDS(on) (Ohm)
-    'diode_rs': 1e-3     # diode resistance (Ohm)
+    'L': 10e-6,  # inductance (H)
+    'C': 44e-6, # capacitance (F)
+    'Rload': 2.06,       # load resistance (Ohm)
+    'RC': 0.02,     # capacitor ESR (Ohm)
+    'RL': 19.5e-3, # inductor ESR (Ohm)
+    'RD': 1e-9,     # transistor RDS(on) (Ohm)
+    'RDS_ON': 0.05,     # diode resistance (Ohm)
+    'diode_short_circuit_resistance': 1e12 # Ohm
 }
 
 # Function to create a buck converter
 def create_buck_converter(
-    vin=DEFAULT_PARAMS['vin'],
-    duty_cycle=DEFAULT_PARAMS['duty_cycle'],
+    Vin=DEFAULT_PARAMS['Vin'],
+    D=DEFAULT_PARAMS['D'],
     frequency=DEFAULT_PARAMS['frequency'],
-    inductor=DEFAULT_PARAMS['inductor'],
-    capacitor=DEFAULT_PARAMS['capacitor'],
-    load=DEFAULT_PARAMS['load'],
-    esr_cap=DEFAULT_PARAMS['esr_cap'],
-    esr_ind=DEFAULT_PARAMS['esr_ind'],
-    rds_on=DEFAULT_PARAMS['rds_on'],
-    diode_rs=DEFAULT_PARAMS['diode_rs']
+    L=DEFAULT_PARAMS['L'],
+    C=DEFAULT_PARAMS['C'],
+    Rload=DEFAULT_PARAMS['Rload'],
+    RC=DEFAULT_PARAMS['RC'],
+    RL=DEFAULT_PARAMS['RL'],
+    RD=DEFAULT_PARAMS['RD'],
+    RDS_ON=DEFAULT_PARAMS['RDS_ON'],
+    diode_short_circuit_resistance=DEFAULT_PARAMS['diode_short_circuit_resistance']
 ):
     
     circuit = Circuit('Buck Converter')
-    circuit.V('in', 'vin', 'gnd', vin)
+    circuit.V('in', 'vin', 'gnd', Vin)
     
     period = 1/frequency
-    ton = duty_cycle * period * 1e6
+    ton = D * period * 1e6
     period_us = period * 1e6
     circuit.V('gate', 'g', 'gnd', f'DC 0 PULSE(0 10 0 1n 1n {ton}us {period_us}us)')
     
     circuit.S('1', 'vin', 'sw', 'g', 'gnd', model='SWITCH')
-    circuit.model('SWITCH', 'SW', ron=rds_on, vt=1, vh=0)
+    circuit.model('SWITCH', 'SW', ron=RD, vt=1, vh=0)
     
     circuit.D('1', 'gnd', 'sw', model='MYDIODE')
-    circuit.model('MYDIODE', 'D', is_=1e6)
+    circuit.model('MYDIODE', 'D', is_=1e6, rs=RDS_ON)
+    circuit.R('diode_short_circuit', 'sw', 'gnd', diode_short_circuit_resistance)
         
-    circuit.L('1', 'sw', 'out', inductor)
-    circuit.R('L1', 'out', 'out_c', esr_ind)
+    circuit.L('1', 'sw', 'out', L)
+    circuit.R('L1', 'out', 'out_c', RL)
 
-    circuit.C('1', 'out_c', 'c_res', capacitor)
-    circuit.R('C1', 'c_res', 'gnd', esr_cap)
+    circuit.C('1', 'out_c', 'c_res', C)
+    circuit.R('C1', 'c_res', 'gnd', RC)
     
-    circuit.R('load', 'out_c', 'gnd', load)
+    circuit.R('load', 'out_c', 'gnd', Rload)
     
     return circuit
 
 # Function for simulation and parameter extraction
-def simulate_and_analyze(circuit, esr_ind, settling_cycles=600 ):
+def simulate_and_analyze(circuit, esr_ind ):
     try:
         # Calculate settling time
         freq = 312500  # PWM frequency (Hz)
         period = 1/freq
-        settling_time = settling_cycles * period
         
-        delta = period * 600
-        end_time = delta + period * 2
-        step_time = period / 300
+        delta = period * 5000
+        end_time = delta + period
+        step_time = period / 200
         # Run simulation
         simulator = circuit.simulator()
-        analysis = simulator.transient(step_time=step_time, end_time=end_time)
+        analysis = simulator.transient(start_time=delta, step_time=step_time, end_time=end_time)
         
         # Determine the index to start analysis after settling
         time_points = np.array(analysis.time)
-        start_idx = np.searchsorted(time_points, settling_time)
-        
-        if start_idx >= len(time_points) - 10:
-            # Not enough points after settling
-            start_idx = len(time_points) // 2
-        
+
         # Output parameter analysis
-        vout = np.array(analysis['out_c'])[start_idx:]
-        il = (np.array(analysis['out'])[start_idx:] - np.array(analysis['out_c'])[start_idx:]) / esr_ind
+        vout = np.array(analysis['out_c'])
+        il = (np.array(analysis['out']) - np.array(analysis['out_c'])) / esr_ind
         
         vout_avg = np.mean(vout)
         vout_ripple = np.max(vout) - np.min(vout)
@@ -97,7 +95,9 @@ def simulate_and_analyze(circuit, esr_ind, settling_cycles=600 ):
             'vout_ripple': vout_ripple,
             'il_avg': il_avg,
             'il_ripple': il_ripple,
-
+            'vout': vout,
+            'il': il,
+            'time': time_points
         }
     
     except Exception as e:
@@ -111,7 +111,7 @@ def simulate_and_analyze(circuit, esr_ind, settling_cycles=600 ):
         }
 
 # Function to determine the octant
-def determine_octant(baseline, modified, threshold=10):
+def determine_octant(baseline, modified, threshold=6):
     """
     Determines the octant of parameter changes considering a 10% threshold
     
@@ -132,102 +132,174 @@ def determine_octant(baseline, modified, threshold=10):
         baseline_value = baseline[param]
         modified_value = modified[param]
         
-        if abs(baseline_value) < 1e-9:  # Prevent division by zero
-            if abs(modified_value) < 1e-9:
-                change = 0
-            else:
-                change = 1 if modified_value > 0 else -1
+        # if abs(baseline_value) < 1e-9:  # Prevent division by zero
+        #     if abs(modified_value) < 1e-9:
+        #         change = 0
+        #     else:
+        #         change = 1 if modified_value > 0 else -1
+        # else:
+        percent_change = ((modified_value - baseline_value) / baseline_value) * 100
+        
+        if percent_change > threshold:
+            change = 1  # increase
+        elif percent_change < -threshold:
+            change = -1  # decrease
         else:
-            percent_change = ((modified_value - baseline_value) / baseline_value) * 100
-            
-            if percent_change > threshold:
-                change = 1  # increase
-            elif percent_change < -threshold:
-                change = -1  # decrease
-            else:
-                change = 0  # no change
+            change = 0  # no change
         
         results.append(change)
     
     return tuple(results)
+
+# Function to create waveform plots for each parameter
+def generate_waveform_plots(baseline, modified_results, param_name, modifier, folder="waveform_plots"):
+    """
+    Creates and saves voltage and current plots for comparing the baseline and modified circuit
+    
+    Parameters:
+    baseline: dict with baseline simulation results
+    modified_results: dict with modified circuit simulation results
+    param_name: parameter name
+    modifier: modifier label ('>', '>>', etc.)
+    folder: folder to save plots
+    """
+    # Create folder if it doesn't exist
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    
+    # Create voltage plot
+    plt.figure(figsize=(12, 6))
+
+    print(len(baseline['time']))
+    print(len(baseline['vout']))
+    print(len(baseline['il']))
+    print(len(modified_results['time']))
+    print(len(modified_results['vout']))
+    print(len(modified_results['il']))
+
+    # Voltage plot
+    plt.subplot(2, 1, 1)
+    plt.plot(baseline['time'], baseline['vout'], 'b-', label='Baseline Vout')
+    plt.plot(modified_results['time'], modified_results['vout'], 'r-', label=f'Modified Vout ({param_name} {modifier})')
+    plt.title(f'Voltage Comparison - {param_name} {modifier}')
+    plt.xlabel('Time')
+    plt.ylabel('Voltage (V)')
+    plt.grid(True)
+    plt.legend()
+    
+    # Current plot
+    plt.subplot(2, 1, 2)
+    plt.plot(baseline['time'], baseline['il'], 'b-', label='Baseline Current')
+    plt.plot(modified_results['time'], modified_results['il'], 'r-', label=f'Modified Current ({param_name} {modifier})')
+    plt.title('Current Comparison')
+    plt.xlabel('Time')
+    plt.ylabel('Current (A)')
+    plt.grid(True)
+    plt.legend()
+    
+    plt.tight_layout()
+    
+    # Save the plot
+    filename = f"{folder}/{param_name}_{modifier.replace('>', 'inc').replace('<', 'dec')}.png"
+    plt.savefig(filename)
+    plt.close()
+    
+    print(f"Waveform plot saved to {filename}")
 
 # Main function for parameter impact analysis
 def analyze_parameter_impact():
     print("Creating baseline circuit...")
     # Create the base circuit and get reference values
     base_circuit = create_buck_converter()
-    baseline_results = simulate_and_analyze(base_circuit, esr_ind=DEFAULT_PARAMS['esr_ind'])
+    baseline_results = simulate_and_analyze(base_circuit, esr_ind=DEFAULT_PARAMS['RL'])
     
     print("Baseline results:")
     for param, value in baseline_results.items():
-        print(f"{param}: {value:.6f}")
+        if param not in ['vout', 'il', 'time']:
+            print(f"{param}: {value:.6f}")
     
     # Parameters for analysis and their multipliers with symbolic labels
     parameters = {
-        'duty_cycle': [
-            {'label': '>>>', 'mult': 1.95},
-            {'label': '>>', 'mult': 1.5},
-            {'label': '>', 'mult': 1.2},
-            {'label': '<', 'mult': 1/1.2},
-            {'label': '<<', 'mult': 1/1.5},
-            {'label': '<<<', 'mult': 1/1.95}
+        # 'frequency': [
+        #     {'label': '+++', 'mult': 100},
+        #     {'label': '++', 'mult': 10},
+        #     {'label': '+', 'mult': 2},
+        #     {'label': '-', 'mult': 1/2},
+        #     {'label': '--', 'mult': 1/10},
+        #     {'label': '---', 'mult': 1/100}
+        # ],
+        'Vin': [
+            {'label': '+++', 'mult': 2},
+            {'label': '++', 'mult': 1.5},
+            {'label': '+', 'mult': 1.1},
+            {'label': '-', 'mult': 1/1.1},
+            {'label': '--', 'mult': 1/1.5},
+            {'label': '---', 'mult': 1/2}
         ],
-        'inductor': [
-            {'label': '>>>', 'mult': 1e12},
-            {'label': '>>', 'mult': 10},
-            {'label': '>', 'mult': 3},
-            {'label': '<', 'mult': 1/3},
-            {'label': '<<', 'mult': 1/10},
-            {'label': '<<<', 'mult': 1e-12}
+        'D': [
+            {'label': '+++', 'mult': 2},
+            {'label': '++', 'mult': 1.7},
+            {'label': '+', 'mult': 1.2},
+            {'label': '-', 'mult': 1/1.2},
+            {'label': '--', 'mult': 1/1.7},
+            {'label': '---', 'mult': 1e-6}
         ],
-        'capacitor': [
-            {'label': '>>>', 'mult': 1e12},
-            {'label': '>>', 'mult': 10},
-            {'label': '>', 'mult': 3},
-            {'label': '<', 'mult': 1/3},
-            {'label': '<<', 'mult': 1/10},
-            {'label': '<<<', 'mult': 1e-12}
+        'L': [
+            {'label': '+++', 'mult': 100},
+            {'label': '++', 'mult': 10},
+            {'label': '+', 'mult': 3},
+            {'label': '-', 'mult': 1/3},
+            {'label': '--', 'mult': 1/10},
+            {'label': '---', 'mult': 0}
         ],
-        'load': [
-            {'label': '>>>', 'mult': 1e12},
-            {'label': '>>', 'mult': 10},
-            {'label': '>', 'mult': 3},
-            {'label': '<', 'mult': 1/3},
-            {'label': '<<', 'mult': 1/10},
-            {'label': '<<<', 'mult': 1e-12}
+        'C': [
+            {'label': '+++', 'mult': 100},
+            {'label': '++', 'mult': 10},
+            {'label': '+', 'mult': 3},
+            {'label': '-', 'mult': 1/3},
+            {'label': '--', 'mult': 1/10},
+            {'label': '---', 'mult': 0}
         ],
-        'esr_cap': [
-            {'label': '>>>', 'mult': 1e12},
-            {'label': '>>', 'mult': 10},
-            {'label': '>', 'mult': 3},
-            {'label': '<', 'mult': 1/3},
-            {'label': '<<', 'mult': 1/10},
-            {'label': '<<<', 'mult': 1e-12}
+        'Rload': [
+            {'label': '+++', 'mult': 1e18},
+            {'label': '++', 'mult': 10},
+            {'label': '+', 'mult': 3},
+            {'label': '-', 'mult': 1/3},
+            {'label': '--', 'mult': 1/10},
+            {'label': '---', 'mult': 0}
         ],
-        'esr_ind': [
-            {'label': '>>>', 'mult': 1e12},
-            {'label': '>>', 'mult': 10},
-            {'label': '>', 'mult': 3},
-            {'label': '<', 'mult': 1/3},
-            {'label': '<<', 'mult': 1/10},
-            {'label': '<<<', 'mult': 1e-12}
+        'RC': [
+            {'label': '+++', 'mult': 1e18},
+            {'label': '++', 'mult': 10},
+            {'label': '+', 'mult': 3},
+            {'label': '-', 'mult': 1/3},
+            {'label': '--', 'mult': 1/10},
+            {'label': '---', 'mult': 0}
         ],
-        'rds_on': [
-            {'label': '>>>', 'mult': 1e12},
-            {'label': '>>', 'mult': 10},
-            {'label': '>', 'mult': 3},
-            {'label': '<', 'mult': 1/3},
-            {'label': '<<', 'mult': 1/10},
-            {'label': '<<<', 'mult': 1e-12}
+        'RL': [
+            {'label': '+++', 'mult': 1e18},
+            {'label': '++', 'mult': 10},
+            {'label': '+', 'mult': 3},
+            {'label': '-', 'mult': 1/3},
+            {'label': '--', 'mult': 1/10},
+            {'label': '---', 'mult': 1e-12}
         ],
-        # 'diode_rs': [
-        #     {'label': '>>>', 'mult': 1e12},
-        #     {'label': '>>', 'mult': 10},
-        #     {'label': '>', 'mult': 3},
-        #     {'label': '<', 'mult': 1/3},
-        #     {'label': '<<', 'mult': 1/10},
-        #     {'label': '<<<', 'mult': 1e-12}
-        # ]
+        'RD': [
+            {'label': '+++', 'mult': 1e18},
+            {'label': '++', 'mult': 1e5},
+            {'label': '+', 'mult': 100},
+            {'label': '-', 'mult': 1/3},
+            {'label': '--', 'mult': 1/10},
+            {'label': '---', 'mult': 1e-24}
+        ],
+        'RDS_ON': [
+            {'label': '+++', 'mult': 1e18},
+            {'label': '++', 'mult': 1e5},
+            {'label': '+', 'mult': 100},
+            {'label': '-', 'mult': 1/3},
+            {'label': '--', 'mult': 1/10},
+            {'label': '---', 'mult': 0}
+        ]
     }
     
     results = {}
@@ -251,19 +323,16 @@ def analyze_parameter_impact():
             try:
                 # Create and simulate the circuit with the modified parameter
                 circuit = create_buck_converter(**modified_params)
-                modified_results = simulate_and_analyze(circuit, esr_ind=modified_params['esr_ind'])
+                modified_results = simulate_and_analyze(circuit, esr_ind=modified_params['RL'])
                 
+                # Create and save waveform plots
+                generate_waveform_plots(baseline_results, modified_results, param_name, label)
+
                 # Skip invalid results
                 if (modified_results['vout_avg'] <= 0 or 
                     modified_results['il_avg'] <= 0):
-                    
-                    
-
                     print(f"  Skipping invalid results for {param_name} {label}")
                     continue
-                
-
-
                 # Determine the octant of change
                 octant = determine_octant(baseline_results, modified_results)
                 
@@ -276,8 +345,9 @@ def analyze_parameter_impact():
                 
                 print(f"  {param_name} {label}: Octant {octant}")
                 for p, v in modified_results.items():
-                    change = ((v - baseline_results[p]) / baseline_results[p]) * 100
-                    print(f"    {p}: {v:.6f} ({change:+.2f}%)")
+                    if p not in ['vout', 'il', 'time']:
+                        change = ((v - baseline_results[p]) / baseline_results[p]) * 100
+                        print(f"    {p}: {v:.6f} ({change:+.2f}%)")
                 
             except Exception as e:
                 print(f"  Error simulating {param_name} {label}: {e}")
@@ -313,11 +383,11 @@ def save_results_to_csv(baseline, results, filename='parameter_impact.csv'):
                 octant_str = ""
                 for o in octant:
                     if o == 1:
-                        octant_str += "↑"
+                        octant_str += "+"
                     elif o == -1:
-                        octant_str += "↓"
-                    else:
                         octant_str += "-"
+                    else:
+                        octant_str += "0"
                 
                 # Calculate percentage changes
                 changes = []
@@ -343,7 +413,7 @@ def visualize_parameter_impact(baseline, results):
     all_params = list(results.keys())
     
     # Use predefined order of modifiers
-    all_modifiers = ['<<<', '<<', '<', '>', '>>', '>>>']
+    all_modifiers = ['---', '--', '-', '+', '++', '+++']
     
     # Data for heat maps
     heat_data = np.zeros((len(all_params), len(all_modifiers), 4))
@@ -360,20 +430,23 @@ def visualize_parameter_impact(baseline, results):
     fig, axes = plt.subplots(2, 2, figsize=(18, 12))
     axes = axes.flatten()
     
+    plt.rcParams.update({'font.size': 18})
+
     for k in range(4):
         # Use masked array for NaN values
         masked_data = np.ma.array(heat_data[:, :, k], mask=np.isnan(heat_data[:, :, k]))
         
         im = axes[k].imshow(masked_data, cmap='RdBu', vmin=-1, vmax=1)
-        axes[k].set_title(f'Impact on {parameter_names[k]}')
+        axes[k].set_title(f'Impact on {parameter_names[k]}', fontsize=18)
         axes[k].set_yticks(np.arange(len(all_params)))
         axes[k].set_xticks(np.arange(len(all_modifiers)))
-        axes[k].set_yticklabels(all_params)
-        axes[k].set_xticklabels(all_modifiers)
-        plt.colorbar(im, ax=axes[k], ticks=[-1, 0, 1], label='↓ = -1, — = 0, ↑ = 1')
+        axes[k].set_yticklabels(all_params, fontsize=18)
+        axes[k].set_xticklabels(all_modifiers, fontsize=16)
+        plt.colorbar(im, ax=axes[k], ticks=[-1, 0, 1], label='- = -1, 0 = 0, + = 1')
     
     plt.tight_layout()
     plt.savefig('parameter_heatmaps.png')
+    plt.savefig('parameter_heatmaps.svg', format='svg')
     print("Heat maps saved to parameter_heatmaps.png")
     
     # Create a summary table of octants
