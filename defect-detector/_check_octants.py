@@ -35,6 +35,8 @@ class BuckConverter:
         if params.overwrite_resistance:
             self.r_load = self.r_load * params.overwrite_resistance_multiplier
 
+        print(f"R load: {self.r_load}")
+
     def build_circuit(self):
         circuit = Circuit('Buck Converter')
         circuit.V('in', 'vin', 'gnd', self.vin)
@@ -67,8 +69,9 @@ class BuckConverter:
         simulator = self.circuit.simulator(temperature=25, nominal_temperature=25)
         
         delta = self.period * 600
-        end_time = delta + self.period * 2
-        step_time = self.period / 300
+        end_time = delta + self.period
+        step_time = self.period / 1000
+        print(f"Step time: {step_time}")
         
         analysis = simulator.transient(
             step_time=step_time,
@@ -106,12 +109,12 @@ def main():
 
     converter = BuckConverter(params)
     converter.build_circuit()
-    results = converter.run_simulation()
+    results_before = converter.run_simulation()
 
-    mean_voltage_before = np.mean(results['out_c'])
-    mean_current_before = np.mean(results['sim_current'])
-    voltage_ripple_before = np.max(results['out_c']) - np.min(results['out_c'])
-    current_ripple_before = np.max(results['sim_current']) - np.min(results['sim_current'])
+    mean_voltage_before = np.mean(results_before['out_c'])
+    mean_current_before = np.mean(results_before['sim_current'])
+    voltage_ripple_before = np.max(results_before['out_c']) - np.min(results_before['out_c'])
+    current_ripple_before = np.max(results_before['sim_current']) - np.min(results_before['sim_current'])
 
     print(f"Mean voltage before: {mean_voltage_before}")
     print(f"Voltage ripple before: {voltage_ripple_before}")
@@ -120,16 +123,15 @@ def main():
 
     print("===================================")
 
-    params.overwrite_resistance = True
-    params.overwrite_resistance_multiplier = 1000
+    params.l_value = params.l_value * 10
     converter = BuckConverter(params)
     converter.build_circuit()
-    results = converter.run_simulation()
+    results_after = converter.run_simulation()
 
-    mean_voltage_after = np.mean(results['out_c'])
-    mean_current_after = np.mean(results['sim_current'])
-    voltage_ripple_after = np.max(results['out_c']) - np.min(results['out_c'])
-    current_ripple_after = np.max(results['sim_current']) - np.min(results['sim_current'])
+    mean_voltage_after = np.mean(results_after['out_c'])
+    mean_current_after = np.mean(results_after['sim_current'])
+    voltage_ripple_after = np.max(results_after['out_c']) - np.min(results_after['out_c'])
+    current_ripple_after = np.max(results_after['sim_current']) - np.min(results_after['sim_current'])
 
     print(f"Mean voltage after: {mean_voltage_after}")
     print(f"Voltage ripple after: {voltage_ripple_after}")
@@ -147,6 +149,32 @@ def main():
     print(f"Voltage ripple ratio: {voltage_ripple_ratio}")
     print(f"Mean current ratio: {mean_current_ratio}")
     print(f"Current ripple ratio: {current_ripple_ratio}")
+
+    # Create plots for voltage and current
+    plt.figure(figsize=(12, 8))
+    
+    # Plot for voltage
+    plt.subplot(2, 1, 1)
+    plt.plot(results_before['time'], results_before['out_c'], 'b-', label='Voltage Before')
+    plt.plot(results_after['time'], results_after['out_c'], 'r-', label='Voltage After')
+    plt.title('Voltage Comparison')
+    plt.xlabel('Time')
+    plt.ylabel('Voltage (V)')
+    plt.grid(True)
+    plt.legend()
+    
+    # Plot for current
+    plt.subplot(2, 1, 2)
+    plt.plot(results_before['time'], results_before['sim_current'], 'b-', label='Current Before')
+    plt.plot(results_after['time'], results_after['sim_current'], 'r-', label='Current After')
+    plt.title('Current Comparison')
+    plt.xlabel('Time')
+    plt.ylabel('Current (A)')
+    plt.grid(True)
+    plt.legend()
+    
+    plt.tight_layout()
+    plt.show()
 
 if __name__ == "__main__":
     main()

@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 
 app = FastAPI()
 
-
 class CircuitParams(BaseModel):
     vin: float = 13
     c_value: float = 44e-6
@@ -57,8 +56,6 @@ class BuckConverter:
         self.r_load = self.vout / self.current_out
         self.period = 1 / self.freq
 
-        periods_in_time_constant = np.sqrt(self.c_value / self.l_value) / self.period
-
         self.circuit = None
 
     def build_circuit(self):
@@ -67,20 +64,14 @@ class BuckConverter:
         
         ton = self.duty_cycle * self.period * 1e6
         period_us = self.period * 1e6
+
         circuit.V('gate', 'g', circuit.gnd, f'PULSE(0 10 0 1n 1n {ton}us {period_us}us)')
         circuit.S('1', 'vin', 'sw', 'g', circuit.gnd, model='switch_model')
-        # circuit.PulseVoltageSource('pulse', 'g', circuit.gnd,
-        #                 initial_value=0, pulsed_value=self.vin,
-        #                 pulse_width=self.duty_cycle*self.period,
-        #                 period=self.period)
-        # May be set VT to 0?
-        # Looks like the roff is not used
-        # circuit.VoltageControlledSwitch('sw', 'vin', 'sw', 'g', circuit.gnd, 
-        #                           model='switch_model')
+
         circuit.model('switch_model', 'SW', ron=1e-9, roff=1e12, vt=1, vh=0)
         
         circuit.D('1', circuit.gnd, 'sw', model='MYDIODE')
-        circuit.model('MYDIODE', 'D', is_=1e6, rs=1e-5)
+        circuit.model('MYDIODE', 'D', is_=1e6, rs=1e-4)
 
         circuit.L('1', 'sw', 'out', self.l_value)
         circuit.R('L1', 'out', 'out_c', self.l_resistance)
@@ -243,14 +234,14 @@ async def analyze_measurements(
         
 
         # Visualize comparison
-        # visualize_comparison(
-        #     measured_time, 
-        #     measured_voltage, 
-        #     measured_current_filtered, 
-        #     analysis['pwm'], 
-        #     sim_voltage, 
-        #     sim_current, 
-        #     analysis['pwm'])
+        visualize_comparison(
+            measured_time, 
+            measured_voltage, 
+            measured_current_filtered, 
+            analysis['pwm'], 
+            sim_voltage, 
+            sim_current, 
+            analysis['pwm'])
         
         return ComparisonResult(
             is_defective=is_defective,
