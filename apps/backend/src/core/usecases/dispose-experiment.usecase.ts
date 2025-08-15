@@ -64,13 +64,14 @@ export class DisposeExperimentUsecase {
         this.clientConnectTimeoutAdapter.clearTimeoutIfExists();
         this.clientDisconnectTimeoutAdapter.clearTimeoutIfExists();
 
-        this.logger.info({
-          message: 'The session is over, reseting the MCU.',
-          username: user.username,
-          usernameUnique: user.usernameUnique,
-        });
+        // TODO: Uncomment later
 
-        await this.mcuResetter.reset();
+        // this.logger.info({
+        //   message: 'The session is over, reseting the MCU.',
+        //   username: user.username,
+        //   usernameUnique: user.usernameUnique,
+        // });
+        // await this.mcuResetter.reset();
 
         await this.digitalTwinService.checkHardwareConditions();
       }
