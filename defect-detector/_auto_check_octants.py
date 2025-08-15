@@ -359,55 +359,6 @@ def analyze_parameter_impact():
     
     return baseline_results, results
 
-# Function to save results to CSV
-def save_results_to_csv(baseline, results, filename='parameter_impact.csv'):
-    with open(filename, 'w', newline='') as csvfile:
-        writer = csv.writer(csvfile)
-        
-        # Header
-        writer.writerow(['Parameter', 'Modifier', 'Vmean', 'Vpulse', 'Imean', 'Ipulse', 
-                         'Vmean(%)', 'Vpulse(%)', 'Imean(%)', 'Ipulse(%)', 'Octant'])
-        
-        # Baseline values
-        writer.writerow(['Baseline', 'x1', 
-                         f"{baseline['vout_avg']:.6f}", 
-                         f"{baseline['vout_ripple']:.6f}", 
-                         f"{baseline['il_avg']:.6f}", 
-                         f"{baseline['il_ripple']:.6f}",
-                         "0.0%", "0.0%", "0.0%", "0.0%", "----"])
-        
-        # Parameter data
-        for param, modifiers in results.items():
-            for mod_name, data in modifiers.items():
-                octant = data['octant']
-                values = data['values']
-                
-                # Convert octant to a string with arrows
-                octant_str = ""
-                for o in octant:
-                    if o == 1:
-                        octant_str += "+"
-                    elif o == -1:
-                        octant_str += "-"
-                    else:
-                        octant_str += "0"
-                
-                # Calculate percentage changes
-                changes = []
-                for p in ['vout_avg', 'vout_ripple', 'il_avg', 'il_ripple']:
-                    change = ((values[p] - baseline[p]) / baseline[p]) * 100
-                    changes.append(f"{change:+.2f}%")
-                
-                writer.writerow([param, mod_name, 
-                                f"{values['vout_avg']:.6f}", 
-                                f"{values['vout_ripple']:.6f}", 
-                                f"{values['il_avg']:.6f}", 
-                                f"{values['il_ripple']:.6f}",
-                                changes[0], changes[1], changes[2], changes[3], 
-                                octant_str])
-    
-    print(f"Results saved to {filename}")
-
 def visualize_parameter_impact(baseline, results):
     # Create heat maps for each parameter
     parameter_names = ['Vmean', 'Vpulse', 'Imean', 'Ipulse']
@@ -448,147 +399,8 @@ def visualize_parameter_impact(baseline, results):
         plt.colorbar(im, ax=axes[k], ticks=[-1, 0, 1], label='- = -1, 0 = 0, + = 1')
     
     plt.tight_layout()
-    plt.savefig('parameter_heatmaps.png')
     plt.savefig('parameter_heatmaps.svg', format='svg')
-    print("Heat maps saved to parameter_heatmaps.png")
-    
-    # Create a summary table of octants
-    unique_octants = {}
-    
-    # Collect data for octants
-    for param, modifiers in results.items():
-        for mod_name, data in modifiers.items():
-            octant = data['octant']
-            
-            # Convert to string representation for use as a key
-            octant_key = ''.join(['↑' if o == 1 else '↓' if o == -1 else '-' for o in octant])
-            octant_key = f"{octant_key[0]},{octant_key[1]},{octant_key[2]},{octant_key[3]}"
-            
-            if octant_key not in unique_octants:
-                unique_octants[octant_key] = []
-            
-            unique_octants[octant_key].append((param, mod_name))
-    
-    # Create a distribution diagram by octants
-    fig, ax = plt.subplots(figsize=(15, 8))
-    
-    octant_counts = {key: len(value) for key, value in unique_octants.items()}
-    sorted_octants = sorted(octant_counts.items(), key=lambda x: x[1], reverse=True)
-    
-    octant_labels = [octant for octant, _ in sorted_octants]
-    octant_values = [count for _, count in sorted_octants]
-    
-    # Create a color scheme for octants
-    cmap = plt.cm.tab20
-    colors = [cmap(i % 20) for i in range(len(octant_labels))]
-    
-    bars = ax.bar(octant_labels, octant_values, color=colors)
-    
-    ax.set_title('Distribution of parameters by octants', fontsize=16)
-    ax.set_xlabel('Octant (Vmean,Vpulse,Imean,Ipulse)', fontsize=14)
-    ax.set_ylabel('Number of parameters', fontsize=14)
-    
-    # Add labels and rotate them for better readability
-    plt.xticks(rotation=45, ha='right')
-    
-    # Add labels to columns
-    for bar in bars:
-        height = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2., height + 0.1,
-                str(int(height)), ha='center', va='bottom')
-    
-    # Instead of adding text to the plot, save it to a separate text file
-    plt.tight_layout()
-    plt.savefig('octant_distribution.png')
-    print("Octant distribution saved to octant_distribution.png")
-    
-    # NEW FUNCTIONALITY: Save detailed information about octants to a separate file
-    with open('octant_details.txt', 'w', encoding='utf-8') as f:
-        f.write("Detailed information about parameters in each octant\n")
-        f.write("=================================================\n\n")
-        for octant, params in sorted_octants:
-            f.write(f"Octant {octant}:\n")
-            # Group parameters by type for better readability
-            param_groups = {}
-            for p, m in unique_octants[octant]:
-                param_name = p
-                modifier = m
-                if param_name not in param_groups:
-                    param_groups[param_name] = []
-                param_groups[param_name].append(modifier)
-            
-            # Output in "parameter: modifiers" format
-            for param, modifiers in param_groups.items():
-                f.write(f"  {param}: {', '.join(modifiers)}\n")
-            f.write("\n")
-    
-    print("Detailed octant information saved to octant_details.txt")
-    
-    # ADDITIONALLY: Create a more compact visualization of the relationship between parameters and octants
-    num_octants = len(sorted_octants)
-    unique_params = sorted(all_params)
-    
-    # Create figure with parameter heatmap by octants
-    plt.figure(figsize=(18, 10))
-    matrix_data = np.zeros((len(unique_params), num_octants))
-    
-    for param_idx, param in enumerate(unique_params):
-        for octant_idx, (octant, _) in enumerate(sorted_octants):
-            # Count how many modifiers of this parameter fall into this octant
-            count = sum(1 for p, m in unique_octants[octant] if p == param)
-            matrix_data[param_idx, octant_idx] = count
-    
-    # Show the heat map
-    plt.imshow(matrix_data, cmap='YlOrRd', aspect='auto')
-    plt.colorbar(label='Number of modifiers')
-    
-    # Axis labels
-    plt.yticks(range(len(unique_params)), unique_params)
-    plt.xticks(range(num_octants), octant_labels, rotation=45, ha='right')
-    
-    plt.title('Distribution of parameters by octants (heatmap)', fontsize=16)
-    plt.tight_layout()
-    plt.savefig('octant_heatmap.png')
-    print("Octant heatmap saved to octant_heatmap.png")
-    
-    # ADDITIONALLY: Create a summary table for each parameter
-    plt.figure(figsize=(14, len(unique_params) * 2))
-    
-    for param_idx, param in enumerate(unique_params):
-        plt.subplot(len(unique_params), 1, param_idx + 1)
-        
-        # Collect data by octants for this parameter
-        param_octants = {}
-        for octant, items in unique_octants.items():
-            for p, m in items:
-                if p == param:
-                    if octant not in param_octants:
-                        param_octants[octant] = []
-                    param_octants[octant].append(m)
-        
-        # Sort octants by the number of modifiers
-        sorted_param_octants = sorted(param_octants.items(), key=lambda x: len(x[1]), reverse=True)
-        
-        # Create a bar plot
-        octant_labels = [o for o, _ in sorted_param_octants]
-        octant_values = [len(m) for _, m in sorted_param_octants]
-        
-        colors = [cmap(i % 20) for i in range(len(octant_labels))]
-        bars = plt.bar(octant_labels, octant_values, color=colors)
-        
-        # Add labels
-        for bar in bars:
-            height = bar.get_height()
-            plt.text(bar.get_x() + bar.get_width()/2., height + 0.1,
-                    str(int(height)), ha='center', va='bottom')
-        
-        plt.title(f'Distribution of parameter {param} by octants')
-        plt.xticks(rotation=45, ha='right')
-        plt.tight_layout()
-    
-    plt.tight_layout()
-    plt.savefig('parameter_octant_distribution.png')
-    print("Parameter octant distribution saved to parameter_octant_distribution.png")
+    print("Heat maps saved to parameter_heatmaps.svg")
 
 # Main function
 def main():
@@ -596,9 +408,6 @@ def main():
     
     # Run analysis
     baseline, impact_results = analyze_parameter_impact()
-    
-    # Save results
-    save_results_to_csv(baseline, impact_results)
     
     # Visualize results
     visualize_parameter_impact(baseline, impact_results)
