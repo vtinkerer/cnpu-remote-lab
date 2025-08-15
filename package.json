@@ -5,6 +5,7 @@
   "scripts": {
     "backend": "nx run backend:build && node dist/apps/backend/index.js | pino-pretty",
     "backend:test": "nx run backend:build-test && npx ava dist/apps/backend-test/test/index.test.js",
+    "backend:run": "nx run backend:build && pm2 restart all",
     "frontend": "nx run frontend:serve",
     "frontend:build": "nx run frontend:build",
     "frontend:build:watch": "nx run frontend:build:development",
