@@ -53,7 +53,10 @@ export class DigitalTwinService {
   ) {}
 
   async checkHardwareConditions(): Promise<void> {
-    await this.mcuSender.send([...MCU_COMMANDS_TO_SET]);
+    for (const command of MCU_COMMANDS_TO_SET) {
+      await this.mcuSender.send(command);
+      await sleep(200); // Wait to allow the MCU to process the command
+    }
     await this.checkCircuitParams();
   }
 
