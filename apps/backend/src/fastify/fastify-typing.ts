@@ -9,6 +9,7 @@ import { IMcuSender } from '../core/interfaces/mcu-sender.interface';
 import { IMeasurementsRepository } from '../core/interfaces/measurements-repository.interface';
 import { IScopeSender } from '../core/interfaces/scope-sender.interface';
 import { IUserRepository } from '../core/interfaces/user-repository.interface';
+import { DigitalTwinService } from '../core/services/digital-twin.service';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -22,5 +23,6 @@ declare module 'fastify' {
     mcuResetter: IMcuResetter;
     measurementsRepository: IMeasurementsRepository;
     defectDetectorAdapter: IDefectDetectorAdapter;
+    digitalTwinService: DigitalTwinService;
   }
 }

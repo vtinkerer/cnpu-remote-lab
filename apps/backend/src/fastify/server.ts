@@ -29,6 +29,7 @@ import { createFakeUserSessionPlugin } from '../fakes/user-session.fake';
 import { MeasurementsRepository } from '../adapters/measurements.repository';
 import { DefectDetectorAdapter } from '../adapters/defect-detector.adapter';
 import { testDefectDetector } from '../client-interfaces/http/routes/test-defect-detector';
+import { DigitalTwinService } from '../core/services/digital-twin.service';
 export type AppDependenciesOverrides = {
   mcu?: {
     receiver: IMcuReceiver;
@@ -144,6 +145,21 @@ export function buildApp() {
   server.register(WebSocket);
   server.register(scopePlugin());
   server.register(mcuPlugin());
+
+  // Services (shared services)
+  server.register(
+    fp(async (fastify, ops) => {
+      const digitalTwinService = new DigitalTwinService(
+        fastify.mcuSender,
+        fastify.measurementsRepository
+      );
+      fastify.decorate('digitalTwinService', {
+        getter() {
+          return digitalTwinService;
+        },
+      });
+    })
+  );
 
   server.register(universalRoutes);
 

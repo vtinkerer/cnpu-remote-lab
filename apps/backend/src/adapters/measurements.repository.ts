@@ -6,27 +6,35 @@ import {
   ScopeData,
   isScopeDataDto,
   BaseDto,
+  isResistanceLoadDto,
+  VoltageOutputDto,
 } from '@cnpu-remote-lab-nx/shared';
 import { IMeasurementsRepository } from '../core/interfaces/measurements-repository.interface';
 
 export class MeasurementsRepository implements IMeasurementsRepository {
   private vin: number;
-  private duty_cycle: number;
+  private pwm_percentage: number;
   private c_value: number;
   private current_out: number;
+  private r_load: number;
   private scopeData: ScopeData;
+  private vout: number;
 
   saveMeasurements(measurement: BaseDto): void {
     if (isVoltageInputDto(measurement)) {
       this.vin = measurement.voltage;
     } else if (isPWMDto(measurement)) {
-      this.duty_cycle = measurement.pwmPercentage / 100;
+      this.pwm_percentage = measurement.pwmPercentage / 100;
     } else if (isCapacitorDto(measurement)) {
       this.c_value = measurement.capacity * 1e-6;
     } else if (isCurrentLoadDto(measurement)) {
       this.current_out = measurement.mA; // It's an error, it's A not mA
     } else if (isScopeDataDto(measurement)) {
       this.scopeData = measurement.scopeData;
+    } else if (isResistanceLoadDto(measurement)) {
+      this.r_load = measurement.resistance;
+    } else if (measurement instanceof VoltageOutputDto) {
+      this.vout = measurement.voltage;
     }
     // Otherwise, do nothing
   }
@@ -34,9 +42,11 @@ export class MeasurementsRepository implements IMeasurementsRepository {
   getMeasurements(): {
     circuit_params: {
       vin: number;
-      duty_cycle: number;
+      pwm_percentage: number;
       c_value: number;
       current_out: number;
+      r_load: number;
+      vout: number;
     };
     measurements: {
       voltage: number[];
@@ -48,9 +58,11 @@ export class MeasurementsRepository implements IMeasurementsRepository {
     return {
       circuit_params: {
         vin: this.vin,
-        duty_cycle: this.duty_cycle,
+        pwm_percentage: this.pwm_percentage,
         c_value: this.c_value,
         current_out: this.current_out,
+        r_load: this.r_load,
+        vout: this.vout,
       },
       measurements: this.scopeData,
     };

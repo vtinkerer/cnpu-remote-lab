@@ -22,7 +22,7 @@ DEFAULT_PARAMS = {
     'frequency': 312500, # PWM frequency (Hz)
     'L': 10e-6,  # inductance (H)
     'C': 44e-6, # capacitance (F)
-    'Rload': 2.06,       # load resistance (Ohm)
+    'Rload': 2,       # load resistance (Ohm)
     'RC': 0.02,     # capacitor ESR (Ohm)
     'RL': 19.5e-3, # inductor ESR (Ohm)
     'RD': 1e-9,     # transistor RDS(on) (Ohm)
@@ -117,15 +117,15 @@ def simulate_and_analyze(circuit, esr_ind):
         }
 
 # Function to determine the octant
-def determine_octant(baseline, modified, threshold=6):
+def determine_octant(baseline, modified, threshold=10):
     """
-    Determines the octant of parameter changes considering a 6% threshold
-    
+    Determines the octant of parameter changes considering a 10% threshold
+
     Parameters:
     baseline: dict with baseline parameters
     modified: dict with modified parameters
-    threshold: change threshold in percentage (6%)
-    
+    threshold: change threshold in percentage (10%)
+
     Returns:
     Tuple (dVmean, dVpulse, dImean, dIpulse), where each element is:
     1: increase (>threshold%)

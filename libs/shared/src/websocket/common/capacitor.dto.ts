@@ -6,6 +6,7 @@ export const isCapacitorDto = (dto: unknown): dto is CapacitorDTO =>
 export class CapacitorDTO implements BaseDto {
   dtoName = CapacitorDTO.name;
 
+  // The capacitance of the capacitor in microfarads
   readonly capacity: number;
 
   constructor({ capacity }: { capacity: number }) {

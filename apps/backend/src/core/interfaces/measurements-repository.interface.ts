@@ -5,9 +5,11 @@ export interface IMeasurementsRepository {
   getMeasurements(): {
     circuit_params: {
       vin: number;
-      duty_cycle: number;
+      pwm_percentage: number;
       c_value: number;
       current_out: number;
+      r_load: number;
+      vout: number;
     };
     measurements: {
       voltage: number[];

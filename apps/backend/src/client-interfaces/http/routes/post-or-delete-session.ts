@@ -25,7 +25,8 @@ export const postOrDeleteSessionRoutes: FastifyPluginAsync = async (
         fastify.clientWebsocketAdapter,
         fastify.clientConnectTimeoutAdapter,
         fastify.clientDisconnectTimeoutAdapter,
-        fastify.mcuResetter
+        fastify.mcuResetter,
+        fastify.digitalTwinService
       );
       try {
         await usecase.execute({ sessionId, waiting: true });
@@ -54,7 +55,8 @@ export const postOrDeleteSessionRoutes: FastifyPluginAsync = async (
         fastify.clientWebsocketAdapter,
         fastify.clientConnectTimeoutAdapter,
         fastify.clientDisconnectTimeoutAdapter,
-        fastify.mcuResetter
+        fastify.mcuResetter,
+        fastify.digitalTwinService
       );
       try {
         await usecase.execute({ sessionId, waiting: true });

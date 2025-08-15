@@ -27,7 +27,7 @@ export class Logger implements ILogger {
       });
     }
     if (arg instanceof Object) {
-      return Logger.logger[level]({ context: this.context, msg: arg });
+      return Logger.logger[level]({ context: this.context, ...arg });
     }
     if (typeof arg === 'string') {
       return Logger.logger[level]({ context: this.context, msg: arg });

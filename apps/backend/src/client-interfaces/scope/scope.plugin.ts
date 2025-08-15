@@ -1,7 +1,7 @@
 import fp from 'fastify-plugin';
 import { Logger } from '../../logger/logger';
 import { ScopeError } from '../../core/errors/scope.error';
-import { SendScopeDataToUserUsecase } from '../../core/usecases/send-scope-data-to-user.usecase';
+import { ProcessScopeDataUsecase } from '../../core/usecases/send-scope-data-to-user.usecase';
 import { ScopeData } from '@cnpu-remote-lab-nx/shared';
 import * as child_process from 'child_process';
 import { ScopeReader } from './scope-reader';
@@ -38,7 +38,7 @@ export const scopePlugin = () =>
     }
 
     scopeReader.on('scope-data', async (scopeData) => {
-      const usecase = new SendScopeDataToUserUsecase(
+      const usecase = new ProcessScopeDataUsecase(
         fastify.clientWebsocketAdapter,
         fastify.measurementsRepository
       );

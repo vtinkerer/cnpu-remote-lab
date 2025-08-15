@@ -10,6 +10,7 @@ import { SessionIsOver } from '@cnpu-remote-lab-nx/shared';
 import { IClientConnectTimeoutManager } from '../interfaces/client-connect-timeout-manager.interface';
 import { IClientDisconnectTimeoutManager } from '../interfaces/client-disconnect-timeout-manager.interface';
 import { IMcuResetter } from '../interfaces/mcu-resetter.interface';
+import { DigitalTwinService } from '../services/digital-twin.service';
 
 export const DisposeExperimentPayloadValidationSchema = Type.Object({
   sessionId: Type.String(),
@@ -29,7 +30,8 @@ export class DisposeExperimentUsecase {
       IClientDataSender,
     private readonly clientConnectTimeoutAdapter: IClientConnectTimeoutManager,
     private readonly clientDisconnectTimeoutAdapter: IClientDisconnectTimeoutManager,
-    private readonly mcuResetter: IMcuResetter
+    private readonly mcuResetter: IMcuResetter,
+    private readonly digitalTwinService: DigitalTwinService
   ) {}
 
   @WithSchemaDecorator(DisposeExperimentPayloadValidationSchema)
@@ -69,6 +71,8 @@ export class DisposeExperimentUsecase {
         });
 
         await this.mcuResetter.reset();
+
+        await this.digitalTwinService.checkHardwareConditions();
       }
     }
   }

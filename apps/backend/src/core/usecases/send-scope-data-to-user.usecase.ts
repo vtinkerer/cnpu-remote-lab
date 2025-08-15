@@ -3,8 +3,8 @@ import { IClientDataSender } from '../interfaces/client-data-sender.interface';
 import { Logger } from '../../logger/logger';
 import { IMeasurementsRepository } from '../interfaces/measurements-repository.interface';
 
-export class SendScopeDataToUserUsecase {
-  private logger = new Logger(SendScopeDataToUserUsecase.name);
+export class ProcessScopeDataUsecase {
+  private logger = new Logger(ProcessScopeDataUsecase.name);
 
   constructor(
     private readonly clientWebsocketAdapter: IClientDataSender,
