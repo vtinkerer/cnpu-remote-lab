@@ -54,10 +54,10 @@ export class DigitalTwinService {
 
   async checkHardwareConditions(): Promise<void> {
     await this.mcuSender.send([...MCU_COMMANDS_TO_SET]);
-    await this.checkMeasurements();
+    await this.checkCircuitParams();
   }
 
-  private async checkMeasurements(recursionCounter = 0): Promise<void> {
+  private async checkCircuitParams(recursionCounter = 0): Promise<void> {
     if (recursionCounter > 5) {
       this.logger.warn('Max recursion reached');
       return;
@@ -74,14 +74,14 @@ export class DigitalTwinService {
       !compareWithAccuracy(measurements.circuit_params.vout, VOLTAGE_OUTPUT)
     ) {
       this.logger.warn({
-        msg: 'Measurements do not match expected values',
-        measurements,
+        msg: 'Circuit params do not match expected values',
+        circuitParams: measurements.circuit_params,
       });
-      return this.checkMeasurements(recursionCounter + 1);
+      return this.checkCircuitParams(recursionCounter + 1);
     }
 
     this.logger.info({
-      msg: 'Measurements match expected values',
+      msg: 'Circuit params match expected values',
       measurements,
     });
   }
