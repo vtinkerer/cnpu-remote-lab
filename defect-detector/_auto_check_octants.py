@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import csv
+import json
 import PySpice.Logging.Logging as Logging
 from PySpice.Spice.Netlist import Circuit
 from PySpice.Unit import u_F, u_uF
@@ -27,7 +27,6 @@ DEFAULT_PARAMS = {
     'RL': 19.5e-3, # inductor ESR (Ohm)
     'RD': 1e-9,     # transistor RDS(on) (Ohm)
     'RDS_ON': 0.05,     # diode resistance (Ohm)
-    # 'diode_short_circuit_resistance': 1e12 # Ohm
 }
 
 # Function to create a buck converter
@@ -42,7 +41,6 @@ def create_buck_converter(
     RL=DEFAULT_PARAMS['RL'],
     RD=DEFAULT_PARAMS['RD'],
     RDS_ON=DEFAULT_PARAMS['RDS_ON'],
-    # diode_short_circuit_resistance=DEFAULT_PARAMS['diode_short_circuit_resistance']
 ):
     
     circuit = Circuit('Buck Converter')
@@ -61,7 +59,6 @@ def create_buck_converter(
     
     circuit.D('1', 'gnd', 'sw', model='MYDIODE')
     circuit.model('MYDIODE', 'D', is_=1e6, rs=RDS_ON)
-    # circuit.R('diode_short_circuit', 'sw', 'gnd', diode_short_circuit_resistance)
     
     circuit.L('1', 'sw', 'out', henries_to_femtohenries(L))
     print(f"Inductor L1: {henries_to_femtohenries(L)}")
@@ -70,13 +67,11 @@ def create_buck_converter(
     circuit.R('C1', 'c_res', 'gnd', RC)
     
     circuit.R('load', 'out_c', 'gnd', Rload)
-    
-    # print(circuit)
 
     return circuit
 
 # Function for simulation and parameter extraction
-def simulate_and_analyze(circuit, esr_ind ):
+def simulate_and_analyze(circuit, esr_ind):
     try:
         # Calculate settling time
         freq = 312500  # PWM frequency (Hz)
@@ -124,12 +119,12 @@ def simulate_and_analyze(circuit, esr_ind ):
 # Function to determine the octant
 def determine_octant(baseline, modified, threshold=6):
     """
-    Determines the octant of parameter changes considering a 10% threshold
+    Determines the octant of parameter changes considering a 6% threshold
     
     Parameters:
     baseline: dict with baseline parameters
     modified: dict with modified parameters
-    threshold: change threshold in percentage (10%)
+    threshold: change threshold in percentage (6%)
     
     Returns:
     Tuple (dVmean, dVpulse, dImean, dIpulse), where each element is:
@@ -143,12 +138,6 @@ def determine_octant(baseline, modified, threshold=6):
         baseline_value = baseline[param]
         modified_value = modified[param]
         
-        # if abs(baseline_value) < 1e-9:  # Prevent division by zero
-        #     if abs(modified_value) < 1e-9:
-        #         change = 0
-        #     else:
-        #         change = 1 if modified_value > 0 else -1
-        # else:
         percent_change = ((modified_value - baseline_value) / baseline_value) * 100
         
         if percent_change > threshold:
@@ -162,17 +151,14 @@ def determine_octant(baseline, modified, threshold=6):
     
     return tuple(results)
 
-# Function to create waveform plots for each parameter
+def octant_to_string(octant):
+    """Convert octant tuple to string representation"""
+    mapping = {1: '+', 0: '0', -1: '-'}
+    return ''.join(mapping[val] for val in octant)
+
 def generate_waveform_plots(baseline, modified_results, param_name, modifier, folder="defect-detector/output/waveform_plots"):
     """
     Creates and saves voltage and current plots for comparing the baseline and modified circuit
-    
-    Parameters:
-    baseline: dict with baseline simulation results
-    modified_results: dict with modified circuit simulation results
-    param_name: parameter name
-    modifier: modifier label ('>', '>>', etc.)
-    folder: folder to save plots
     """
     # Create folder if it doesn't exist
     if not os.path.exists(folder):
@@ -217,7 +203,6 @@ def generate_waveform_plots(baseline, modified_results, param_name, modifier, fo
     
     print(f"Waveform plot saved to {filename}")
 
-# Main function for parameter impact analysis
 def analyze_parameter_impact():
     print("Creating baseline circuit...")
     # Create the base circuit and get reference values
@@ -307,6 +292,13 @@ def analyze_parameter_impact():
     
     results = {}
     
+    # Dictionary to store the JSON structure
+    # Key: octant string (e.g., '0000'), Value: list of parameter modifier lists
+    json_data = {}
+    
+    # Parameter order for the JSON output
+    param_order = ['Vin', 'D', 'L', 'C', 'Rload', 'RC', 'RL', 'RD', 'RDS_ON']
+    
     for param_name, modifiers in parameters.items():
         print(f"\nAnalyzing parameter: {param_name}")
         param_results = {}
@@ -336,17 +328,29 @@ def analyze_parameter_impact():
                     modified_results['il_avg'] <= 0):
                     print(f"  Skipping invalid results for {param_name} {label}")
                     continue
+                    
                 # Determine the octant of change
                 octant = determine_octant(baseline_results, modified_results)
+                octant_str = octant_to_string(octant)
+                
+                # Initialize the octant key in json_data if not exists
+                if octant_str not in json_data:
+                    # Initialize with empty lists for each parameter
+                    json_data[octant_str] = [[] for _ in range(len(param_order))]
+                
+                # Find the index of current parameter and add the modifier label
+                param_index = param_order.index(param_name)
+                if label not in json_data[octant_str][param_index]:
+                    json_data[octant_str][param_index].append(label)
                 
                 # Save the results
                 param_results[label] = {
                     'octant': octant,
                     'values': modified_results,
-                    'mult': mult  # Save multiplier for reference
+                    'mult': mult
                 }
                 
-                print(f"  {param_name} {label}: Octant {octant}")
+                print(f"  {param_name} {label}: Octant {octant} -> {octant_str}")
                 for p, v in modified_results.items():
                     if p not in ['vout', 'il', 'time']:
                         change = ((v - baseline_results[p]) / baseline_results[p]) * 100
@@ -357,7 +361,13 @@ def analyze_parameter_impact():
         
         results[param_name] = param_results
     
-    return baseline_results, results
+    # Fill empty parameter lists with ['0'] for octants that don't have changes for all parameters
+    for octant_str in json_data:
+        for i in range(len(param_order)):
+            if not json_data[octant_str][i]:  # If list is empty
+                json_data[octant_str][i] = ['0']
+    
+    return baseline_results, results, json_data
 
 def visualize_parameter_impact(baseline, results):
     # Create heat maps for each parameter
@@ -402,12 +412,31 @@ def visualize_parameter_impact(baseline, results):
     plt.savefig('defect-detector/output/parameter_heatmaps.svg', format='svg')
     print("Heat maps saved to defect-detector/output/parameter_heatmaps.svg")
 
+def save_json_data(json_data, filename="defect-detector/output/parameter_octant_mapping.json"):
+    """Save the JSON data structure to file"""
+    # Create output directory if it doesn't exist
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    
+    with open(filename, 'w') as f:
+        json.dump(json_data, f, indent=2)
+    
+    print(f"JSON data saved to {filename}")
+    
+    # Also print a summary
+    print(f"\nJSON Data Summary:")
+    print(f"Number of unique octants: {len(json_data)}")
+    for octant_str, param_lists in json_data.items():
+        print(f"Octant '{octant_str}': {param_lists}")
+
 # Main function
 def main():
     print("Starting parameter impact analysis...")
     
     # Run analysis
-    baseline, impact_results = analyze_parameter_impact()
+    baseline, impact_results, json_data = analyze_parameter_impact()
+    
+    # Save JSON data
+    save_json_data(json_data)
     
     # Visualize results
     visualize_parameter_impact(baseline, impact_results)
