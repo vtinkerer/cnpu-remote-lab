@@ -3,8 +3,14 @@ import matplotlib.pyplot as plt
 import csv
 import PySpice.Logging.Logging as Logging
 from PySpice.Spice.Netlist import Circuit
-from PySpice.Unit import *
+from PySpice.Unit import u_F, u_uF
 import os
+
+def henries_to_femtohenries(henries):
+    return f"{int(henries * 1e15)}fH"
+
+def farads_to_femtofarads(farads):
+    return f"{int(farads * 1e15)}fF"
 
 # Logging setup
 Logging.setup_logging()
@@ -21,7 +27,7 @@ DEFAULT_PARAMS = {
     'RL': 19.5e-3, # inductor ESR (Ohm)
     'RD': 1e-9,     # transistor RDS(on) (Ohm)
     'RDS_ON': 0.05,     # diode resistance (Ohm)
-    'diode_short_circuit_resistance': 1e12 # Ohm
+    # 'diode_short_circuit_resistance': 1e12 # Ohm
 }
 
 # Function to create a buck converter
@@ -36,7 +42,7 @@ def create_buck_converter(
     RL=DEFAULT_PARAMS['RL'],
     RD=DEFAULT_PARAMS['RD'],
     RDS_ON=DEFAULT_PARAMS['RDS_ON'],
-    diode_short_circuit_resistance=DEFAULT_PARAMS['diode_short_circuit_resistance']
+    # diode_short_circuit_resistance=DEFAULT_PARAMS['diode_short_circuit_resistance']
 ):
     
     circuit = Circuit('Buck Converter')
@@ -47,21 +53,26 @@ def create_buck_converter(
     period_us = period * 1e6
     circuit.V('gate', 'g', 'gnd', f'DC 0 PULSE(0 10 0 1n 1n {ton}us {period_us}us)')
     
+    circuit.C('1', 'out_c', 'c_res', farads_to_femtofarads(C))
+    print(farads_to_femtofarads(C))
+
     circuit.S('1', 'vin', 'sw', 'g', 'gnd', model='SWITCH')
     circuit.model('SWITCH', 'SW', ron=RD, vt=1, vh=0)
     
     circuit.D('1', 'gnd', 'sw', model='MYDIODE')
     circuit.model('MYDIODE', 'D', is_=1e6, rs=RDS_ON)
-    circuit.R('diode_short_circuit', 'sw', 'gnd', diode_short_circuit_resistance)
-        
-    circuit.L('1', 'sw', 'out', L)
+    # circuit.R('diode_short_circuit', 'sw', 'gnd', diode_short_circuit_resistance)
+    
+    circuit.L('1', 'sw', 'out', henries_to_femtohenries(L))
+    print(f"Inductor L1: {henries_to_femtohenries(L)}")
     circuit.R('L1', 'out', 'out_c', RL)
 
-    circuit.C('1', 'out_c', 'c_res', C)
     circuit.R('C1', 'c_res', 'gnd', RC)
     
     circuit.R('load', 'out_c', 'gnd', Rload)
     
+    # print(circuit)
+
     return circuit
 
 # Function for simulation and parameter extraction
@@ -220,14 +231,6 @@ def analyze_parameter_impact():
     
     # Parameters for analysis and their multipliers with symbolic labels
     parameters = {
-        # 'frequency': [
-        #     {'label': '+++', 'mult': 100},
-        #     {'label': '++', 'mult': 10},
-        #     {'label': '+', 'mult': 2},
-        #     {'label': '-', 'mult': 1/2},
-        #     {'label': '--', 'mult': 1/10},
-        #     {'label': '---', 'mult': 1/100}
-        # ],
         'Vin': [
             {'label': '+++', 'mult': 2},
             {'label': '++', 'mult': 1.5},
