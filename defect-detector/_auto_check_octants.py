@@ -163,7 +163,7 @@ def determine_octant(baseline, modified, threshold=6):
     return tuple(results)
 
 # Function to create waveform plots for each parameter
-def generate_waveform_plots(baseline, modified_results, param_name, modifier, folder="waveform_plots"):
+def generate_waveform_plots(baseline, modified_results, param_name, modifier, folder="defect-detector/output/waveform_plots"):
     """
     Creates and saves voltage and current plots for comparing the baseline and modified circuit
     
@@ -399,8 +399,8 @@ def visualize_parameter_impact(baseline, results):
         plt.colorbar(im, ax=axes[k], ticks=[-1, 0, 1], label='- = -1, 0 = 0, + = 1')
     
     plt.tight_layout()
-    plt.savefig('parameter_heatmaps.svg', format='svg')
-    print("Heat maps saved to parameter_heatmaps.svg")
+    plt.savefig('defect-detector/output/parameter_heatmaps.svg', format='svg')
+    print("Heat maps saved to defect-detector/output/parameter_heatmaps.svg")
 
 # Main function
 def main():
