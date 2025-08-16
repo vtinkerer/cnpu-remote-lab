@@ -43,6 +43,7 @@ store.connectToWebSocket();
 <template>
   <header class="sticky-header">
     <div>Time left: {{ store.timeLeft }}</div>
+    <div>Are conditions ok: {{ store.isConditionsOk }}</div>
   </header>
 
   <div class="background container-fluid">
@@ -50,20 +51,18 @@ store.connectToWebSocket();
       <!-- 1st component (Schematic Diagram) -->
       <div class="col-lg-6">
         <Section>
-
           <div v-if="store.laboratoryType === 'down'">
             <h3 class="text-center">DC-DC Buck Converter - Schematic Diagramm</h3>
           </div>
           <div v-if="store.laboratoryType === 'up'">
             <h3 class="text-center">DC-DC Boost Converter - Schematic Diagramm</h3>
-          </div>        
+          </div>
 
           <div class="container-overwritten">
-
             <div v-if="store.laboratoryType === 'down'">
               <img class="img-fluid" src="../img/buck.svg" />
             </div>
-              
+
             <div v-if="store.laboratoryType === 'up'">
               <img class="img-fluid" src="../img/boost.svg" />
             </div>
@@ -89,10 +88,10 @@ store.connectToWebSocket();
               </div>
               <UserInputCapacitor class="btn-icap" />
               <div v-if="store.typeLoad.type === 'CUR'">
-                <UserInputILoad class="btn-load" />                
+                <UserInputILoad class="btn-load" />
               </div>
               <div v-if="store.typeLoad.type === 'RES'">
-                <UserInputRLoad class="btn-load" />                
+                <UserInputRLoad class="btn-load" />
               </div>
               <UserInputPWMType class="btn-ipwm-type" />
               <UserInputLoadType class="btn-load-type" />

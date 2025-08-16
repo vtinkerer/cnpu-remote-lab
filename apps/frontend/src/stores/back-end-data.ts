@@ -32,6 +32,7 @@ export const useBackendDataStore = defineStore('backend-data', () => {
   const typeLoad = ref({ type: 'CUR' });
   const typePWM = ref({ type: 'AUT' });
   const laboratoryType = ref(LaboratoryType.UP);
+  const isConditionsOk = ref<boolean>(false);
 
   function connectToWebSocket() {
     if (!sessionId.value) {
@@ -135,11 +136,7 @@ export const useBackendDataStore = defineStore('backend-data', () => {
     calculateTimeLeft();
     setInterval(calculateTimeLeft, 1000);
 
-    if (data.isConditionsOk === false) {
-      alert('Conditions are not met. Please check the circuit parameters.');
-    } else if (data.isConditionsOk === true) {
-      alert('Conditions are met. You can start working.');
-    }
+    isConditionsOk.value = data.isConditionsOk ?? false;
   }
 
   return {
@@ -158,5 +155,6 @@ export const useBackendDataStore = defineStore('backend-data', () => {
     typePWM,
     typeLoad,
     laboratoryType,
+    isConditionsOk,
   };
 });
