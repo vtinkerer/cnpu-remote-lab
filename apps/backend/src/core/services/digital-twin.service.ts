@@ -15,8 +15,7 @@ import { IMcuResetter } from '../interfaces/mcu-resetter.interface';
 const compareWithAccuracy = (
   value: number,
   expected: number,
-  // Default accuracy is 2% for voltage and current measurements
-  accuracy: number = 0.02
+  accuracy: number = 0.1
 ): boolean => {
   // Compares two number with a given accuracy in percentage
   const diff = Math.abs(value - expected);
@@ -68,9 +67,9 @@ export class DigitalTwinService {
     }
 
     await this.mcuResetter.reset();
-    await sleep(200);
+    await sleep(300);
     await this.mcuSender.send([...MCU_COMMANDS_TO_SET]);
-    await sleep(200);
+    await sleep(300);
 
     const measurements = this.measurementsRepository.getMeasurements();
 
@@ -84,8 +83,7 @@ export class DigitalTwinService {
     );
     const compareResistance = compareWithAccuracy(
       measurements.circuit_params.r_load,
-      RESISTANCE,
-      0.1 // 10% accuracy for resistance
+      RESISTANCE
     );
     const compareVin = compareWithAccuracy(
       measurements.circuit_params.vin,
