@@ -8,6 +8,7 @@ import { CurrentUser } from '../entities/user.entity.js';
 import { IClientConnectTimeoutManager } from '../interfaces/client-connect-timeout-manager.interface.js';
 import { IMcuResetter } from '../interfaces/mcu-resetter.interface.js';
 import { LaboratoryType } from '@cnpu-remote-lab-nx/shared';
+import { DigitalTwinService } from '../services/digital-twin.service.js';
 
 export const StartSessionPayloadValidationSchema = Type.Object({
   request: Type.Object({
@@ -43,7 +44,8 @@ export class StartSessionsUsecase {
     private readonly userRepository: IUserRepository,
     private readonly clientConnectTimeoutAdapter: IClientConnectTimeoutManager,
     private readonly callbackUrl: string,
-    private readonly mcuResetter: IMcuResetter
+    private readonly mcuResetter: IMcuResetter,
+    private readonly digitalTwinService: DigitalTwinService
   ) {}
 
   @WithSchemaDecorator(StartSessionPayloadValidationSchema)
@@ -86,6 +88,8 @@ export class StartSessionsUsecase {
     this.clientConnectTimeoutAdapter.startTimeout();
 
     this.logger.info(`Session started: ${sessionId}`);
+
+    await this.digitalTwinService.checkHardwareConditions();
 
     await this.mcuResetter.reset();
 

@@ -30,8 +30,7 @@ export class DisposeExperimentUsecase {
       IClientDataSender,
     private readonly clientConnectTimeoutAdapter: IClientConnectTimeoutManager,
     private readonly clientDisconnectTimeoutAdapter: IClientDisconnectTimeoutManager,
-    private readonly mcuResetter: IMcuResetter,
-    private readonly digitalTwinService: DigitalTwinService
+    private readonly mcuResetter: IMcuResetter
   ) {}
 
   @WithSchemaDecorator(DisposeExperimentPayloadValidationSchema)
@@ -64,16 +63,12 @@ export class DisposeExperimentUsecase {
         this.clientConnectTimeoutAdapter.clearTimeoutIfExists();
         this.clientDisconnectTimeoutAdapter.clearTimeoutIfExists();
 
-        // TODO: Uncomment later
-
-        // this.logger.info({
-        //   message: 'The session is over, reseting the MCU.',
-        //   username: user.username,
-        //   usernameUnique: user.usernameUnique,
-        // });
-        // await this.mcuResetter.reset();
-
-        await this.digitalTwinService.checkHardwareConditions();
+        this.logger.info({
+          message: 'The session is over, reseting the MCU.',
+          username: user.username,
+          usernameUnique: user.usernameUnique,
+        });
+        await this.mcuResetter.reset();
       }
     }
   }
