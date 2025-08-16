@@ -14,18 +14,14 @@ export class SendMcuDataToUserUsecase {
   ) {}
 
   async execute<T extends BaseDto>(data: T): Promise<void> {
-    if (!this.clientWebsocketAdapter.isAlive()) {
-      // this.logger.warn(
-      //   "Don't send MCU data because the websocket is not alive"
-      // );
-      return;
-    }
-    this.clientWebsocketAdapter.send(data);
-
     if (data instanceof VoltageOutputDto) {
       this.scopeSender.sendOutVoltage(data.voltage);
     }
 
     this.measurementsRepository.saveMeasurements(data);
+
+    if (this.clientWebsocketAdapter.isAlive()) {
+      this.clientWebsocketAdapter.send(data);
+    }
   }
 }
