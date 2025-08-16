@@ -24,10 +24,10 @@ export class MeasurementsRepository implements IMeasurementsRepository {
   private vout: number;
 
   saveMeasurements(measurement: BaseDto): void {
-    this.logger.info({
-      message: 'Saving measurement',
-      measurement,
-    });
+    // this.logger.info({
+    // message: 'Saving measurement',
+    // measurement,
+    // });
 
     if (isVoltageInputDto(measurement)) {
       this.vin = measurement.voltage;
