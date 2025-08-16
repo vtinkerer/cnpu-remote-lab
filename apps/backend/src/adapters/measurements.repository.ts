@@ -34,7 +34,7 @@ export class MeasurementsRepository implements IMeasurementsRepository {
     } else if (isPWMDto(measurement)) {
       this.pwm_percentage = measurement.pwmPercentage / 100;
     } else if (isCapacitorDto(measurement)) {
-      this.c_value = measurement.capacity * 1e-6;
+      this.c_value = measurement.capacity;
     } else if (isCurrentLoadDto(measurement)) {
       this.current_out = measurement.mA; // It's an error, it's A not mA
     } else if (isScopeDataDto(measurement)) {

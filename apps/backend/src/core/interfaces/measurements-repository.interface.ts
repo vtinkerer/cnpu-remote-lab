@@ -5,7 +5,13 @@ export interface IMeasurementsRepository {
   getMeasurements(): {
     circuit_params: {
       vin: number;
+      /**
+       * Percentage
+       */
       pwm_percentage: number;
+      /**
+       * microfarads
+       */
       c_value: number;
       current_out: number;
       r_load: number;
