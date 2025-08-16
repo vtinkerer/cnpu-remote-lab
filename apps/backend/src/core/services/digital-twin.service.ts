@@ -25,7 +25,7 @@ const compareWithAccuracy = (
 const VOLTAGE_INPUT = 12;
 const PWM_PERCENTAGE = 50;
 const CAPACITOR_CAPACITY = 44; // uF
-const RESISTANCE = 2;
+const RESISTANCE = 4;
 const VOLTAGE_OUTPUT = VOLTAGE_INPUT * (PWM_PERCENTAGE / 100);
 
 const MCU_COMMANDS_TO_SET = [
@@ -57,13 +57,12 @@ export class DigitalTwinService {
   }
 
   private async checkCircuitParams(recursionCounter = 0): Promise<void> {
-    await this.mcuSender.send([...MCU_COMMANDS_TO_SET]);
-
     if (recursionCounter > 5) {
       this.logger.warn('Max recursion reached');
       return;
     }
 
+    await this.mcuSender.send([...MCU_COMMANDS_TO_SET]);
     await sleep(200); // Wait to allow the MCU to process the commands and digital oscilloscope to capture the data
 
     const measurements = this.measurementsRepository.getMeasurements();
