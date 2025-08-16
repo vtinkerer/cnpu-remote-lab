@@ -9,11 +9,15 @@ import {
   ExpiredUser,
 } from '../entities/user.entity';
 import { IUserRepository } from '../interfaces/user-repository.interface';
+import { IContextRepository } from '../interfaces/context-repository.interface';
 
 export class GetUserInitState {
   private logger = new Logger(GetUserInitState.name);
 
-  constructor(private readonly userRepository: IUserRepository) {}
+  constructor(
+    private readonly userRepository: IUserRepository,
+    private readonly contextRepository: IContextRepository
+  ) {}
 
   async execute(sessionId: string): Promise<GetUserInitStateResponse> {
     this.logger.info('Getting user init state');
@@ -52,6 +56,7 @@ export class GetUserInitState {
       stopDate: user.maxDate.toISO(),
       url: user.back,
       laboratoryType: user.categoryName as LaboratoryType,
+      isConditionsOk: await this.contextRepository.isConditionsOk(),
     };
   }
 }

@@ -95,7 +95,6 @@ export const useBackendDataStore = defineStore('backend-data', () => {
       if (isLoadTypeDto(dto)) {
         typeLoad.value.type = dto.type;
       }
-
     };
   }
 
@@ -126,7 +125,7 @@ export const useBackendDataStore = defineStore('backend-data', () => {
     } else {
       laboratoryType.value = LaboratoryType.DOWN;
     }
-    
+
     const stopTimestamp = DateTime.fromISO(data.stopDate!).toMillis();
     const calculateTimeLeft = () => {
       const millisLeft = stopTimestamp - DateTime.now().toMillis();
@@ -135,6 +134,12 @@ export const useBackendDataStore = defineStore('backend-data', () => {
     };
     calculateTimeLeft();
     setInterval(calculateTimeLeft, 1000);
+
+    if (data.isConditionsOk === false) {
+      alert('Conditions are not met. Please check the circuit parameters.');
+    } else if (data.isConditionsOk === true) {
+      alert('Conditions are met. You can start working.');
+    }
   }
 
   return {

@@ -11,6 +11,7 @@ const responseSchema = Type.Object({
   isActive: Type.Boolean(),
   url: Type.Optional(Type.String()),
   stopDate: Type.Optional(Type.String()),
+  isConditionsOk: Type.Optional(Type.Boolean()),
 });
 type ResponseType = Static<typeof responseSchema>;
 
@@ -27,11 +28,15 @@ export const getInitUserState: FastifyPluginAsync = async (fastify, opts) => {
     },
     async (request, reply) => {
       const { sessionId } = request.params;
-      const { isActive, url, stopDate } = await new GetUserInitState(
-        fastify.userRepository
-      ).execute(sessionId);
+      const { isActive, url, stopDate, isConditionsOk } =
+        await new GetUserInitState(
+          fastify.userRepository,
+          fastify.contextRepository
+        ).execute(sessionId);
       if (isActive) {
-        await reply.status(200).send({ isActive: true, stopDate, url });
+        await reply
+          .status(200)
+          .send({ isActive: true, stopDate, url, isConditionsOk });
         return;
       }
       await reply.status(200).send({ isActive: false, url });

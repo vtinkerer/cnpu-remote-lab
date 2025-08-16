@@ -9,6 +9,7 @@ import { Logger } from '../../logger/logger';
 import { IMcuSender } from '../interfaces/mcu-sender.interface';
 import { sleep } from '../../utils/sleep';
 import { IMeasurementsRepository } from '../interfaces/measurements-repository.interface';
+import { IContextRepository } from '../interfaces/context-repository.interface';
 
 const compareWithAccuracy = (
   value: number,
@@ -48,18 +49,20 @@ export class DigitalTwinService {
   private logger = new Logger(DigitalTwinService.name);
 
   constructor(
-    private mcuSender: IMcuSender,
-    private measurementsRepository: IMeasurementsRepository
+    private readonly mcuSender: IMcuSender,
+    private readonly measurementsRepository: IMeasurementsRepository,
+    private readonly contextRepository: IContextRepository
   ) {}
 
   async checkHardwareConditions(): Promise<void> {
-    await this.checkCircuitParams();
+    const isOk = await this.checkCircuitParams();
+    this.contextRepository.setIsConditionsOk(isOk);
   }
 
-  private async checkCircuitParams(recursionCounter = 0): Promise<void> {
+  private async checkCircuitParams(recursionCounter = 0): Promise<boolean> {
     if (recursionCounter > 5) {
       this.logger.warn('Max recursion reached');
-      return;
+      return false;
     }
 
     await this.mcuSender.send([...MCU_COMMANDS_TO_SET]);
@@ -111,5 +114,7 @@ export class DigitalTwinService {
       msg: 'Circuit params match expected values',
       measurements,
     });
+
+    return true;
   }
 }

@@ -30,6 +30,8 @@ import { MeasurementsRepository } from '../adapters/measurements.repository';
 import { DefectDetectorAdapter } from '../adapters/defect-detector.adapter';
 import { testDefectDetector } from '../client-interfaces/http/routes/test-defect-detector';
 import { DigitalTwinService } from '../core/services/digital-twin.service';
+import { ContextRepository } from '../adapters/context.repository';
+
 export type AppDependenciesOverrides = {
   mcu?: {
     receiver: IMcuReceiver;
@@ -86,6 +88,16 @@ export function buildApp() {
       fastify.decorate('userRepository', {
         getter() {
           return userRepository;
+        },
+      });
+    })
+  );
+  server.register(
+    fp(async (fastify, ops) => {
+      const contextRepository = new ContextRepository();
+      fastify.decorate('contextRepository', {
+        getter() {
+          return contextRepository;
         },
       });
     })
@@ -151,7 +163,8 @@ export function buildApp() {
     fp(async (fastify, ops) => {
       const digitalTwinService = new DigitalTwinService(
         fastify.mcuSender,
-        fastify.measurementsRepository
+        fastify.measurementsRepository,
+        fastify.contextRepository
       );
       fastify.decorate('digitalTwinService', {
         getter() {
