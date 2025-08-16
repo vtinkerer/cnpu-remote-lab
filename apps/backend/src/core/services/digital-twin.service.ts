@@ -24,7 +24,7 @@ const compareWithAccuracy = (
 
 const VOLTAGE_INPUT = 12;
 const PWM_PERCENTAGE = 50;
-const CAPACITOR_CAPACITY = 44 * 1e-6; // uF
+const CAPACITOR_CAPACITY = 44; // uF
 const RESISTANCE = 2;
 const VOLTAGE_OUTPUT = VOLTAGE_INPUT * (PWM_PERCENTAGE / 100);
 
