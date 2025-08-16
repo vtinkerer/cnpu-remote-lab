@@ -29,19 +29,19 @@ const RESISTANCE = 2;
 const VOLTAGE_OUTPUT = VOLTAGE_INPUT * (PWM_PERCENTAGE / 100);
 
 const MCU_COMMANDS_TO_SET = [
-  // new LoadTypeDTO({
-  // type: 'RES',
-  // }),
+  new LoadTypeDTO({
+    type: 'RES',
+  }),
   new VoltageInputDTO({
     voltage: VOLTAGE_INPUT,
   }),
   new PWMDTO({ pwmPercentage: PWM_PERCENTAGE }),
-  // new CapacitorDTO({
-  //   capacity: CAPACITOR_CAPACITY,
-  // }),
-  // new ResistanceLoadDTO({
-  // resistance: RESISTANCE,
-  // }),
+  new CapacitorDTO({
+    capacity: CAPACITOR_CAPACITY,
+  }),
+  new ResistanceLoadDTO({
+    resistance: RESISTANCE,
+  }),
 ] as const;
 
 export class DigitalTwinService {
@@ -53,10 +53,7 @@ export class DigitalTwinService {
   ) {}
 
   async checkHardwareConditions(): Promise<void> {
-    for (const command of MCU_COMMANDS_TO_SET) {
-      await this.mcuSender.send(command);
-      await sleep(200); // Wait to allow the MCU to process the command
-    }
+    await this.mcuSender.send([...MCU_COMMANDS_TO_SET]);
     await this.checkCircuitParams();
   }
 
