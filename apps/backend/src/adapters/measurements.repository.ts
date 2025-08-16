@@ -10,8 +10,11 @@ import {
   VoltageOutputDto,
 } from '@cnpu-remote-lab-nx/shared';
 import { IMeasurementsRepository } from '../core/interfaces/measurements-repository.interface';
+import { Logger } from '../logger/logger';
 
 export class MeasurementsRepository implements IMeasurementsRepository {
+  private logger = new Logger(MeasurementsRepository.name);
+
   private vin: number;
   private pwm_percentage: number;
   private c_value: number;
@@ -21,6 +24,11 @@ export class MeasurementsRepository implements IMeasurementsRepository {
   private vout: number;
 
   saveMeasurements(measurement: BaseDto): void {
+    this.logger.info({
+      message: 'Saving measurement',
+      measurement,
+    });
+
     if (isVoltageInputDto(measurement)) {
       this.vin = measurement.voltage;
     } else if (isPWMDto(measurement)) {
