@@ -164,7 +164,8 @@ export function buildApp() {
       const digitalTwinService = new DigitalTwinService(
         fastify.mcuSender,
         fastify.measurementsRepository,
-        fastify.contextRepository
+        fastify.contextRepository,
+        fastify.mcuResetter
       );
       fastify.decorate('digitalTwinService', {
         getter() {

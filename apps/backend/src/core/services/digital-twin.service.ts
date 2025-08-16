@@ -10,6 +10,7 @@ import { IMcuSender } from '../interfaces/mcu-sender.interface';
 import { sleep } from '../../utils/sleep';
 import { IMeasurementsRepository } from '../interfaces/measurements-repository.interface';
 import { IContextRepository } from '../interfaces/context-repository.interface';
+import { IMcuResetter } from '../interfaces/mcu-resetter.interface';
 
 const compareWithAccuracy = (
   value: number,
@@ -51,7 +52,8 @@ export class DigitalTwinService {
   constructor(
     private readonly mcuSender: IMcuSender,
     private readonly measurementsRepository: IMeasurementsRepository,
-    private readonly contextRepository: IContextRepository
+    private readonly contextRepository: IContextRepository,
+    private readonly mcuResetter: IMcuResetter
   ) {}
 
   async checkHardwareConditions(): Promise<void> {
@@ -65,8 +67,10 @@ export class DigitalTwinService {
       return false;
     }
 
+    await this.mcuResetter.reset();
+    await sleep(200);
     await this.mcuSender.send([...MCU_COMMANDS_TO_SET]);
-    await sleep(200); // Wait to allow the MCU to process the commands and digital oscilloscope to capture the data
+    await sleep(200);
 
     const measurements = this.measurementsRepository.getMeasurements();
 
