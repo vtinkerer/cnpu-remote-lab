@@ -32,7 +32,7 @@ export class MeasurementsRepository implements IMeasurementsRepository {
     if (isVoltageInputDto(measurement)) {
       this.vin = measurement.voltage;
     } else if (isPWMDto(measurement)) {
-      this.pwm_percentage = measurement.pwmPercentage / 100;
+      this.pwm_percentage = measurement.pwmPercentage;
     } else if (isCapacitorDto(measurement)) {
       this.c_value = measurement.capacity;
     } else if (isCurrentLoadDto(measurement)) {
