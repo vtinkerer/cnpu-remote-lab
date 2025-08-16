@@ -29,8 +29,10 @@ export class McuSender implements IMcuSender {
         ...data.map((d) => this.getOneSerialized(d)).filter((str) => !!str),
         '',
       ].join(';') + '\n';
-    this.serialport.write(serializedData);
-    this.logger.info(`Send serialized data: ${serializedData}`);
+    const writeResult = this.serialport.write(serializedData);
+    this.logger.info(
+      `Send serialized data: ${serializedData}, write result: ${writeResult}`
+    );
   }
 
   private getOneSerialized<T extends BaseDto>(data: T): string {
