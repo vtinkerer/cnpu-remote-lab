@@ -77,7 +77,8 @@ export class DigitalTwinService {
     );
     const compareResistance = compareWithAccuracy(
       measurements.circuit_params.r_load,
-      RESISTANCE
+      RESISTANCE,
+      0.1 // 10% accuracy for resistance
     );
     const compareVin = compareWithAccuracy(
       measurements.circuit_params.vin,
