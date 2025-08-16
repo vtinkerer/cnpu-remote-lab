@@ -24,24 +24,24 @@ const compareWithAccuracy = (
 
 const VOLTAGE_INPUT = 12;
 const PWM_PERCENTAGE = 50;
-const CAPACITOR_CAPACITY = 44;
+const CAPACITOR_CAPACITY = 44 * 1e-6; // uF
 const RESISTANCE = 2;
 const VOLTAGE_OUTPUT = VOLTAGE_INPUT * (PWM_PERCENTAGE / 100);
 
 const MCU_COMMANDS_TO_SET = [
-  new LoadTypeDTO({
-    type: 'RES',
-  }),
+  // new LoadTypeDTO({
+  // type: 'RES',
+  // }),
   new VoltageInputDTO({
     voltage: VOLTAGE_INPUT,
   }),
   new PWMDTO({ pwmPercentage: PWM_PERCENTAGE }),
-  new CapacitorDTO({
-    capacity: CAPACITOR_CAPACITY,
-  }),
-  new ResistanceLoadDTO({
-    resistance: RESISTANCE,
-  }),
+  // new CapacitorDTO({
+  //   capacity: CAPACITOR_CAPACITY,
+  // }),
+  // new ResistanceLoadDTO({
+  // resistance: RESISTANCE,
+  // }),
 ] as const;
 
 export class DigitalTwinService {
