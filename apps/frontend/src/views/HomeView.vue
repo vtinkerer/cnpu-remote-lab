@@ -42,8 +42,8 @@ store.connectToWebSocket();
 
 <template>
   <header class="sticky-header">
-    <div>Time left: {{ store.timeLeft }}</div>
-    <div>Are conditions ok: {{ store.isConditionsOk }}</div>
+    <div class="time-left">Time left: {{ store.timeLeft }}</div>
+    <div class="conditions">Are conditions ok: {{ store.isConditionsOk }}</div>
   </header>
 
   <div class="background container-fluid">
