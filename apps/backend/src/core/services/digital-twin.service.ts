@@ -66,16 +66,42 @@ export class DigitalTwinService {
     await sleep(200); // Wait to allow the MCU to process the commands and digital oscilloscope to capture the data
 
     const measurements = this.measurementsRepository.getMeasurements();
+
+    const compareCapacity = compareWithAccuracy(
+      measurements.circuit_params.c_value,
+      CAPACITOR_CAPACITY
+    );
+    const comparePWM = compareWithAccuracy(
+      measurements.circuit_params.pwm_percentage,
+      PWM_PERCENTAGE
+    );
+    const compareResistance = compareWithAccuracy(
+      measurements.circuit_params.r_load,
+      RESISTANCE
+    );
+    const compareVin = compareWithAccuracy(
+      measurements.circuit_params.vin,
+      VOLTAGE_INPUT
+    );
+    const compareVout = compareWithAccuracy(
+      measurements.circuit_params.vout,
+      VOLTAGE_OUTPUT
+    );
     if (
-      measurements.circuit_params.c_value !== CAPACITOR_CAPACITY ||
-      measurements.circuit_params.pwm_percentage !== PWM_PERCENTAGE ||
-      !compareWithAccuracy(measurements.circuit_params.r_load, RESISTANCE) ||
-      !compareWithAccuracy(measurements.circuit_params.vin, VOLTAGE_INPUT) ||
-      !compareWithAccuracy(measurements.circuit_params.vout, VOLTAGE_OUTPUT)
+      !compareCapacity ||
+      !comparePWM ||
+      !compareResistance ||
+      !compareVin ||
+      !compareVout
     ) {
       this.logger.warn({
         msg: 'Circuit params do not match expected values',
         circuitParams: measurements.circuit_params,
+        compareCapacity,
+        comparePWM,
+        compareResistance,
+        compareVin,
+        compareVout,
       });
       return this.checkCircuitParams(recursionCounter + 1);
     }
