@@ -31,16 +31,18 @@ export class DefectDetectorAdapter implements IDefectDetectorAdapter {
       JSON.stringify(measurements, null, 2)
     );
 
-    const response = await fetch(this.serviceUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(measurements),
-    });
+    // const response = await fetch(this.serviceUrl, {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify(measurements),
+    // });
 
-    const result = await response.json();
+    // const result = await response.json();
 
-    return result;
+    // return result;
+
+    return null;
   }
 }
