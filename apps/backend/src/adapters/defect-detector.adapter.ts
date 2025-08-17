@@ -1,8 +1,11 @@
 import { IDefectDetectorAdapter } from '../core/interfaces/defect-detector-adapter.interface';
 import { IMeasurementsRepository } from '../core/interfaces/measurements-repository.interface';
 import fs from 'node:fs';
+import { Logger } from '../logger/logger';
 
 export class DefectDetectorAdapter implements IDefectDetectorAdapter {
+  private logger = new Logger(DefectDetectorAdapter.name);
+
   private serviceUrl = 'http://localhost:3801/analyze';
 
   constructor(
@@ -17,6 +20,11 @@ export class DefectDetectorAdapter implements IDefectDetectorAdapter {
     current_error_percentage: number;
   }> {
     const measurements = this.measurementsRepository.getMeasurements();
+
+    this.logger.info({
+      msg: 'Measurements to be sent for analysis',
+      measurements,
+    });
 
     fs.writeFileSync(
       '/home/user1-44/measurements.json',

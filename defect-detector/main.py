@@ -11,7 +11,7 @@ app = FastAPI()
 class CircuitParams(BaseModel):
     vin: float 
     c_value: float 
-    duty_cycle: float 
+    pwm_percentage: float 
     r_load: float 
 
 class ComparisonResult(BaseModel):
@@ -47,8 +47,8 @@ class BuckConverter:
         self.vin = params.vin
         self.freq = 312500
         self.l_value = 10e-6
-        self.c_value = params.c_value
-        self.duty_cycle = params.duty_cycle
+        self.c_value = params.c_value * 1e-6  # Convert to Farads
+        self.duty_cycle = params.pwm_percentage / 100.0
         self.l_resistance = 19.5e-3  # from datasheet
         self.r_load = params.r_load        
         self.vout = self.vin * self.duty_cycle
