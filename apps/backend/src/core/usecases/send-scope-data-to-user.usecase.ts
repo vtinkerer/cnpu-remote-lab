@@ -12,11 +12,11 @@ export class ProcessScopeDataUsecase {
   ) {}
 
   async execute(data: ScopeData): Promise<ScopeDataDTO> {
+    const dto = new ScopeDataDTO(data);
+    this.measurementRepo.saveMeasurements(dto);
     if (!this.clientWebsocketAdapter.isAlive()) {
       return;
     }
-    const dto = new ScopeDataDTO(data);
     this.clientWebsocketAdapter.send(dto);
-    this.measurementRepo.saveMeasurements(dto);
   }
 }
