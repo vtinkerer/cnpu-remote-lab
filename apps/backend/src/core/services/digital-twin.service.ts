@@ -81,6 +81,11 @@ export class DigitalTwinService {
 
     const measurements = this.measurementsRepository.getMeasurements();
 
+    this.logger.info({
+      msg: 'Checking circuit params',
+      measurements,
+    });
+
     const compareCapacity = compareWithAccuracy(
       measurements.circuit_params.c_value,
       CAPACITOR_CAPACITY
