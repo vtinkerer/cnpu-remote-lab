@@ -9,10 +9,10 @@ import matplotlib.pyplot as plt
 app = FastAPI()
 
 class CircuitParams(BaseModel):
-    vin: float = 13
-    c_value: float = 44e-6
-    duty_cycle: float = 0.45
-    current_out: float = 2.9
+    vin: float 
+    c_value: float 
+    duty_cycle: float 
+    r_load: float 
 
 class ComparisonResult(BaseModel):
     simulation_voltage: List[float]
@@ -50,10 +50,8 @@ class BuckConverter:
         self.c_value = params.c_value
         self.duty_cycle = params.duty_cycle
         self.l_resistance = 19.5e-3  # from datasheet
-        self.current_out = params.current_out
-        
+        self.r_load = params.r_load        
         self.vout = self.vin * self.duty_cycle
-        self.r_load = self.vout / self.current_out
         self.period = 1 / self.freq
 
         self.circuit = None

@@ -11,6 +11,7 @@ import { sleep } from '../../utils/sleep';
 import { IMeasurementsRepository } from '../interfaces/measurements-repository.interface';
 import { IContextRepository } from '../interfaces/context-repository.interface';
 import { IMcuResetter } from '../interfaces/mcu-resetter.interface';
+import { IDefectDetectorAdapter } from '../interfaces/defect-detector-adapter.interface';
 
 const compareWithAccuracy = (
   value: number,
@@ -52,12 +53,19 @@ export class DigitalTwinService {
     private readonly mcuSender: IMcuSender,
     private readonly measurementsRepository: IMeasurementsRepository,
     private readonly contextRepository: IContextRepository,
-    private readonly mcuResetter: IMcuResetter
+    private readonly mcuResetter: IMcuResetter,
+    private readonly defectDetectorAdapter: IDefectDetectorAdapter
   ) {}
 
   async checkHardwareConditions(): Promise<void> {
     const isOk = await this.checkCircuitParams();
     this.contextRepository.setIsConditionsOk(isOk);
+    const measurementsAnalyzed =
+      await this.defectDetectorAdapter.analyzeMeasurements();
+    this.logger.info({
+      msg: 'Measurements analyzed',
+      measurementsAnalyzed,
+    });
   }
 
   private async checkCircuitParams(recursionCounter = 0): Promise<boolean> {

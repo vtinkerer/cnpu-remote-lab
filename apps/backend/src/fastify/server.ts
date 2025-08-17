@@ -165,7 +165,8 @@ export function buildApp() {
         fastify.mcuSender,
         fastify.measurementsRepository,
         fastify.contextRepository,
-        fastify.mcuResetter
+        fastify.mcuResetter,
+        fastify.defectDetectorAdapter
       );
       fastify.decorate('digitalTwinService', {
         getter() {
