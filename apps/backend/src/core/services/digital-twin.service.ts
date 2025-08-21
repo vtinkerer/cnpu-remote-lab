@@ -68,16 +68,20 @@ export class DigitalTwinService {
     });
   }
 
+  private async _sendCommands() {
+    await this.mcuSender.send([...MCU_COMMANDS_TO_SET]);
+    await sleep(400);
+  }
+
   private async checkCircuitParams(recursionCounter = 0): Promise<boolean> {
+    if (recursionCounter === 0) {
+      await this._sendCommands();
+    }
+
     if (recursionCounter > 5) {
       this.logger.warn('Max recursion reached');
       return false;
     }
-
-    // await this.mcuResetter.reset();
-    // await sleep(300);
-    await this.mcuSender.send([...MCU_COMMANDS_TO_SET]);
-    await sleep(2_000);
 
     const measurements = this.measurementsRepository.getMeasurements();
 
@@ -85,6 +89,19 @@ export class DigitalTwinService {
       msg: 'Checking circuit params',
       params: measurements.circuit_params,
     });
+
+    // Sometimes the scope reader returns constant voltage measurements for some reason
+    // This is a workaround to retry the check if the measurements are constant
+    const minVoltage = Math.min(...measurements.measurements.voltage);
+    const maxVoltage = Math.max(...measurements.measurements.voltage);
+    if (minVoltage === maxVoltage) {
+      this.logger.info({
+        msg: 'Voltage measurements are constant, retrying',
+        minVoltage,
+        maxVoltage,
+      });
+      return this.checkCircuitParams(recursionCounter + 1);
+    }
 
     const compareCapacity = compareWithAccuracy(
       measurements.circuit_params.c_value,
@@ -122,6 +139,7 @@ export class DigitalTwinService {
         compareVin,
         compareVout,
       });
+      await this._sendCommands();
       return this.checkCircuitParams(recursionCounter + 1);
     }
 
