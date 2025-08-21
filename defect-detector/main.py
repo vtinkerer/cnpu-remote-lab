@@ -15,25 +15,18 @@ class CircuitParams(BaseModel):
     r_load: float 
 
 class ComparisonResult(BaseModel):
-    simulation_voltage: List[float]
-    simulation_current: List[float]
-    simulation_time: List[float]
-    measured_voltage: List[float]
-    measured_current: List[float]
-    measured_time: List[float]
-    voltage_error_rms: float
-    current_error_rms: float
-    voltage_error_percentage: float
-    current_error_percentage: float
-    is_defective: bool
-    mean_voltage: float
-    mean_current: float
-    model_mean_voltage: float
-    model_mean_current: float
-    model_min_voltage: float
-    model_max_voltage: float
-    model_min_current: float
-    model_max_current: float
+    percentage_difference_avg_vout: float
+    percentage_difference_ripple_vout: float
+    percentage_difference_avg_il: float
+    percentage_difference_ripple_il: float
+    sim_vout_avg: float
+    sim_vout_ripple: float
+    sim_il_avg: float
+    sim_il_ripple: float
+    measured_vout_avg: float
+    measured_vout_ripple: float
+    measured_il_avg: float
+    measured_il_ripple: float
 
 
 class MeasurementData(BaseModel):
@@ -136,10 +129,6 @@ class BuckConverter:
         
         return result
 
-def calculate_rms_error(measured: List[float], simulated: List[float]) -> float:
-    # Vectorized calculation
-    return np.sqrt(np.mean(np.square(np.asarray(measured) - np.asarray(simulated))))
-
 def visualize_comparison(measured_time, measured_voltage, measured_current, measured_pwm,
                         sim_voltage_matched, sim_current_matched, sim_pwm_matched, ):
     # Create figure with three subplots
@@ -206,30 +195,16 @@ async def analyze_measurements(
         # Extract results (already numpy arrays)
         sim_voltage = analysis['out_c']
         sim_current = analysis['sim_current']
-        
-        # Use filtered current for calculations
-        mean_measured_voltage = np.mean(np.abs(measured_voltage))
-        mean_measured_current = np.mean(np.abs(measured_current_filtered))
-        
-        model_min_voltage = np.min(np.abs(sim_voltage))
-        model_max_voltage = np.max(np.abs(sim_voltage))
-        model_min_current = np.min(np.abs(sim_current))
-        model_max_current = np.max(np.abs(sim_current))
 
-        voltage_error = calculate_rms_error(measured_voltage, sim_voltage)
-        current_error = calculate_rms_error(measured_current_filtered, sim_current)
-        
-        voltage_error_percentage = (voltage_error / mean_measured_voltage) * 100
-        current_error_percentage = (current_error / mean_measured_current) * 100
-        
-        # Simplified defective check
-        voltage_threshold = 0.1
-        current_threshold = 0.2
-        is_defective = (
-            voltage_error > voltage_threshold * mean_measured_voltage or 
-            current_error > current_threshold * mean_measured_current
-        )
-        
+        sim_vout_avg = np.mean(sim_voltage)
+        sim_vout_ripple = np.max(sim_voltage) - np.min(sim_voltage)
+        sim_il_avg = np.mean(sim_current)
+        sim_il_ripple = np.max(sim_current) - np.min(sim_current)
+
+        measured_vout_avg = np.mean(measured_voltage)
+        measured_vout_ripple = np.max(measured_voltage) - np.min(measured_voltage)
+        measured_il_avg = np.mean(measured_current_filtered)
+        measured_il_ripple = np.max(measured_current_filtered) - np.min(measured_current_filtered)
 
         # Visualize comparison
         visualize_comparison(
@@ -242,25 +217,18 @@ async def analyze_measurements(
             analysis['pwm'])
         
         return ComparisonResult(
-            is_defective=is_defective,
-            simulation_voltage=sim_voltage.tolist(),
-            simulation_current=sim_current.tolist(),
-            simulation_time=analysis['time'].tolist(),
-            measured_voltage=measured_voltage.tolist(),
-            measured_current=measured_current_filtered.tolist(),
-            measured_time=measured_time,
-            voltage_error_rms=voltage_error,
-            current_error_rms=current_error,
-            voltage_error_percentage=voltage_error_percentage,
-            current_error_percentage=current_error_percentage,
-            mean_voltage=mean_measured_voltage,
-            mean_current=mean_measured_current,
-            model_mean_voltage=np.mean(np.abs(sim_voltage)),
-            model_mean_current=np.mean(np.abs(sim_current)),
-            model_min_voltage=model_min_voltage,
-            model_max_voltage=model_max_voltage,
-            model_min_current=model_min_current,
-            model_max_current=model_max_current
+            sim_vout_avg=sim_vout_avg,
+            sim_vout_ripple=sim_vout_ripple,
+            sim_il_avg=sim_il_avg,
+            sim_il_ripple=sim_il_ripple,
+            measured_vout_avg=measured_vout_avg,
+            measured_vout_ripple=measured_vout_ripple,
+            measured_il_avg=measured_il_avg,
+            measured_il_ripple=measured_il_ripple,
+            percentage_difference_avg_vout=((sim_vout_avg - measured_vout_avg) / measured_vout_avg) * 100,
+            percentage_difference_ripple_vout=((sim_vout_ripple - measured_vout_ripple) / measured_vout_ripple) * 100,
+            percentage_difference_avg_il=((sim_il_avg - measured_il_avg) / measured_il_avg) * 100,
+            percentage_difference_ripple_il=((sim_il_ripple - measured_il_ripple) / measured_il_ripple) * 100,
         )
         
     except Exception as e:

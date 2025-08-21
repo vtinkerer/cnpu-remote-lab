@@ -83,7 +83,7 @@ export class DigitalTwinService {
 
     this.logger.info({
       msg: 'Checking circuit params',
-      measurements,
+      params: measurements.circuit_params,
     });
 
     const compareCapacity = compareWithAccuracy(
