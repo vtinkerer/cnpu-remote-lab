@@ -77,7 +77,7 @@ export class DigitalTwinService {
     // await this.mcuResetter.reset();
     // await sleep(300);
     await this.mcuSender.send([...MCU_COMMANDS_TO_SET]);
-    await sleep(600);
+    await sleep(1_000);
 
     const measurements = this.measurementsRepository.getMeasurements();
 
