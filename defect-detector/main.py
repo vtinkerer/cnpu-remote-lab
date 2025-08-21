@@ -193,7 +193,7 @@ async def analyze_measurements(
         measured_time = measurements.time
         
         # Apply median filter to remove current spikes
-        window_size = 15  # Adjust this value based on your spike width
+        window_size = 13  # Adjust this value based on your spike width
         measured_current_filtered = np.median(
             np.lib.stride_tricks.sliding_window_view(
                 np.pad(measured_current, (window_size//2, window_size//2), mode='edge'),
