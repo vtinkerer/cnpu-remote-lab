@@ -70,13 +70,14 @@ export class DigitalTwinService {
 
   private async _sendCommands() {
     await this.mcuSender.send([...MCU_COMMANDS_TO_SET]);
-    await sleep(400);
   }
 
   private async checkCircuitParams(recursionCounter = 0): Promise<boolean> {
     if (recursionCounter === 0) {
       await this._sendCommands();
     }
+
+    await sleep(500);
 
     if (recursionCounter > 5) {
       this.logger.warn('Max recursion reached');
