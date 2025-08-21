@@ -8,6 +8,7 @@ import {
   BaseDto,
   isResistanceLoadDto,
   VoltageOutputDto,
+  isVoltageOutputDto,
 } from '@cnpu-remote-lab-nx/shared';
 import { IMeasurementsRepository } from '../core/interfaces/measurements-repository.interface';
 import { Logger } from '../logger/logger';
@@ -29,6 +30,19 @@ export class MeasurementsRepository implements IMeasurementsRepository {
     // measurement,
     // });
 
+    // TEST CODE
+    if (isScopeDataDto(measurement)) {
+      const voltage = measurement.scopeData.voltage;
+      const minVoltage = Math.min(...voltage);
+      const maxVoltage = Math.max(...voltage);
+
+      this.logger.info({
+        msg: 'Scope data received',
+        minVoltage,
+        maxVoltage,
+      });
+    }
+
     if (isVoltageInputDto(measurement)) {
       this.vin = measurement.voltage;
     } else if (isPWMDto(measurement)) {
@@ -41,7 +55,7 @@ export class MeasurementsRepository implements IMeasurementsRepository {
       this.scopeData = measurement.scopeData;
     } else if (isResistanceLoadDto(measurement)) {
       this.r_load = measurement.resistance;
-    } else if (measurement instanceof VoltageOutputDto) {
+    } else if (isVoltageOutputDto(measurement)) {
       this.vout = measurement.voltage;
     }
     // Otherwise, do nothing

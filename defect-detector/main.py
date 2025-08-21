@@ -82,7 +82,7 @@ class BuckConverter:
                 
         simulator = self.circuit.simulator(temperature=25, nominal_temperature=25)
         
-        # Convert measurement times to seconds and pre-allocate numpy array
+        # Convert measurement times to seconds for simulation setup
         time_points = np.asarray(measurement_time_points, dtype=np.float64) * 1e-6
         
         delta = self.period * 600
@@ -96,41 +96,55 @@ class BuckConverter:
             use_initial_condition=False
         )
             
-        # Vectorize data extraction
-        sim_data = np.array([
-            [float(v) for v in analysis['g']],
-            [float(v) for v in analysis['out_c']],
-            [float(v) for v in analysis['out']]
-        ])
+        # Extract full simulation data (no time matching here)
+        sim_gate = np.array([float(v) for v in analysis['g']])
+        sim_voltage_full = np.array([float(v) for v in analysis['out_c']])
+        sim_out_full = np.array([float(v) for v in analysis['out']])
+        sim_time_full = (np.array([float(t) for t in analysis.time]) - delta) * 1e6
         
-        sim_time = (np.array([float(t) for t in analysis.time]) - delta) * 1e6
+        # Calculate current from full dataset
+        v_l_sense_full = sim_out_full - sim_voltage_full
+        sim_current_full = v_l_sense_full / self.l_resistance
         
-        # Vectorized calculations
-        v_l_sense = sim_data[2] - sim_data[1]
-        sim_current = v_l_sense / self.l_resistance
-        
-        # Optimized time matching using searchsorted
-        measurement_time = np.asarray(measurement_time_points)
-        indices = np.searchsorted(sim_time, measurement_time)
-        indices = np.clip(indices, 0, len(sim_time) - 1)
-        
-        # Adjust indices to get closest point
-        mask = indices > 0
-        prev_diff = np.abs(sim_time[indices[mask] - 1] - measurement_time[mask])
-        curr_diff = np.abs(sim_time[indices[mask]] - measurement_time[mask])
-        indices[mask][prev_diff < curr_diff] -= 1
-        
+        # Return both full dataset for calculations and matched data for visualization
         result = {
-            'out_c': sim_data[1][indices],
-            'sim_current': sim_current[indices],
-            'time': sim_time[indices],
-            'pwm': sim_data[0][indices]
+            'sim_voltage_full': sim_voltage_full,
+            'sim_current_full': sim_current_full,
+            'sim_time_full': sim_time_full,
+            'sim_gate_full': sim_gate,
+            'measurement_time_points': measurement_time_points
         }
         
         return result
 
+    def get_visualization_data(self, simulation_result):
+        """Extract matched data points for visualization using searchsorted"""
+        sim_voltage_full = simulation_result['sim_voltage_full']
+        sim_current_full = simulation_result['sim_current_full']
+        sim_time_full = simulation_result['sim_time_full']
+        sim_gate_full = simulation_result['sim_gate_full']
+        measurement_time_points = simulation_result['measurement_time_points']
+        
+        # Use searchsorted only for visualization matching
+        measurement_time = np.asarray(measurement_time_points)
+        indices = np.searchsorted(sim_time_full, measurement_time)
+        indices = np.clip(indices, 0, len(sim_time_full) - 1)
+        
+        # Adjust indices to get closest point
+        mask = indices > 0
+        prev_diff = np.abs(sim_time_full[indices[mask] - 1] - measurement_time[mask])
+        curr_diff = np.abs(sim_time_full[indices[mask]] - measurement_time[mask])
+        indices[mask][prev_diff < curr_diff] -= 1
+        
+        return {
+            'sim_voltage_matched': sim_voltage_full[indices],
+            'sim_current_matched': sim_current_full[indices],
+            'sim_pwm_matched': sim_gate_full[indices],
+            'matched_time': measurement_time
+        }
+
 def visualize_comparison(measured_time, measured_voltage, measured_current, measured_pwm,
-                        sim_voltage_matched, sim_current_matched, sim_pwm_matched, ):
+                        sim_voltage_matched, sim_current_matched, sim_pwm_matched):
     # Create figure with three subplots
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(12, 10))
     
@@ -188,33 +202,38 @@ async def analyze_measurements(
             axis=1
         )
         
-        # Run simulation
+        # Run simulation and get full dataset
         buck = BuckConverter(circuit_params)
-        analysis = buck.run_simulation(measured_time)
+        simulation_result = buck.run_simulation(measured_time)
         
-        # Extract results (already numpy arrays)
-        sim_voltage = analysis['out_c']
-        sim_current = analysis['sim_current']
+        # Calculate statistics from FULL simulation dataset (not matched points)
+        sim_voltage_full = simulation_result['sim_voltage_full']
+        sim_current_full = simulation_result['sim_current_full']
+        
+        sim_vout_avg = np.mean(sim_voltage_full)
+        sim_vout_ripple = np.max(sim_voltage_full) - np.min(sim_voltage_full)
+        sim_il_avg = np.mean(sim_current_full)
+        sim_il_ripple = np.max(sim_current_full) - np.min(sim_current_full)
 
-        sim_vout_avg = np.mean(sim_voltage)
-        sim_vout_ripple = np.max(sim_voltage) - np.min(sim_voltage)
-        sim_il_avg = np.mean(sim_current)
-        sim_il_ripple = np.max(sim_current) - np.min(sim_current)
-
+        # Calculate statistics from measured data
         measured_vout_avg = np.mean(measured_voltage)
         measured_vout_ripple = np.max(measured_voltage) - np.min(measured_voltage)
         measured_il_avg = np.mean(measured_current_filtered)
         measured_il_ripple = np.max(measured_current_filtered) - np.min(measured_current_filtered)
 
-        # Visualize comparison
+        # Get matched data ONLY for visualization
+        viz_data = buck.get_visualization_data(simulation_result)
+        
+        # Visualize comparison using matched data
         visualize_comparison(
             measured_time, 
             measured_voltage, 
             measured_current_filtered, 
-            analysis['pwm'], 
-            sim_voltage, 
-            sim_current, 
-            analysis['pwm'])
+            measurements.pwm,
+            viz_data['sim_voltage_matched'], 
+            viz_data['sim_current_matched'], 
+            viz_data['sim_pwm_matched']
+        )
         
         return ComparisonResult(
             sim_vout_avg=sim_vout_avg,
