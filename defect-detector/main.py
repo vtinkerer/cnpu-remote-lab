@@ -35,6 +35,14 @@ class MeasurementData(BaseModel):
     pwm: List[int]
     current: List[float]
 
+def trim_data_for_calculations(data_array):
+    """Trim 10% from beginning and end of data for calculations"""
+    n = len(data_array)
+    trim_size = n // 10
+    if trim_size == 0:  # Handle small datasets
+        return data_array
+    return data_array[trim_size:-trim_size]
+
 class BuckConverter:
     def __init__(self, params: CircuitParams):
         self.vin = params.vin
@@ -148,32 +156,32 @@ def visualize_comparison(measured_time, measured_voltage, measured_current, meas
     # Create figure with three subplots
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(12, 10))
     
-    # Plot voltage comparison
+    # Plot voltage comparison - USE ALL DATA
     ax1.plot(measured_time, measured_voltage, 'b-', label='Measured', linewidth=2)
     ax1.plot(measured_time, sim_voltage_matched, 'r--', label='Simulated', linewidth=2)
     ax1.set_xlabel('Time (μs)')
     ax1.set_ylabel('Voltage (V)')
-    ax1.set_title('Voltage Comparison')
+    ax1.set_title('Voltage Comparison (Full Dataset)')
     ax1.grid(True)
     ax1.legend()
     ax1.set_ylim(bottom=0, top=15)  # Set y-axis from 0 to 15V
     
-    # Plot current comparison
+    # Plot current comparison - USE ALL DATA
     ax2.plot(measured_time, measured_current, 'b-', label='Measured', linewidth=2)
     ax2.plot(measured_time, sim_current_matched, 'r--', label='Simulated', linewidth=2)
     ax2.set_xlabel('Time (μs)')
     ax2.set_ylabel('Current (A)')
-    ax2.set_title('Current Comparison')
+    ax2.set_title('Current Comparison (Full Dataset)')
     ax2.grid(True)
     ax2.legend()
     ax2.set_ylim(bottom=0)  # Set y-axis to start from 0
     
-    # Plot PWM signal
+    # Plot PWM signal - USE ALL DATA
     ax3.plot(measured_time, measured_pwm, 'g-', label='PWM', linewidth=2)
     ax3.plot(measured_time, sim_pwm_matched, 'r--', label='Simulated', linewidth=2)
     ax3.set_xlabel('Time (μs)')
     ax3.set_ylabel('PWM Value')
-    ax3.set_title('PWM Signal')
+    ax3.set_title('PWM Signal (Full Dataset)')
     ax3.grid(True)
     ax3.legend()
     ax3.set_ylim(bottom=0)  # Set y-axis to start from 0
@@ -206,29 +214,36 @@ async def analyze_measurements(
         buck = BuckConverter(circuit_params)
         simulation_result = buck.run_simulation(measured_time)
         
-        # Calculate statistics from FULL simulation dataset (not matched points)
+        # Get FULL simulation dataset for plotting
         sim_voltage_full = simulation_result['sim_voltage_full']
         sim_current_full = simulation_result['sim_current_full']
         
-        sim_vout_avg = np.mean(sim_voltage_full)
-        sim_vout_ripple = np.max(sim_voltage_full) - np.min(sim_voltage_full)
-        sim_il_avg = np.mean(sim_current_full)
-        sim_il_ripple = np.max(sim_current_full) - np.min(sim_current_full)
+        # TRIM data for calculations (remove 10% from beginning and end)
+        sim_voltage_trimmed = trim_data_for_calculations(sim_voltage_full)
+        sim_current_trimmed = trim_data_for_calculations(sim_current_full)
+        measured_voltage_trimmed = trim_data_for_calculations(measured_voltage)
+        measured_current_filtered_trimmed = trim_data_for_calculations(measured_current_filtered)
+        
+        # Calculate statistics from TRIMMED datasets
+        sim_vout_avg = np.mean(sim_voltage_trimmed)
+        sim_vout_ripple = np.max(sim_voltage_trimmed) - np.min(sim_voltage_trimmed)
+        sim_il_avg = np.mean(sim_current_trimmed)
+        sim_il_ripple = np.max(sim_current_trimmed) - np.min(sim_current_trimmed)
 
-        # Calculate statistics from measured data
-        measured_vout_avg = np.mean(measured_voltage)
-        measured_vout_ripple = np.max(measured_voltage) - np.min(measured_voltage)
-        measured_il_avg = np.mean(measured_current_filtered)
-        measured_il_ripple = np.max(measured_current_filtered) - np.min(measured_current_filtered)
+        # Calculate statistics from TRIMMED measured data
+        measured_vout_avg = np.mean(measured_voltage_trimmed)
+        measured_vout_ripple = np.max(measured_voltage_trimmed) - np.min(measured_voltage_trimmed)
+        measured_il_avg = np.mean(measured_current_filtered_trimmed)
+        measured_il_ripple = np.max(measured_current_filtered_trimmed) - np.min(measured_current_filtered_trimmed)
 
-        # Get matched data ONLY for visualization
+        # Get matched data for visualization (using FULL datasets)
         viz_data = buck.get_visualization_data(simulation_result)
         
-        # Visualize comparison using matched data
+        # Visualize comparison using FULL matched data (not trimmed)
         visualize_comparison(
             measured_time, 
-            measured_voltage, 
-            measured_current_filtered, 
+            measured_voltage,  # Full dataset for plotting
+            measured_current_filtered,  # Full dataset for plotting
             measurements.pwm,
             viz_data['sim_voltage_matched'], 
             viz_data['sim_current_matched'], 

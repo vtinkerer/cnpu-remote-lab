@@ -79,7 +79,7 @@ export class DigitalTwinService {
 
     await sleep(500);
 
-    if (recursionCounter > 5) {
+    if (recursionCounter > 10) {
       this.logger.warn('Max recursion reached');
       return false;
     }
