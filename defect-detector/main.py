@@ -259,10 +259,10 @@ async def analyze_measurements(
             measured_vout_ripple=measured_vout_ripple,
             measured_il_avg=measured_il_avg,
             measured_il_ripple=measured_il_ripple,
-            percentage_difference_avg_vout=((sim_vout_avg - measured_vout_avg) / measured_vout_avg) * 100,
-            percentage_difference_ripple_vout=((sim_vout_ripple - measured_vout_ripple) / measured_vout_ripple) * 100,
-            percentage_difference_avg_il=((sim_il_avg - measured_il_avg) / measured_il_avg) * 100,
-            percentage_difference_ripple_il=((sim_il_ripple - measured_il_ripple) / measured_il_ripple) * 100,
+            percentage_difference_avg_vout=((measured_vout_avg - sim_vout_avg) / sim_vout_avg) * 100,
+            percentage_difference_ripple_vout=((measured_vout_ripple - sim_vout_ripple) / sim_vout_ripple) * 100,
+            percentage_difference_avg_il=((measured_il_avg - sim_il_avg) / sim_il_avg) * 100,
+            percentage_difference_ripple_il=((measured_il_ripple - sim_il_ripple) / sim_il_ripple) * 100,
         )
         
     except Exception as e:
