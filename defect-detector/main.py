@@ -201,15 +201,24 @@ async def analyze_measurements(
         measured_time = measurements.time
         
         # Apply median filter to remove current spikes
-        window_size = 13  # Adjust this value based on your spike width
+        window_size_current = 17  # Adjust this value based on your spike width
         measured_current_filtered = np.median(
             np.lib.stride_tricks.sliding_window_view(
-                np.pad(measured_current, (window_size//2, window_size//2), mode='edge'),
-                window_size
+                np.pad(measured_current, (window_size_current//2, window_size_current//2), mode='edge'),
+                window_size_current
             ),
             axis=1
         )
-        
+
+        window_size_voltage = 3 
+        measured_voltage_filtered = np.median(
+            np.lib.stride_tricks.sliding_window_view(
+                np.pad(measured_voltage, (window_size_voltage//2, window_size_voltage//2), mode='edge'),
+                window_size_voltage
+            ),
+            axis=1
+        )
+
         # Run simulation and get full dataset
         buck = BuckConverter(circuit_params)
         simulation_result = buck.run_simulation(measured_time)
@@ -221,7 +230,7 @@ async def analyze_measurements(
         # TRIM data for calculations (remove 10% from beginning and end)
         sim_voltage_trimmed = trim_data_for_calculations(sim_voltage_full)
         sim_current_trimmed = trim_data_for_calculations(sim_current_full)
-        measured_voltage_trimmed = trim_data_for_calculations(measured_voltage)
+        measured_voltage_filtered_trimmed = trim_data_for_calculations(measured_voltage_filtered)
         measured_current_filtered_trimmed = trim_data_for_calculations(measured_current_filtered)
         
         # Calculate statistics from TRIMMED datasets
@@ -231,8 +240,8 @@ async def analyze_measurements(
         sim_il_ripple = np.max(sim_current_trimmed) - np.min(sim_current_trimmed)
 
         # Calculate statistics from TRIMMED measured data
-        measured_vout_avg = np.mean(measured_voltage_trimmed)
-        measured_vout_ripple = np.max(measured_voltage_trimmed) - np.min(measured_voltage_trimmed)
+        measured_vout_avg = np.mean(measured_voltage_filtered_trimmed)
+        measured_vout_ripple = np.max(measured_voltage_filtered_trimmed) - np.min(measured_voltage_filtered_trimmed)
         measured_il_avg = np.mean(measured_current_filtered_trimmed)
         measured_il_ripple = np.max(measured_current_filtered_trimmed) - np.min(measured_current_filtered_trimmed)
 
@@ -242,7 +251,7 @@ async def analyze_measurements(
         # Visualize comparison using FULL matched data (not trimmed)
         visualize_comparison(
             measured_time, 
-            measured_voltage,  # Full dataset for plotting
+            measured_voltage_filtered,  # Full dataset for plotting
             measured_current_filtered,  # Full dataset for plotting
             measurements.pwm,
             viz_data['sim_voltage_matched'], 
