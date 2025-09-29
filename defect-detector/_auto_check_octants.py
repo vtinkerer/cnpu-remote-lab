@@ -22,7 +22,7 @@ DEFAULT_PARAMS = {
     'frequency': 312500, # PWM frequency (Hz)
     'L': 10e-6,  # inductance (H)
     'C': 44e-6, # capacitance (F)
-    'Rload': 2,       # load resistance (Ohm)
+    'Rload': 3.8,       # load resistance (Ohm)
     'RC': 0.02,     # capacitor ESR (Ohm)
     'RL': 19.5e-3, # inductor ESR (Ohm)
     'RD': 1e-9,     # transistor RDS(on) (Ohm)
@@ -52,7 +52,6 @@ def create_buck_converter(
     circuit.V('gate', 'g', 'gnd', f'DC 0 PULSE(0 10 0 1n 1n {ton}us {period_us}us)')
     
     circuit.C('1', 'out_c', 'c_res', farads_to_femtofarads(C))
-    print(farads_to_femtofarads(C))
 
     circuit.S('1', 'vin', 'sw', 'g', 'gnd', model='SWITCH')
     circuit.model('SWITCH', 'SW', ron=RD, vt=1, vh=0)
@@ -61,7 +60,6 @@ def create_buck_converter(
     circuit.model('MYDIODE', 'D', is_=1e6, rs=RDS_ON)
     
     circuit.L('1', 'sw', 'out', henries_to_femtohenries(L))
-    print(f"Inductor L1: {henries_to_femtohenries(L)}")
     circuit.R('L1', 'out', 'out_c', RL)
 
     circuit.R('C1', 'c_res', 'gnd', RC)
@@ -90,7 +88,7 @@ def simulate_and_analyze(circuit, esr_ind):
         # Output parameter analysis
         vout = np.array(analysis['out_c'])
         il = (np.array(analysis['out']) - np.array(analysis['out_c'])) / esr_ind
-        
+
         vout_avg = np.mean(vout)
         vout_ripple = np.max(vout) - np.min(vout)
         il_avg = np.mean(il)
@@ -306,7 +304,7 @@ def analyze_parameter_impact():
         for mod_info in modifiers:
             label = mod_info['label']
             mult = mod_info['mult']
-            print(f"  Testing modifier: {label} (x{mult})")
+            print(f"\nTesting modifier: {label} (x{mult})")
             
             # Create a copy of base parameters
             modified_params = DEFAULT_PARAMS.copy()
@@ -322,12 +320,6 @@ def analyze_parameter_impact():
                 
                 # Create and save waveform plots
                 generate_waveform_plots(baseline_results, modified_results, param_name, label)
-
-                # Skip invalid results
-                if (modified_results['vout_avg'] <= 0 or 
-                    modified_results['il_avg'] <= 0):
-                    print(f"  Skipping invalid results for {param_name} {label}")
-                    continue
                     
                 # Determine the octant of change
                 octant = determine_octant(baseline_results, modified_results)

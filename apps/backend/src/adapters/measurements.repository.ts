@@ -25,24 +25,6 @@ export class MeasurementsRepository implements IMeasurementsRepository {
   private vout: number;
 
   saveMeasurements(measurement: BaseDto): void {
-    // this.logger.info({
-    // message: 'Saving measurement',
-    // measurement,
-    // });
-
-    // TEST CODE
-    if (isScopeDataDto(measurement)) {
-      const voltage = measurement.scopeData.voltage;
-      const minVoltage = Math.min(...voltage);
-      const maxVoltage = Math.max(...voltage);
-
-      this.logger.info({
-        msg: 'Scope data received',
-        minVoltage,
-        maxVoltage,
-      });
-    }
-
     if (isVoltageInputDto(measurement)) {
       this.vin = measurement.voltage;
     } else if (isPWMDto(measurement)) {

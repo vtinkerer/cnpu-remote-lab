@@ -6,6 +6,83 @@ from pydantic import BaseModel
 from typing import List, Dict, Optional
 import matplotlib.pyplot as plt
 
+def fix_signal_spike(signal, extrapolate_percent=5, reference_start=5, reference_end=10):
+    """
+    Fix spike at beginning of signal by extrapolating from a stable reference region.
+    
+    Parameters:
+    -----------
+    signal : array-like
+        Input signal with spike at beginning
+    extrapolate_percent : float
+        Percentage of signal length to replace (default: 5%)
+    reference_start : float
+        Start of reference region as percentage of signal length (default: 5%)
+    reference_end : float
+        End of reference region as percentage of signal length (default: 10%)
+
+    Returns:
+    --------
+    corrected_signal : numpy array
+        Signal with corrected beginning
+    """
+    signal = np.array(signal)
+    n = len(signal)
+    
+    # Calculate indices
+    replace_end = int(n * extrapolate_percent / 100)
+    ref_start = int(n * reference_start / 100)
+    ref_end = int(n * reference_end / 100)
+    
+    # Extract reference region for extrapolation
+    ref_indices = np.arange(ref_start, ref_end)
+    ref_values = signal[ref_start:ref_end]
+    
+    # Fit polynomial to reference region (linear or quadratic)
+    # Try linear first, then quadratic if needed
+    try:
+        # Linear fit
+        coeffs = np.polyfit(ref_indices, ref_values, 1)
+        poly_func = np.poly1d(coeffs)
+    except:
+        # Fallback to mean if fitting fails
+        poly_func = lambda x: np.mean(ref_values)
+    
+    # Generate extrapolated values for the beginning
+    replace_indices = np.arange(0, replace_end)
+    extrapolated_values = poly_func(replace_indices)
+    
+    # Create corrected signal
+    corrected_signal = signal.copy()
+    corrected_signal[:replace_end] = extrapolated_values
+    
+    # Smooth the transition to avoid discontinuity
+    transition_length = min(20, replace_end // 2)
+    if transition_length > 0:
+        transition_start = replace_end - transition_length
+        transition_end = replace_end + transition_length
+        
+        # Create smooth transition using cosine taper
+        taper = np.linspace(0, np.pi, 2 * transition_length)
+        weight = (1 + np.cos(taper)) / 2
+        
+        # Apply transition weights
+        for i in range(transition_length):
+            idx = transition_start + i
+            if idx < len(corrected_signal):
+                original_weight = 1 - weight[i]
+                extrapolated_weight = weight[i]
+                corrected_signal[idx] = (original_weight * signal[idx] + 
+                                       extrapolated_weight * extrapolated_values[idx])
+    
+    return corrected_signal
+
+def henries_to_femtohenries(henries):
+    return f"{int(henries * 1e15)}fH"
+
+def farads_to_femtofarads(farads):
+    return f"{int(farads * 1e15)}fF"
+
 app = FastAPI()
 
 class CircuitParams(BaseModel):
@@ -52,7 +129,6 @@ class BuckConverter:
         self.duty_cycle = params.pwm_percentage / 100.0
         self.l_resistance = 19.5e-3  # from datasheet
         self.r_load = params.r_load        
-        self.vout = self.vin * self.duty_cycle
         self.period = 1 / self.freq
 
         self.circuit = None
@@ -72,10 +148,10 @@ class BuckConverter:
         circuit.D('1', circuit.gnd, 'sw', model='MYDIODE')
         circuit.model('MYDIODE', 'D', is_=1e6, rs=1e-4)
 
-        circuit.L('1', 'sw', 'out', self.l_value)
+        circuit.L('1', 'sw', 'out', henries_to_femtohenries(self.l_value))
         circuit.R('L1', 'out', 'out_c', self.l_resistance)
 
-        circuit.C('1', 'out_c', 'c_res', self.c_value )
+        circuit.C('1', 'out_c', 'c_res', farads_to_femtofarads(self.c_value))
         circuit.R('C1', 'c_res', circuit.gnd, 0.1)
         
         circuit.R('load', 'out_c', circuit.gnd, self.r_load)
@@ -169,6 +245,7 @@ def visualize_comparison(measured_time, measured_voltage, measured_current, meas
     # Plot current comparison - USE ALL DATA
     ax2.plot(measured_time, measured_current, 'b-', label='Measured', linewidth=2)
     ax2.plot(measured_time, sim_current_matched, 'r--', label='Simulated', linewidth=2)
+    ax2.plot(measured_time, fix_signal_spike(measured_current), 'g--', label='Fixed', linewidth=2)
     ax2.set_xlabel('Time (μs)')
     ax2.set_ylabel('Current (A)')
     ax2.set_title('Current Comparison (Full Dataset)')
@@ -227,17 +304,16 @@ async def analyze_measurements(
         sim_voltage_full = simulation_result['sim_voltage_full']
         sim_current_full = simulation_result['sim_current_full']
         
-        # TRIM data for calculations (remove 10% from beginning and end)
-        sim_voltage_trimmed = trim_data_for_calculations(sim_voltage_full)
-        sim_current_trimmed = trim_data_for_calculations(sim_current_full)
-        measured_voltage_filtered_trimmed = trim_data_for_calculations(measured_voltage_filtered)
-        measured_current_filtered_trimmed = trim_data_for_calculations(measured_current_filtered)
+        # measured_voltage_filtered_trimmed = trim_data_for_calculations(measured_voltage_filtered)
+        # measured_current_filtered_trimmed = trim_data_for_calculations(measured_current_filtered)
+        measured_voltage_filtered_trimmed = fix_signal_spike(measured_voltage_filtered)
+        measured_current_filtered_trimmed = fix_signal_spike(measured_current_filtered)
         
         # Calculate statistics from TRIMMED datasets
-        sim_vout_avg = np.mean(sim_voltage_trimmed)
-        sim_vout_ripple = np.max(sim_voltage_trimmed) - np.min(sim_voltage_trimmed)
-        sim_il_avg = np.mean(sim_current_trimmed)
-        sim_il_ripple = np.max(sim_current_trimmed) - np.min(sim_current_trimmed)
+        sim_vout_avg = np.mean(sim_voltage_full)
+        sim_vout_ripple = np.max(sim_voltage_full) - np.min(sim_voltage_full)
+        sim_il_avg = np.mean(sim_current_full)
+        sim_il_ripple = np.max(sim_current_full) - np.min(sim_current_full)
 
         # Calculate statistics from TRIMMED measured data
         measured_vout_avg = np.mean(measured_voltage_filtered_trimmed)
@@ -279,4 +355,4 @@ async def analyze_measurements(
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=3802)
+    uvicorn.run(app, host="0.0.0.0", port=3803)

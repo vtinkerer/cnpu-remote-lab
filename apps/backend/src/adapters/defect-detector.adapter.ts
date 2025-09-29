@@ -66,6 +66,10 @@ export class DefectDetectorAdapter implements IDefectDetectorAdapter {
   }> {
     const measurements = this.measurementsRepository.getMeasurements();
 
+    measurements.measurements.voltage = measurements.measurements.voltage.map(
+      (v) => v * 1
+    );
+
     this.logger.info({
       msg: 'Sending measurements to defect detector service',
       measurements,
