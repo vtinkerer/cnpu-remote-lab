@@ -133,6 +133,53 @@ class BuckConverter:
 
         self.circuit = None
 
+    def calculate_steady_state_values(self):
+        """
+        Calculate theoretical steady-state values for initial conditions.
+        This significantly reduces simulation warmup time.
+        """
+        # Output voltage (ideal buck converter)
+        vout_ideal = self.vin * self.duty_cycle
+        
+        # Average output current (considering load resistance)
+        iout_avg = vout_ideal / self.r_load
+        
+        # Average inductor current (equals output current in CCM)
+        il_avg = iout_avg
+        
+        # Account for inductor resistance voltage drop
+        v_drop_inductor = il_avg * self.l_resistance
+        vout_with_loss = vout_ideal - v_drop_inductor
+        
+        # Recalculate current with actual output voltage
+        il_avg = vout_with_loss / self.r_load
+        v_drop_inductor = il_avg * self.l_resistance
+        vout_with_loss = vout_ideal - v_drop_inductor
+        
+        # Inductor current ripple: ΔiL = (Vin - Vout) * D * T / L
+        delta_il = (self.vin - vout_with_loss) * self.duty_cycle * self.period / self.l_value
+        
+        # Peak and valley inductor currents
+        il_peak = il_avg + delta_il / 2
+        il_valley = il_avg - delta_il / 2
+        
+        # Capacitor voltage (same as output voltage in steady state)
+        vc = vout_with_loss
+        
+        # For initial condition, start at valley current (switch about to turn on)
+        # This matches the natural start of the PWM cycle
+        il_initial = il_valley
+        
+        return {
+            'vout': vout_with_loss,
+            'vc': vc,
+            'il_avg': il_avg,
+            'il_initial': il_initial,  # Use valley current for better initial sync
+            'il_peak': il_peak,
+            'il_valley': il_valley,
+            'delta_il': delta_il
+        }
+
     def build_circuit(self):
         circuit = Circuit('Buck Converter')
         circuit.V('in', 'vin', circuit.gnd, self.vin)
@@ -148,11 +195,13 @@ class BuckConverter:
         circuit.D('1', circuit.gnd, 'sw', model='MYDIODE')
         circuit.model('MYDIODE', 'D', is_=1e6, rs=1e-4)
 
-        circuit.L('1', 'sw', 'out', henries_to_femtohenries(self.l_value))
+        # Store inductor reference for setting initial current
+        self.inductor = circuit.L('1', 'sw', 'out', henries_to_femtohenries(self.l_value))
         circuit.R('L1', 'out', 'out_c', self.l_resistance)
 
-        circuit.C('1', 'out_c', 'c_res', farads_to_femtofarads(self.c_value))
-        circuit.R('C1', 'c_res', circuit.gnd, 0.1)
+        circuit.L('C1', 'out_c', 'c_r', henries_to_femtohenries(1e-9))
+        circuit.R('C1', 'c_r', 'c_c', 0.05)
+        circuit.C('1', 'c_c', circuit.gnd, farads_to_femtofarads(self.c_value))
         
         circuit.R('load', 'out_c', circuit.gnd, self.r_load)
         
@@ -164,12 +213,21 @@ class BuckConverter:
         if self.circuit is None:
             self.build_circuit()
                 
-        simulator = self.circuit.simulator(temperature=25, nominal_temperature=25)
+        # Calculate optimal initial conditions
+        steady_state = self.calculate_steady_state_values()
         
+        simulator = self.circuit.simulator(temperature=25, nominal_temperature=25)
+
+        simulator.initial_condition(out_c=steady_state['vout'])
+        simulator.initial_condition(c_c=steady_state['vc'])
+        simulator.initial_condition(c_r=steady_state['vc'])
+        simulator.initial_condition(out=steady_state['vout']) 
+        self.inductor.ic = steady_state['il_initial']
+
         # Convert measurement times to seconds for simulation setup
         time_points = np.asarray(measurement_time_points, dtype=np.float64) * 1e-6
         
-        delta = self.period * 600
+        delta = self.period * 100
         end_time = delta + time_points[-1]
         step_time = (time_points[1] - time_points[0]) * 0.5
         
@@ -177,7 +235,7 @@ class BuckConverter:
             step_time=step_time,
             end_time=end_time,
             start_time=delta,
-            use_initial_condition=False
+            use_initial_condition=True
         )
             
         # Extract full simulation data (no time matching here)
