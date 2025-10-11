@@ -297,20 +297,20 @@ class GeneticOptimizer:
             meas_il_avg = np.mean(self.measured_data['current'])
             meas_il_ripple = np.max(self.measured_data['current']) - np.min(self.measured_data['current'])
 
-            # Calculate percentage differences (absolute values)
-            diff_ripple_vout = abs((meas_vout_ripple - sim_vout_ripple) / (sim_vout_ripple + 1e-10)) * 100
-            diff_ripple_il = abs((meas_il_ripple - sim_il_ripple) / (sim_il_ripple + 1e-10)) * 100
-            diff_avg_vout = abs((meas_vout_avg - sim_vout_avg) / (sim_vout_avg + 1e-10)) * 100
-            diff_avg_il = abs((meas_il_avg - sim_il_avg) / (sim_il_avg + 1e-10)) * 100
-            
-            # Calculate weighted fitness
+            # Calculate percentage differences (signed, will be squared)
+            diff_ripple_vout = ((meas_vout_ripple - sim_vout_ripple) / (sim_vout_ripple + 1e-10)) * 100
+            diff_ripple_il = ((meas_il_ripple - sim_il_ripple) / (sim_il_ripple + 1e-10)) * 100
+            diff_avg_vout = ((meas_vout_avg - sim_vout_avg) / (sim_vout_avg + 1e-10)) * 100
+            diff_avg_il = ((meas_il_avg - sim_il_avg) / (sim_il_avg + 1e-10)) * 100
+
+            # Square errors to penalize both magnitude and bias
             fitness = (
-                self.WEIGHTS['ripple_vout'] * diff_ripple_vout +
-                self.WEIGHTS['ripple_il'] * diff_ripple_il +
-                self.WEIGHTS['avg_vout'] * diff_avg_vout +
-                self.WEIGHTS['avg_il'] * diff_avg_il
+                self.WEIGHTS['ripple_vout'] * (diff_ripple_vout ** 2) +
+                self.WEIGHTS['ripple_il'] * (diff_ripple_il ** 2) +
+                self.WEIGHTS['avg_vout'] * (diff_avg_vout ** 2) +
+                self.WEIGHTS['avg_il'] * (diff_avg_il ** 2)
             )
-            
+
             return fitness
             
         except Exception as e:
