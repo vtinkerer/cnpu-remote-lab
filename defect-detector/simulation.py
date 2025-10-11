@@ -6,15 +6,18 @@ from .utils import henries_to_femtohenries, farads_to_femtofarads
 
 
 class BuckConverter:
-    def __init__(self, params):
+    def __init__(self, params, optimization_params=None):
         self.vin = params.vin
         self.freq = 312500
         self.l_value = 10e-6
         self.c_value = params.c_value * 1e-6  # Convert to Farads
         self.duty_cycle = params.pwm_percentage / 100.0
-        self.l_resistance = 19.5e-3  # from datasheet
-        self.r_load = params.r_load        
+        self.l_resistance = 19.5e-3  # from datasheet (fixed, not optimized)
+        self.r_load = params.r_load
         self.period = 1 / self.freq
+        
+        # Store optimization parameters (defaults will be used if None)
+        self.optimization_params = optimization_params or {}
 
         self.circuit = None
 
@@ -66,26 +69,39 @@ class BuckConverter:
         }
 
     def build_circuit(self):
+        # Get optimization parameters with defaults
+        gate_rise_time = self.optimization_params.get('gate_rise_time', 4.709689497078811e-9)
+        gate_fall_time = self.optimization_params.get('gate_fall_time', 8.21639622891056e-9)
+        switch_ron = self.optimization_params.get('switch_ron', 1.1863225425236333e-8)
+        diode_rs = self.optimization_params.get('diode_rs', 3.0071094384922703e-5)
+        diode_is = self.optimization_params.get('diode_is', 211080501.71901667)
+        cap_esr = self.optimization_params.get('cap_esr', 0.04432208570080457)
+        cap_inductance = self.optimization_params.get('cap_inductance', 6.661647555991315e-10)
+
         circuit = Circuit('Buck Converter')
         circuit.V('in', 'vin', circuit.gnd, self.vin)
         
         ton = self.duty_cycle * self.period * 1e6
         period_us = self.period * 1e6
+        
+        # Convert rise/fall times to proper format for SPICE (in seconds, will be shown in nanoseconds)
+        rise_time_str = f'{gate_rise_time*1e9}n'
+        fall_time_str = f'{gate_fall_time*1e9}n'
 
-        circuit.V('gate', 'g', circuit.gnd, f'PULSE(0 10 0 1n 1n {ton}us {period_us}us)')
+        circuit.V('gate', 'g', circuit.gnd, f'DC 0 PULSE(0 10 0 {rise_time_str} {fall_time_str} {ton}us {period_us}us)')
         circuit.S('1', 'vin', 'sw', 'g', circuit.gnd, model='switch_model')
 
-        circuit.model('switch_model', 'SW', ron=1e-9, roff=1e12, vt=1, vh=0)
+        circuit.model('switch_model', 'SW', ron=switch_ron, roff=1e12, vt=1, vh=0)
         
         circuit.D('1', circuit.gnd, 'sw', model='MYDIODE')
-        circuit.model('MYDIODE', 'D', is_=1e6, rs=1e-4)
+        circuit.model('MYDIODE', 'D', is_=diode_is, rs=diode_rs)
 
         # Store inductor reference for setting initial current
         self.inductor = circuit.L('1', 'sw', 'out', henries_to_femtohenries(self.l_value))
         circuit.R('L1', 'out', 'out_c', self.l_resistance)
 
-        circuit.L('C1', 'out_c', 'c_r', henries_to_femtohenries(1e-9))
-        circuit.R('C1', 'c_r', 'c_c', 0.05)
+        circuit.L('C1', 'out_c', 'c_r', henries_to_femtohenries(cap_inductance))
+        circuit.R('C1', 'c_r', 'c_c', cap_esr)
         circuit.C('1', 'c_c', circuit.gnd, farads_to_femtofarads(self.c_value))
         
         circuit.R('load', 'out_c', circuit.gnd, self.r_load)

@@ -88,3 +88,22 @@ def trim_data_for_calculations(data_array):
     if trim_size == 0:  # Handle small datasets
         return data_array
     return data_array[trim_size:-trim_size]
+
+
+def filter_signal(signal, signal_type):
+    window_width = 0
+    if signal_type == 'current':
+        window_width = 17  # Wider window for current to remove spikes
+    elif signal_type == 'voltage':
+        window_width = 3   # Narrower window for voltage to preserve details
+    else:
+        raise ValueError("signal_type must be 'current' or 'voltage'")
+     
+    filtered_signal = np.median(
+        np.lib.stride_tricks.sliding_window_view(
+            np.pad(signal, (window_width//2, window_width//2), mode='edge'),
+            window_width
+        ),
+        axis=1
+    )
+    return filtered_signal

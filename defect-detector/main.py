@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Dict, Optional
 import matplotlib.pyplot as plt
-from .utils import fix_signal_spike, trim_data_for_calculations
+from .utils import filter_signal, fix_signal_spike, trim_data_for_calculations
 from .simulation import BuckConverter
 
 app = FastAPI()
@@ -86,23 +86,8 @@ async def analyze_measurements(
         measured_time = measurements.time
         
         # Apply median filter to remove current spikes
-        window_size_current = 17  # Adjust this value based on your spike width
-        measured_current_filtered = np.median(
-            np.lib.stride_tricks.sliding_window_view(
-                np.pad(measured_current, (window_size_current//2, window_size_current//2), mode='edge'),
-                window_size_current
-            ),
-            axis=1
-        )
-
-        window_size_voltage = 3 
-        measured_voltage_filtered = np.median(
-            np.lib.stride_tricks.sliding_window_view(
-                np.pad(measured_voltage, (window_size_voltage//2, window_size_voltage//2), mode='edge'),
-                window_size_voltage
-            ),
-            axis=1
-        )
+        measured_current_filtered = filter_signal(measured_current, 'current')
+        measured_voltage_filtered = filter_signal(measured_voltage, 'voltage')
 
         # Run simulation and get full dataset
         buck = BuckConverter(circuit_params)
@@ -112,8 +97,6 @@ async def analyze_measurements(
         sim_voltage_full = simulation_result['sim_voltage_full']
         sim_current_full = simulation_result['sim_current_full']
         
-        # measured_voltage_filtered_trimmed = trim_data_for_calculations(measured_voltage_filtered)
-        # measured_current_filtered_trimmed = trim_data_for_calculations(measured_current_filtered)
         measured_voltage_filtered_trimmed = fix_signal_spike(measured_voltage_filtered)
         measured_current_filtered_trimmed = fix_signal_spike(measured_current_filtered)
         
