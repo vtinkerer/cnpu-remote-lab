@@ -132,7 +132,7 @@ def main():
     
     # Process each measurement
     for idx, measurement_entry in enumerate(measurements_data):
-        print(f"Processing measurement {idx + 1}/{len(measurements_data)}...")
+        # print(f"Processing measurement {idx + 1}/{len(measurements_data)}...")
         
         # Extract circuit parameters from this measurement
         circuit_params_dict = measurement_entry['measurements']['circuit_params']
@@ -161,10 +161,10 @@ def main():
         }
         all_comparisons.append(comparison)
         
-        print(f"  Voltage Mean Diff: {differences['voltage_mean_diff']:.2f}%")
-        print(f"  Voltage Ripple Diff: {differences['voltage_ripple_diff']:.2f}%")
-        print(f"  Current Mean Diff: {differences['current_mean_diff']:.2f}%")
-        print(f"  Current Ripple Diff: {differences['current_ripple_diff']:.2f}%\n")
+        # print(f"  Voltage Mean Diff: {differences['voltage_mean_diff']:.2f}%")
+        # print(f"  Voltage Ripple Diff: {differences['voltage_ripple_diff']:.2f}%")
+        # print(f"  Current Mean Diff: {differences['current_mean_diff']:.2f}%")
+        # print(f"  Current Ripple Diff: {differences['current_ripple_diff']:.2f}%\n")
     
     # Check if we have valid comparisons
     if not all_comparisons:

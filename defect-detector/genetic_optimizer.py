@@ -493,6 +493,11 @@ class GeneticOptimizer:
                 print(f"  Mean fitness: {np.mean(self.fitness_scores):.4f}")
                 print(f"  Worst fitness: {np.max(self.fitness_scores):.4f}")
                 print(f"  Generations without improvement: {generations_without_improvement}")
+                    # Print best candidate's parameters
+                best_params = self.population[current_best_idx].decode()
+                print(f"  Best parameters:")
+                for name, value in best_params.items():
+                    print(f"    {name}: {value:.6e}")
                 print()
             
             # Check convergence
