@@ -31,6 +31,7 @@ import { DefectDetectorAdapter } from '../adapters/defect-detector.adapter';
 import { testDefectDetector } from '../client-interfaces/http/routes/test-defect-detector';
 import { DigitalTwinService } from '../core/services/digital-twin.service';
 import { ContextRepository } from '../adapters/context.repository';
+import { MeasurementsCollectorService } from '../core/services/measurements-collector.service';
 
 export type AppDependenciesOverrides = {
   mcu?: {
@@ -195,6 +196,16 @@ export function buildApp() {
   server.setErrorHandler(errorHandler);
 
   server.register(createFakeUserSessionPlugin());
+
+  // setTimeout(async () => {
+  //     await server.digitalTwinService.checkHardwareConditions();
+  //     setInterval(async () => {
+  //       const service = new MeasurementsCollectorService(
+  //         server.measurementsRepository
+  //       );
+  //       service.run();
+  //   }, 2000);
+  // }, 7000);
 
   return server;
 }

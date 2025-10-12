@@ -219,6 +219,8 @@ export class DigitalTwinService {
     const tableResult = this.calculateTableResult(inputVector);
     this.logger.info({ msg: 'Table result', tableResult });
 
+    this.logger.info({ msg: 'Result', result: measurementsAnalyzed.result });
+
     const condition = inputVector === '0000';
 
     this.logger.info({
