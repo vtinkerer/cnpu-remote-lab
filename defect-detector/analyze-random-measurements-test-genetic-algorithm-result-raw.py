@@ -42,8 +42,8 @@ def process_simulation_result(sim_voltage, sim_current):
 
 def process_measurement(measurement_data):
     """Process measurement data - no filtering, just calculate statistics"""
-    voltage = np.asarray(measurement_data['measurements']['measurements']['voltage'])
-    current = np.asarray(measurement_data['measurements']['measurements']['current'])
+    voltage = np.asarray(measurement_data['measurements']['voltage'])
+    current = np.asarray(measurement_data['measurements']['current'])
     
     return calculate_statistics(voltage, current)
 
@@ -93,16 +93,16 @@ def main():
 
     # Load random measurements
     print("Loading random measurements...")
-    measurements_data = load_ndjson_file('defect-detector/filtered-random-measurements.json')
+    measurements_data = load_ndjson_file('defect-detector/filtered-current-raw-measurements.json')
     
     print(f"Found {len(measurements_data)} measurements to process\n")
     
     # Extract first circuit parameters and time points
     print("Extracting reference circuit parameters from first measurement...")
     first_measurement = measurements_data[0]
-    reference_circuit_params_dict = first_measurement['measurements']['circuit_params']
+    reference_circuit_params_dict = first_measurement['circuit_params']
     reference_circuit_params = CircuitParams(reference_circuit_params_dict)
-    time_points = first_measurement['measurements']['measurements']['time']
+    time_points = first_measurement['measurements']['time']
     
     print(f"Reference circuit parameters:")
     print(f"  Vin: {reference_circuit_params.vin}")
@@ -134,16 +134,16 @@ def main():
         # print(f"Processing measurement {idx + 1}/{len(measurements_data)}...")
         
         # Extract circuit parameters from this measurement
-        circuit_params_dict = measurement_entry['measurements']['circuit_params']
+        circuit_params_dict = measurement_entry['circuit_params']
         circuit_params = CircuitParams(circuit_params_dict)
         
         # Verify that circuit parameters match the reference
-        if circuit_params != reference_circuit_params:
-            print(f"  WARNING: Circuit parameters differ from reference!")
-            print(f"  Expected: {reference_circuit_params.to_dict()}")
-            print(f"  Got: {circuit_params.to_dict()}")
-            print(f"  Skipping this measurement...\n")
-            continue
+        # if circuit_params != reference_circuit_params:
+        #     print(f"  WARNING: Circuit parameters differ from reference!")
+        #     print(f"  Expected: {reference_circuit_params.to_dict()}")
+        #     print(f"  Got: {circuit_params.to_dict()}")
+        #     print(f"  Skipping this measurement...\n")
+        #     continue
         
         # Process measurement (no filtering, just raw statistics)
         meas_stats = process_measurement(measurement_entry)

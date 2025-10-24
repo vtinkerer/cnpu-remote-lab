@@ -95,15 +95,30 @@ def filter_signal(signal, signal_type):
     if signal_type == 'current':
         window_width = 17  # Wider window for current to remove spikes
     elif signal_type == 'voltage':
-        window_width = 3   # Narrower window for voltage to preserve details
+        window_width = 8   # Narrower window for voltage to preserve details
     else:
         raise ValueError("signal_type must be 'current' or 'voltage'")
      
+    pad_width = window_width // 2
+    signal_padded = np.pad(signal, (pad_width, 0), mode='reflect')  # Left: reflect
+    signal_padded = np.pad(signal_padded, (0, pad_width), mode='edge')  # Right: edge
+
     filtered_signal = np.median(
         np.lib.stride_tricks.sliding_window_view(
-            np.pad(signal, (window_width//2, window_width//2), mode='edge'),
-            window_width
+            signal_padded, window_width
         ),
         axis=1
     )
+
+    # Apply second pass of filtering to the left portion
+    left_portion_len = round(len(signal) * (40 / 620))  # Filter first part of signal
+    left_window = window_width * 2  # Double the window for left side
+    left_pad_width = left_window // 2
+    left_padded = np.pad(signal[:left_portion_len + left_pad_width], 
+                         (left_pad_width, left_pad_width), mode='reflect')
+    filtered_signal[:left_portion_len] = np.median(
+        np.lib.stride_tricks.sliding_window_view(left_padded, left_window),
+        axis=1
+    )[:left_portion_len]
+
     return filtered_signal

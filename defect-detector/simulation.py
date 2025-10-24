@@ -70,13 +70,13 @@ class BuckConverter:
 
     def build_circuit(self):
         # Get optimization parameters with defaults
-        gate_rise_time = self.optimization_params.get('gate_rise_time', 1.1022772324785869e-10)
-        gate_fall_time = self.optimization_params.get('gate_fall_time', 1.806339780426396e-09)
-        switch_ron = self.optimization_params.get('switch_ron', 1.2208885716807066e-06)
-        diode_rs = self.optimization_params.get('diode_rs', 0.00014409132667392248)
-        diode_is = self.optimization_params.get('diode_is', 92852.82598448136)
-        cap_esr = self.optimization_params.get('cap_esr', 0.07705831297701732)
-        cap_inductance = self.optimization_params.get('cap_inductance', 2.6462288837282588e-09)
+        gate_rise_time = self.optimization_params.get('gate_rise_time', 1.015435566480695e-10)
+        gate_fall_time = self.optimization_params.get('gate_fall_time', 7.677903815277957e-08)
+        switch_ron = self.optimization_params.get('switch_ron', 1.8575783275122382e-11)
+        diode_rs = self.optimization_params.get('diode_rs', 1.2711852475685458e-05)
+        diode_is = self.optimization_params.get('diode_is', 7.705192529660374e-15)
+        cap_esr = self.optimization_params.get('cap_esr', 0.08784075541117503)
+        cap_inductance = self.optimization_params.get('cap_inductance', 4.36429542552223e-10)
 
         circuit = Circuit('Buck Converter')
         circuit.V('in', 'vin', circuit.gnd, self.vin)

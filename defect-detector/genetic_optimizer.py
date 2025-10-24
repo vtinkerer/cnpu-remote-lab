@@ -9,7 +9,7 @@ Parameter encoding (genes 0-6):
 - Gene 1: gate_fall_time (0.1ns - 100ns, log scale)
 - Gene 2: switch_ron (1e-12 - 1e-3 Ω, log scale)
 - Gene 3: diode_rs (1e-6 - 0.1 Ω, log scale)
-- Gene 4: diode_is (1e-15 - 1e10 A, log scale)
+- Gene 4: diode_is (1e-16 - 1e-10 A, log scale)
 - Gene 5: cap_esr (0.001 - 0.5 Ω, linear scale)
 - Gene 6: cap_inductance (1e-12 - 1e-7 H, log scale)
 """
@@ -59,8 +59,8 @@ class Genome:
         },
         4: {  # diode_is
             'name': 'diode_is',
-            'min': 1e-15,
-            'max': 1e10,
+            'min': 1e-16,
+            'max': 1e-10,
             'scale': 'log',
             'unit': 'A'
         },
@@ -238,13 +238,13 @@ class GeneticOptimizer:
         
         # Add some seeded individuals with default parameters
         default_params = {
-            'gate_rise_time': 1e-9,
-            'gate_fall_time': 1e-9,
-            'switch_ron': 1e-9,
-            'diode_rs': 1e-4,
-            'diode_is': 1e6,
-            'cap_esr': 0.05,
-            'cap_inductance': 1e-9
+            "gate_rise_time": 1.015435566480695e-10,
+            "gate_fall_time": 7.677903815277957e-08,
+            "switch_ron": 1.8575783275122382e-11,
+            "diode_rs": 1.2711852475685458e-05,
+            "diode_is": 7.705192529660374e-15,
+            "cap_esr": 0.08784075541117503,
+            "cap_inductance": 4.36429542552223e-10
         }
         self.population.append(Genome.encode(default_params))
         
@@ -316,7 +316,7 @@ class GeneticOptimizer:
         except Exception as e:
             # Return high penalty for simulation failures
             print(f"Simulation failed: {e}")
-            return 1000.0
+            return 1000000.0
     
     def tournament_selection(self, population: List[Genome], fitness_scores: List[float]) -> Genome:
         """
