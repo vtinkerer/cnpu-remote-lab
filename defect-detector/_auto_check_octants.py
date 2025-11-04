@@ -23,10 +23,10 @@ DEFAULT_PARAMS = {
     'L': 10e-6,  # inductance (H)
     'C': 44e-6, # capacitance (F)
     'Rload': 3.8,       # load resistance (Ohm)
-    'RC': 0.05,     # capacitor ESR (Ohm)
+    'RC': 0.08779711061951505,     # capacitor ESR (Ohm)
     'RL': 19.5e-3, # inductor ESR (Ohm)
-    'RD': 1e-9,     # transistor RDS(on) (Ohm)
-    'RDS_ON': 0.05,     # diode resistance (Ohm)
+    'RD': 3.3157359136705763e-12,     # transistor RDS(on) (Ohm)
+    'RDS_ON': 1e-06,     # diode resistance (Ohm)
 }
 
 # Function to create a buck converter
@@ -43,42 +43,33 @@ def create_buck_converter(
     RDS_ON=DEFAULT_PARAMS['RDS_ON'],
 ):
     
+    gate_rise_time =  1.0072085534880547e-10
+    gate_fall_time = 8.265072857706626e-08
+    diode_is = 2.423465389750961e-15
+    cap_inductance = 3.215742370055204e-10
+
     circuit = Circuit('Buck Converter')
     circuit.V('in', 'vin', 'gnd', Vin)
     
     period = 1/frequency
     ton = D * period * 1e6
     period_us = period * 1e6
-    
-    # circuit.V('gate', 'g', 'gnd', f'DC 0 PULSE(0 10 0 1n 1n {ton}us {period_us}us)')
-    
-    # circuit.S('1', 'vin', 'sw', 'g', 'gnd', model='SWITCH')
-    # circuit.model('SWITCH', 'SW', ron=RD, vt=1, vh=0)
-    
-    # circuit.D('1', 'gnd', 'sw', model='MYDIODE')
-    # circuit.model('MYDIODE', 'D', is_=1e6, rs=RDS_ON)
-    
-    # circuit.L('1', 'sw', 'out', henries_to_femtohenries(L))
-    # circuit.R('L1', 'out', 'out_c', RL)
-    
-    # circuit.L('C1', 'out_c', 'c_r', henries_to_femtohenries(1e-9))
-    # circuit.R('C1', 'c_r', 'c_c', RC)
-    # circuit.C('1', 'c_c', circuit.gnd, farads_to_femtofarads(C))
 
-    # circuit.R('load', 'out_c', 'gnd', Rload)
+    rise_time_str = f'{gate_rise_time*1e9}n'
+    fall_time_str = f'{gate_fall_time*1e9}n'
 
-    circuit.V('gate', 'g', circuit.gnd, f'DC 0 PULSE(0 10 0 1n 1n {ton}us {period_us}us)')
+    circuit.V('gate', 'g', circuit.gnd, f'DC 0 PULSE(0 10 0 {rise_time_str} {fall_time_str} {ton}us {period_us}us)')
     circuit.S('1', 'vin', 'sw', 'g', circuit.gnd, model='switch_model')
 
     circuit.model('switch_model', 'SW', ron=RD, roff=1e12, vt=1, vh=0)
     
     circuit.D('1', circuit.gnd, 'sw', model='MYDIODE')
-    circuit.model('MYDIODE', 'D', is_=1e6, rs=RDS_ON)
+    circuit.model('MYDIODE', 'D', is_=diode_is, rs=RDS_ON)
 
     circuit.L('1', 'sw', 'out', henries_to_femtohenries(L))
     circuit.R('L1', 'out', 'out_c', RL)
 
-    circuit.L('C1', 'out_c', 'c_r', henries_to_femtohenries(1e-9))
+    circuit.L('C1', 'out_c', 'c_r', henries_to_femtohenries(cap_inductance))
     circuit.R('C1', 'c_r', 'c_c', RC)
     circuit.C('1', 'c_c', circuit.gnd, farads_to_femtofarads(C))
 
@@ -233,12 +224,12 @@ def analyze_parameter_impact():
     # Parameters for analysis and their multipliers with symbolic labels
     parameters = {
         'Vin': [
-            {'label': '+++', 'mult': 2},
-            {'label': '++', 'mult': 1.5},
+            {'label': '+++', 'mult': 4},
+            {'label': '++', 'mult': 2},
             {'label': '+', 'mult': 1.1},
             {'label': '-', 'mult': 1/1.1},
-            {'label': '--', 'mult': 1/1.5},
-            {'label': '---', 'mult': 1/2}
+            {'label': '--', 'mult': 1/2},
+            {'label': '---', 'mult': 1/4}
         ],
         'D': [
             {'label': '+++', 'mult': 2},
@@ -266,42 +257,42 @@ def analyze_parameter_impact():
         ],
         'Rload': [
             {'label': '+++', 'mult': 1e18},
-            {'label': '++', 'mult': 100},
+            {'label': '++', 'mult': 500},
             {'label': '+', 'mult': 10},
             {'label': '-', 'mult': 1/10},
-            {'label': '--', 'mult': 1/100},
+            {'label': '--', 'mult': 1/500},
             {'label': '---', 'mult': 0}
         ],
         'RC': [
             {'label': '+++', 'mult': 1e18},
-            {'label': '++', 'mult': 1000},
-            {'label': '+', 'mult': 10},
-            {'label': '-', 'mult': 1/10},
-            {'label': '--', 'mult': 1/1000},
+            {'label': '++', 'mult': 100},
+            {'label': '+', 'mult': 5},
+            {'label': '-', 'mult': 1/5},
+            {'label': '--', 'mult': 1/100},
             {'label': '---', 'mult': 0}
         ],
         'RL': [
             {'label': '+++', 'mult': 1e18},
-            {'label': '++', 'mult': 1000},
-            {'label': '+', 'mult': 10},
-            {'label': '-', 'mult': 1/10},
-            {'label': '--', 'mult': 1/1000},
+            {'label': '++', 'mult': 100},
+            {'label': '+', 'mult': 5},
+            {'label': '-', 'mult': 1/5},
+            {'label': '--', 'mult': 1/100},
             {'label': '---', 'mult': 1e-12}
         ],
         'RD': [
             {'label': '+++', 'mult': 1e18},
-            {'label': '++', 'mult': 1e5},
+            {'label': '++', 'mult': 1000},
             {'label': '+', 'mult': 10},
             {'label': '-', 'mult': 1/10},
-            {'label': '--', 'mult': 1/1e5},
+            {'label': '--', 'mult': 1/1000},
             {'label': '---', 'mult': 1e-24}
         ],
         'RDS_ON': [
             {'label': '+++', 'mult': 1e18},
-            {'label': '++', 'mult': 1e5},
+            {'label': '++', 'mult': 1000},
             {'label': '+', 'mult': 10},
             {'label': '-', 'mult': 1/10},
-            {'label': '--', 'mult': 1/1e5},
+            {'label': '--', 'mult': 1/1000},
             {'label': '---', 'mult': 0}
         ]
     }

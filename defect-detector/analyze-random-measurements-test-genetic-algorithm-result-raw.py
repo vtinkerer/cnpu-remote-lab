@@ -181,18 +181,16 @@ def main():
     print("Generating comprehensive comparison plots...")
     
     fig, axes = plt.subplots(2, 2, figsize=(16, 12))
-    fig.suptitle('Percentage Differences: All Measurements vs Optimized Simulation', 
-                 fontsize=16, fontweight='bold')
     
     # Plot 1: Voltage Mean Differences
     ax1 = axes[0, 0]
     bars1 = ax1.bar(indices, voltage_mean_diffs, color='steelblue', alpha=0.7, edgecolor='black')
     ax1.axhline(y=0, color='red', linestyle='--', linewidth=1, label='Zero Difference')
-    ax1.set_xlabel('Measurement Index')
-    ax1.set_ylabel('Percentage Difference (%)')
-    ax1.set_title('Voltage Mean Difference')
+    ax1.set_xlabel('Measurement Index', fontsize=16)
+    ax1.set_ylabel('% Difference of Voltage Mean', fontsize=16)
+    ax1.tick_params(axis='both', which='major', labelsize=14)
     ax1.grid(axis='y', alpha=0.3)
-    ax1.legend()
+    ax1.legend(fontsize=14)
     
     # Color bars based on magnitude
     for bar, diff in zip(bars1, voltage_mean_diffs):
@@ -207,11 +205,11 @@ def main():
     ax2 = axes[0, 1]
     bars2 = ax2.bar(indices, voltage_ripple_diffs, color='steelblue', alpha=0.7, edgecolor='black')
     ax2.axhline(y=0, color='red', linestyle='--', linewidth=1, label='Zero Difference')
-    ax2.set_xlabel('Measurement Index')
-    ax2.set_ylabel('Percentage Difference (%)')
-    ax2.set_title('Voltage Ripple Difference')
+    ax2.set_xlabel('Measurement Index', fontsize=16)
+    ax2.set_ylabel('% Difference of Voltage Ripple', fontsize=16)
+    ax2.tick_params(axis='both', which='major', labelsize=14)
     ax2.grid(axis='y', alpha=0.3)
-    ax2.legend()
+    ax2.legend(fontsize=14)
     
     for bar, diff in zip(bars2, voltage_ripple_diffs):
         if abs(diff) < 5:
@@ -225,11 +223,11 @@ def main():
     ax3 = axes[1, 0]
     bars3 = ax3.bar(indices, current_mean_diffs, color='steelblue', alpha=0.7, edgecolor='black')
     ax3.axhline(y=0, color='red', linestyle='--', linewidth=1, label='Zero Difference')
-    ax3.set_xlabel('Measurement Index')
-    ax3.set_ylabel('Percentage Difference (%)')
-    ax3.set_title('Current Mean Difference')
+    ax3.set_xlabel('Measurement Index', fontsize=16)
+    ax3.set_ylabel('% Difference of Current Mean', fontsize=16)
+    ax3.tick_params(axis='both', which='major', labelsize=14)
     ax3.grid(axis='y', alpha=0.3)
-    ax3.legend()
+    ax3.legend(fontsize=14)
     
     for bar, diff in zip(bars3, current_mean_diffs):
         if abs(diff) < 5:
@@ -243,11 +241,11 @@ def main():
     ax4 = axes[1, 1]
     bars4 = ax4.bar(indices, current_ripple_diffs, color='steelblue', alpha=0.7, edgecolor='black')
     ax4.axhline(y=0, color='red', linestyle='--', linewidth=1, label='Zero Difference')
-    ax4.set_xlabel('Measurement Index')
-    ax4.set_ylabel('Percentage Difference (%)')
-    ax4.set_title('Current Ripple Difference')
+    ax4.set_xlabel('Measurement Index', fontsize=16)
+    ax4.set_ylabel('% Difference of Current Ripple', fontsize=16)
+    ax4.tick_params(axis='both', which='major', labelsize=14)
     ax4.grid(axis='y', alpha=0.3)
-    ax4.legend()
+    ax4.legend(fontsize=14)
     
     for bar, diff in zip(bars4, current_ripple_diffs):
         if abs(diff) < 5:
