@@ -180,10 +180,10 @@ def main():
     # Create comprehensive comparison plot
     print("Generating comprehensive comparison plots...")
     
-    fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+    fig, axes = plt.subplots(4, 1, figsize=(12, 22))
     
     # Plot 1: Voltage Mean Differences
-    ax1 = axes[0, 0]
+    ax1 = axes[0]
     bars1 = ax1.bar(indices, voltage_mean_diffs, color='steelblue', alpha=0.7, edgecolor='black')
     ax1.axhline(y=0, color='red', linestyle='--', linewidth=1, label='Zero Difference')
     ax1.set_xlabel('Measurement Index', fontsize=16)
@@ -202,7 +202,7 @@ def main():
             bar.set_color('red')
     
     # Plot 2: Voltage Ripple Differences
-    ax2 = axes[0, 1]
+    ax2 = axes[1]
     bars2 = ax2.bar(indices, voltage_ripple_diffs, color='steelblue', alpha=0.7, edgecolor='black')
     ax2.axhline(y=0, color='red', linestyle='--', linewidth=1, label='Zero Difference')
     ax2.set_xlabel('Measurement Index', fontsize=16)
@@ -220,7 +220,7 @@ def main():
             bar.set_color('red')
     
     # Plot 3: Current Mean Differences
-    ax3 = axes[1, 0]
+    ax3 = axes[2]
     bars3 = ax3.bar(indices, current_mean_diffs, color='steelblue', alpha=0.7, edgecolor='black')
     ax3.axhline(y=0, color='red', linestyle='--', linewidth=1, label='Zero Difference')
     ax3.set_xlabel('Measurement Index', fontsize=16)
@@ -238,7 +238,7 @@ def main():
             bar.set_color('red')
     
     # Plot 4: Current Ripple Differences
-    ax4 = axes[1, 1]
+    ax4 = axes[3]
     bars4 = ax4.bar(indices, current_ripple_diffs, color='steelblue', alpha=0.7, edgecolor='black')
     ax4.axhline(y=0, color='red', linestyle='--', linewidth=1, label='Zero Difference')
     ax4.set_xlabel('Measurement Index', fontsize=16)
@@ -256,8 +256,8 @@ def main():
             bar.set_color('red')
     
     plt.tight_layout()
-    plt.savefig('all_measurements_comparison.png', dpi=300, bbox_inches='tight')
-    print("Plot saved as 'all_measurements_comparison.png'")
+    plt.savefig('all_measurements_comparison.svg', bbox_inches='tight')
+    print("Plot saved as 'all_measurements_comparison.svg'")
     plt.show()
     
     # Create summary statistics plot
@@ -279,8 +279,6 @@ def main():
         ax.grid(axis='y', alpha=0.3)
     
     plt.tight_layout()
-    plt.savefig('difference_distributions.png', dpi=300, bbox_inches='tight')
-    print("Plot saved as 'difference_distributions.png'")
     plt.show()
     
     # Create box plot for all metrics
@@ -302,8 +300,6 @@ def main():
     ax.legend()
     
     plt.tight_layout()
-    plt.savefig('boxplot_comparison.png', dpi=300, bbox_inches='tight')
-    print("Plot saved as 'boxplot_comparison.png'")
     plt.show()
     
     # Print summary statistics

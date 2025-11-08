@@ -78,6 +78,15 @@ class BuckConverter:
         cap_esr = self.optimization_params.get('cap_esr', 0.08779711061951505)
         cap_inductance = self.optimization_params.get('cap_inductance', 3.215742370055204e-10)
 
+        # print("Building circuit with parameters:")
+        # print(f"  Gate Rise Time: {gate_rise_time}")
+        # print(f"  Gate Fall Time: {gate_fall_time}")
+        # print(f"  Switch R_on: {switch_ron}")
+        # print(f"  Diode R_s: {diode_rs}")
+        # print(f"  Diode I_s: {diode_is}")
+        # print(f"  Capacitor ESR: {cap_esr}")
+        # print(f"  Capacitor Inductance: {cap_inductance}")
+
         circuit = Circuit('Buck Converter')
         circuit.V('in', 'vin', circuit.gnd, self.vin)
         

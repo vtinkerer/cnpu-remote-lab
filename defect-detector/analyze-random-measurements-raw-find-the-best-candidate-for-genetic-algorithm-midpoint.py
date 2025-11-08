@@ -75,17 +75,17 @@ sorted_by_meanI = sorted(stats_list, key=lambda x: x['meanI'])
 
 # Set global font sizes for better readability
 plt.rcParams.update({
-    'font.size': 14,
-    'axes.labelsize': 16,
-    'axes.titlesize': 18,
-    'xtick.labelsize': 14,
-    'ytick.labelsize': 14,
-    'legend.fontsize': 14,
-    'figure.titlesize': 22
+    'font.size': 20,
+    'axes.labelsize': 20,
+    'axes.titlesize': 20,
+    'xtick.labelsize': 20,
+    'ytick.labelsize': 20,
+    'legend.fontsize': 20,
+    'figure.titlesize': 20
 })
 
 # Create figure with subplots - increased height for taller charts
-fig, axes = plt.subplots(2, 1, figsize=(14, 16))
+fig, axes = plt.subplots(2, 1, figsize=(12, 22))
 # fig.suptitle('Circuit Measurements Distribution Analysis', fontsize=22, fontweight='bold')
 
 # # Plot 1: Ripple Voltage
@@ -146,19 +146,18 @@ ax5.scatter(rippleV_values, rippleI_values, alpha=0.6, s=80, color='#2E86AB')
 ax5.scatter(midpoint_measurement['rippleV'], midpoint_measurement['rippleI'], 
             color='green', s=300, marker='D', label='Closest to Midpoint Measurement', 
             edgecolors='black', linewidth=2)
-ax5.set_xlabel('Voltage Ripple (V)', fontsize=18)
-ax5.set_ylabel('Current Ripple (A)', fontsize=18)
+ax5.set_xlabel('Voltage Ripple (V)')
+ax5.set_ylabel('Current Ripple (A)')
 # ax5.set_title('Ripple Relationship', fontweight='bold', fontsize=20)
 # Add annotation pointing to the midpoint
 ax5.annotate(f'Min: {midpoint_measurement["distance_from_midpoint"]:.4f}',
              xy=(midpoint_measurement['rippleV'], midpoint_measurement['rippleI']),
              xytext=(midpoint_measurement['rippleV'] + 0.02, midpoint_measurement['rippleI'] + 0.3),
              arrowprops=dict(arrowstyle='->', color='green', lw=2),
-             fontsize=14, fontweight='bold', color='darkgreen',
+              fontweight='bold', color='darkgreen',
              bbox=dict(boxstyle='round,pad=0.5', facecolor='lightgreen', alpha=0.7))
 ax5.grid(True, alpha=0.3)
-ax5.legend(fontsize=14)
-ax5.tick_params(axis='both', which='major', labelsize=14)
+ax5.tick_params(axis='both', which='major')
 
 # Plot 6: Distance distribution
 ax6 = axes[1]
@@ -166,14 +165,14 @@ sorted_distances = sorted(distances)
 ax6.plot(sorted_distances, 'o-', color='#6A4C93', linewidth=2, markersize=8)
 ax6.axhline(midpoint_measurement['distance_from_midpoint'], color='green', 
             linestyle=':', linewidth=2, label=f'Min Distance: {midpoint_measurement["distance_from_midpoint"]:.4f}')
-ax6.set_xlabel('Measurement Index (sorted by distance)', fontsize=18)
-ax6.set_ylabel('Normalized Distance from Midpoint', fontsize=18)
+ax6.set_xlabel('Measurement Index (sorted by distance)')
+ax6.set_ylabel('Normalized Distance from Midpoint')
 # ax6.set_title('Distance from Midpoint (sorted)', fontweight='bold', fontsize=20)
 ax6.grid(True, alpha=0.3)
-ax6.legend(fontsize=14)
-ax6.tick_params(axis='both', which='major', labelsize=14)
+ax6.tick_params(axis='both', which='major')
 
 plt.tight_layout(pad=2.0)
+plt.savefig('best-candidate.svg', bbox_inches='tight')
 plt.show()
 
 # Print summary statistics

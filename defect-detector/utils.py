@@ -89,6 +89,20 @@ def trim_data_for_calculations(data_array):
         return data_array
     return data_array[trim_size:-trim_size]
 
+def filter_signal_fft(signal, time):
+    # Calculate FFT
+    fft_values = np.fft.fft(signal)
+    fft_freq = np.fft.fftfreq(len(signal), d=(time[1] - time[0]))
+
+    cutoff_frequency = 0.4 # MHz - adjust this value as needed
+
+    # Filter: Keep only frequencies below a cutoff
+    fft_filtered = fft_values.copy()
+    fft_filtered[np.abs(fft_freq) > cutoff_frequency] = 0
+
+    # Reconstruct signal using inverse FFT
+    reconstructed_signal = np.fft.ifft(fft_filtered).real
+    return reconstructed_signal
 
 def filter_signal(signal, signal_type):
     window_width = 0

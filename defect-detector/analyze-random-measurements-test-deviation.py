@@ -95,6 +95,14 @@ class CircuitParams:
         return self.to_dict() == other.to_dict()
 
 def main():
+    # Define thresholds for each parameter
+    THRESHOLDS = {
+        'voltage_mean': 5.34,
+        'voltage_ripple': 50.03,
+        'current_mean': 13.96,
+        'current_ripple': 50.7
+    }
+    
     # Load optimized parameters
     print("Loading optimized parameters...")
     opt_params_data = load_json_file('defect-detector/optimized_parameters.json')
@@ -104,7 +112,7 @@ def main():
 
     # Load random measurements
     print("Loading random measurements...")
-    measurements_data = load_ndjson_file('defect-detector/raw-measurements-with-40-pwm-instead-of-50.json')
+    measurements_data = load_ndjson_file('defect-detector/raw-measurements-with-60-pwm-instead-of-50.json')
     
     print(f"Found {len(measurements_data)} measurements to process\n")
     
@@ -197,12 +205,10 @@ def main():
     ax1.tick_params(axis='both', which='major')
     ax1.grid(axis='y', alpha=0.3)
     
-    # Color bars based on magnitude
+    # Color bars: green if within threshold, red otherwise
     for bar, diff in zip(bars1, voltage_mean_diffs):
-        if abs(diff) < 5:
+        if abs(diff) < THRESHOLDS['voltage_mean']:
             bar.set_color('green')
-        elif abs(diff) < 10:
-            bar.set_color('orange')
         else:
             bar.set_color('red')
     
@@ -216,10 +222,8 @@ def main():
     ax2.grid(axis='y', alpha=0.3)
     
     for bar, diff in zip(bars2, voltage_ripple_diffs):
-        if abs(diff) < 5:
+        if abs(diff) < THRESHOLDS['voltage_ripple']:
             bar.set_color('green')
-        elif abs(diff) < 10:
-            bar.set_color('orange')
         else:
             bar.set_color('red')
     
@@ -234,10 +238,8 @@ def main():
     ax3.legend(fontsize=14)
     
     for bar, diff in zip(bars3, current_mean_diffs):
-        if abs(diff) < 5:
+        if abs(diff) < THRESHOLDS['current_mean']:
             bar.set_color('green')
-        elif abs(diff) < 10:
-            bar.set_color('orange')
         else:
             bar.set_color('red')
     
@@ -251,10 +253,8 @@ def main():
     ax4.grid(axis='y', alpha=0.3)
     
     for bar, diff in zip(bars4, current_ripple_diffs):
-        if abs(diff) < 5:
+        if abs(diff) < THRESHOLDS['current_ripple']:
             bar.set_color('green')
-        elif abs(diff) < 10:
-            bar.set_color('orange')
         else:
             bar.set_color('red')
     
@@ -273,8 +273,9 @@ def main():
     print("SUMMARY STATISTICS")
     print("="*60)
     
-    for metric_name, data in zip(titles, metrics):
-        print(f"\n{metric_name}:")
+    for metric_name, data, threshold_key in zip(titles, metrics, ['voltage_mean', 'voltage_ripple', 'current_mean', 'current_ripple']):
+        threshold = THRESHOLDS[threshold_key]
+        print(f"\n{metric_name} (Threshold: ±{threshold}%):")
         print(f"  Mean: {np.mean(data):.2f}%")
         print(f"  Median: {np.median(data):.2f}%")
         print(f"  Std Dev: {np.std(data):.2f}%")
@@ -282,13 +283,11 @@ def main():
         print(f"  Max: {np.max(data):.2f}%")
         print(f"  Range: {np.max(data) - np.min(data):.2f}%")
         
-        # Count how many are within acceptable ranges
-        within_5 = sum(1 for d in data if abs(d) < 5)
-        within_10 = sum(1 for d in data if abs(d) < 10)
+        # Count how many are within threshold
+        within_threshold = sum(1 for d in data if abs(d) < threshold)
         total = len(data)
         
-        print(f"  Within ±5%: {within_5}/{total} ({within_5/total*100:.1f}%)")
-        print(f"  Within ±10%: {within_10}/{total} ({within_10/total*100:.1f}%)")
+        print(f"  Within ±{threshold}%: {within_threshold}/{total} ({within_threshold/total*100:.1f}%)")
 
 if __name__ == "__main__":
     main()

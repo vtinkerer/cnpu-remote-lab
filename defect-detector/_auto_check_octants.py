@@ -124,24 +124,13 @@ def simulate_and_analyze(circuit, esr_ind):
         }
 
 # Function to determine the octant
-def determine_octant(baseline, modified, threshold=10):
-    """
-    Determines the octant of parameter changes considering a 10% threshold
-
-    Parameters:
-    baseline: dict with baseline parameters
-    modified: dict with modified parameters
-    threshold: change threshold in percentage (10%)
-
-    Returns:
-    Tuple (dVmean, dVpulse, dImean, dIpulse), where each element is:
-    1: increase (>threshold%)
-    0: no change (±threshold%)
-    -1: decrease (<-threshold%)
-    """
+def determine_octant(baseline, modified):
     results = []
     
-    for param in ['vout_avg', 'vout_ripple', 'il_avg', 'il_ripple']:
+    params = ['vout_avg', 'vout_ripple', 'il_avg', 'il_ripple']
+    thresholds = [5.34, 50.03, 13.96, 50.7]
+
+    for param, threshold in zip(params, thresholds):
         baseline_value = baseline[param]
         modified_value = modified[param]
         
@@ -242,25 +231,25 @@ def analyze_parameter_impact():
         'L': [
             {'label': '+++', 'mult': 100},
             {'label': '++', 'mult': 10},
-            {'label': '+', 'mult': 3},
-            {'label': '-', 'mult': 1/3},
+            {'label': '+', 'mult': 1.2},
+            {'label': '-', 'mult': 1/1.2},
             {'label': '--', 'mult': 1/10},
             {'label': '---', 'mult': 0}
         ],
         'C': [
             {'label': '+++', 'mult': 10000},
             {'label': '++', 'mult': 100},
-            {'label': '+', 'mult': 10},
-            {'label': '-', 'mult': 1/10},
+            {'label': '+', 'mult': 1.5},
+            {'label': '-', 'mult': 1/1.5},
             {'label': '--', 'mult': 1/100},
             {'label': '---', 'mult': 1/10000}
         ],
         'Rload': [
             {'label': '+++', 'mult': 1e18},
-            {'label': '++', 'mult': 500},
-            {'label': '+', 'mult': 10},
-            {'label': '-', 'mult': 1/10},
-            {'label': '--', 'mult': 1/500},
+            {'label': '++', 'mult': 100},
+            {'label': '+', 'mult': 1.5},
+            {'label': '-', 'mult': 1/1.5},
+            {'label': '--', 'mult': 1/100},
             {'label': '---', 'mult': 0}
         ],
         'RC': [
