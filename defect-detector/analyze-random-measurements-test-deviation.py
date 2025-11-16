@@ -112,17 +112,18 @@ def main():
 
     # Load random measurements
     print("Loading random measurements...")
-    measurements_data = load_ndjson_file('defect-detector/raw-measurements-with-60-pwm-instead-of-50.json')
+    measurements_data = load_ndjson_file('defect-detector/raw-measurements-with-18-volts-instead-of-12.json')
     
     print(f"Found {len(measurements_data)} measurements to process\n")
     
     # Extract first circuit parameters and time points
     print("Extracting reference circuit parameters from first measurement...")
-    first_measurement = measurements_data[100]
+    first_measurement = measurements_data[2]
     reference_circuit_params_dict = first_measurement['circuit_params']
     print(reference_circuit_params_dict)
     reference_circuit_params_dict['vin'] = 12
-    reference_circuit_params_dict['pwm_percentage'] = 50
+    # reference_circuit_params_dict['pwm_percentage'] = 50
+    # reference_circuit_params_dict['r_load'] = 4.0
     print(reference_circuit_params_dict)
     reference_circuit_params = CircuitParams(reference_circuit_params_dict)
     time_points = first_measurement['measurements']['time']
@@ -151,6 +152,7 @@ def main():
     
     # Store all results
     all_comparisons = []
+    all_vectors = []
     
     # Process each measurement
     for idx, measurement_entry in enumerate(measurements_data):
@@ -165,12 +167,49 @@ def main():
         # Calculate differences
         differences = calculate_percentage_differences(sim_stats, meas_stats)
         
+        # Generate vector based on thresholds
+        vector = ''
+        # Voltage Mean
+        if differences['voltage_mean_diff'] < -THRESHOLDS['voltage_mean']:
+            vector += '-'
+        elif differences['voltage_mean_diff'] > THRESHOLDS['voltage_mean']:
+            vector += '+'
+        else:
+            vector += '0'
+        
+        # Voltage Ripple
+        if differences['voltage_ripple_diff'] < -THRESHOLDS['voltage_ripple']:
+            vector += '-'
+        elif differences['voltage_ripple_diff'] > THRESHOLDS['voltage_ripple']:
+            vector += '+'
+        else:
+            vector += '0'
+        
+        # Current Mean
+        if differences['current_mean_diff'] < -THRESHOLDS['current_mean']:
+            vector += '-'
+        elif differences['current_mean_diff'] > THRESHOLDS['current_mean']:
+            vector += '+'
+        else:
+            vector += '0'
+        
+        # Current Ripple
+        if differences['current_ripple_diff'] < -THRESHOLDS['current_ripple']:
+            vector += '-'
+        elif differences['current_ripple_diff'] > THRESHOLDS['current_ripple']:
+            vector += '+'
+        else:
+            vector += '0'
+        
+        all_vectors.append(vector)
+        
         # Store results
         comparison = {
             'index': idx,
             'sim_stats': sim_stats,
             'meas_stats': meas_stats,
-            'differences': differences
+            'differences': differences,
+            'vector': vector
         }
         all_comparisons.append(comparison)
         
@@ -288,6 +327,31 @@ def main():
         total = len(data)
         
         print(f"  Within ±{threshold}%: {within_threshold}/{total} ({within_threshold/total*100:.1f}%)")
+    
+    # Print vector analysis
+    print("\n" + "="*60)
+    print("VECTOR ANALYSIS")
+    print("="*60)
+    print("\nVector Format: [Voltage Mean][Voltage Ripple][Current Mean][Current Ripple]")
+    print("  '+' = exceeds positive threshold")
+    print("  '0' = within threshold")
+    print("  '-' = below negative threshold\n")
+    
+    # Count occurrences of each vector
+    from collections import Counter
+    vector_counts = Counter(all_vectors)
+    
+    print(f"Total measurements: {len(all_vectors)}")
+    print(f"Unique vectors found: {len(vector_counts)}\n")
+    
+    # Sort vectors by count (descending) and then alphabetically
+    sorted_vectors = sorted(vector_counts.items(), key=lambda x: (-x[1], x[0]))
+    
+    print("Unique Vectors (sorted by frequency):")
+    print("-" * 40)
+    for vector, count in sorted_vectors:
+        percentage = (count / len(all_vectors)) * 100
+        print(f"  {vector}  :  {count:4d} occurrences ({percentage:5.1f}%)")
 
 if __name__ == "__main__":
     main()

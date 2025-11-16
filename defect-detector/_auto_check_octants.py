@@ -213,12 +213,12 @@ def analyze_parameter_impact():
     # Parameters for analysis and their multipliers with symbolic labels
     parameters = {
         'Vin': [
-            {'label': '+++', 'mult': 4},
-            {'label': '++', 'mult': 2},
+            {'label': '+++', 'mult': 2},
+            {'label': '++', 'mult': 1.5},
             {'label': '+', 'mult': 1.1},
             {'label': '-', 'mult': 1/1.1},
-            {'label': '--', 'mult': 1/2},
-            {'label': '---', 'mult': 1/4}
+            {'label': '--', 'mult': 1/1.5},
+            {'label': '---', 'mult': 1/2}
         ],
         'D': [
             {'label': '+++', 'mult': 2},
@@ -246,10 +246,10 @@ def analyze_parameter_impact():
         ],
         'Rload': [
             {'label': '+++', 'mult': 1e18},
-            {'label': '++', 'mult': 100},
-            {'label': '+', 'mult': 1.5},
-            {'label': '-', 'mult': 1/1.5},
-            {'label': '--', 'mult': 1/100},
+            {'label': '++', 'mult': 5},
+            {'label': '+', 'mult': 1.25},
+            {'label': '-', 'mult': 1/1.25},
+            {'label': '--', 'mult': 1/5},
             {'label': '---', 'mult': 0}
         ],
         'RC': [
