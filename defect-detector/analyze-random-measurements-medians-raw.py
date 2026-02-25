@@ -53,16 +53,13 @@ plt.rcParams.update({
     'legend.fontsize': 20
 })
 
-# Create figure with subplots (single column layout)
-fig, axes = plt.subplots(4, 1, figsize=(12, 22))
+# Create figure with subplots (2x2 layout)
+fig, axes = plt.subplots(2, 2, figsize=(20, 14))
 
-
-
-# Plot 1: Ripple Voltage
-ax1 = axes[0]
+# Plot 1: Ripple Voltage (top-left)
+ax1 = axes[0, 0]
 rippleV_values = [s['rippleV'] for s in sorted_by_rippleV]
 ax1.plot(rippleV_values, 'o-', color='#2E86AB', linewidth=2.5, markersize=10)
-# ax1.set_title('Voltage Ripple (sorted)', fontweight='bold', fontsize=18, pad=10)
 ax1.set_xlabel('Measurement Index')
 ax1.set_ylabel('Ripple Voltage (V)')
 ax1.grid(True, alpha=0.3)
@@ -70,11 +67,10 @@ ax1.axhline(np.mean(rippleV_values), color='red', linestyle='--', linewidth=2,
             label=f'Mean: {np.mean(rippleV_values):.4f}V')
 ax1.tick_params(axis='both', which='major')
 
-# Plot 2: Mean Voltage
-ax2 = axes[1]
+# Plot 2: Mean Voltage (top-right)
+ax2 = axes[0, 1]
 meanV_values = [s['meanV'] for s in sorted_by_meanV]
 ax2.plot(meanV_values, 'o-', color='#A23B72', linewidth=2.5, markersize=10)
-# ax2.set_title('Mean Voltage (sorted)', fontweight='bold', fontsize=18, pad=10)
 ax2.set_xlabel('Measurement Index')
 ax2.set_ylabel('Mean Voltage (V)')
 ax2.grid(True, alpha=0.3)
@@ -82,11 +78,10 @@ ax2.axhline(np.mean(meanV_values), color='red', linestyle='--', linewidth=2,
             label=f'Mean: {np.mean(meanV_values):.4f}V')
 ax2.tick_params(axis='both', which='major')
 
-# Plot 3: Ripple Current
-ax3 = axes[2]
+# Plot 3: Ripple Current (bottom-left)
+ax3 = axes[1, 0]
 rippleI_values = [s['rippleI'] for s in sorted_by_rippleI]
 ax3.plot(rippleI_values, 'o-', color='#F18F01', linewidth=2.5, markersize=10)
-# ax3.set_title('Current Ripple (sorted)', fontweight='bold', fontsize=18, pad=10)
 ax3.set_xlabel('Measurement Index')
 ax3.set_ylabel('Ripple Current (A)')
 ax3.grid(True, alpha=0.3)
@@ -94,11 +89,10 @@ ax3.axhline(np.mean(rippleI_values), color='red', linestyle='--', linewidth=2,
             label=f'Mean: {np.mean(rippleI_values):.4f}A')
 ax3.tick_params(axis='both', which='major')
 
-# Plot 4: Mean Current
-ax4 = axes[3]
+# Plot 4: Mean Current (bottom-right)
+ax4 = axes[1, 1]
 meanI_values = [s['meanI'] for s in sorted_by_meanI]
 ax4.plot(meanI_values, 'o-', color='#6A994E', linewidth=2.5, markersize=10)
-# ax4.set_title('Mean Current (sorted)', fontweight='bold', fontsize=18, pad=10)
 ax4.set_xlabel('Measurement Index')
 ax4.set_ylabel('Mean Current (A)')
 ax4.grid(True, alpha=0.3)
@@ -106,9 +100,8 @@ ax4.axhline(np.mean(meanI_values), color='red', linestyle='--', linewidth=2,
             label=f'Mean: {np.mean(meanI_values):.4f}A')
 ax4.tick_params(axis='both', which='major')
 
-# Adjust layout to ensure x-axis labels are visible
-plt.tight_layout(rect=[0, 0.02, 1, 1])
-plt.subplots_adjust(hspace=0.3)
+# Adjust layout
+plt.tight_layout()
 plt.savefig('circuit_measurements.svg', bbox_inches='tight')
 plt.show()
 
