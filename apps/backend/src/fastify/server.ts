@@ -32,6 +32,7 @@ import { testDefectDetector } from '../client-interfaces/http/routes/test-defect
 import { DigitalTwinService } from '../core/services/digital-twin.service';
 import { ContextRepository } from '../adapters/context.repository';
 import { MeasurementsCollectorService } from '../core/services/measurements-collector.service';
+import { HardwareDataCollectorService } from '../core/services/hardware-data-collector.service';
 
 export type AppDependenciesOverrides = {
   mcu?: {
@@ -197,15 +198,18 @@ export function buildApp() {
 
   server.register(createFakeUserSessionPlugin());
 
-  // setTimeout(async () => {
-  //     await server.digitalTwinService.checkHardwareConditions();
-  //     setInterval(async () => {
-  //       const service = new MeasurementsCollectorService(
-  //         server.measurementsRepository
-  //       );
-  //       service.run();
-  //   }, 2000);
-  // }, 7000);
+  server.ready(async () => {
+    const collector = new HardwareDataCollectorService(
+      server.mcuSender,
+      server.measurementsRepository
+    );
+    // Give the MCU/scope a moment to come up before sending commands.
+    setTimeout(() => {
+      collector.start().catch((err) => {
+        logger.error({ msg: 'HardwareDataCollectorService failed to start', err });
+      });
+    }, 5000);
+  });
 
   return server;
 }
