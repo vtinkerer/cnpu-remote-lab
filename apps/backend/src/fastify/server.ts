@@ -203,10 +203,13 @@ export function buildApp() {
       server.mcuSender,
       server.measurementsRepository
     );
-    Give the MCU/scope a moment to come up before sending commands.
+    // Give the MCU/scope a moment to come up before sending commands.
     setTimeout(() => {
       collector.start().catch((err) => {
-        logger.error({ msg: 'HardwareDataCollectorService failed to start', err });
+        logger.error({
+          msg: 'HardwareDataCollectorService failed to start',
+          err,
+        });
       });
     }, 5000);
   });
