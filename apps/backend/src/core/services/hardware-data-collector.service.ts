@@ -16,9 +16,9 @@ import { IMeasurementsRepository } from '../interfaces/measurements-repository.i
 const DESIRED_PARAMS = {
   loadType: 'RES' as LoadType,
   voltageInput: 6, // V
-  pwmPercentage: 35, // %
+  pwmPercentage: 50, // %
   capacitorCapacity: 44, // µF
-  resistance: 10, // Ω
+  resistance: 4, // Ω
 };
 
 const INTERVAL_MS = 1000;
