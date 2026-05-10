@@ -18,10 +18,10 @@ const DESIRED_PARAMS = {
   voltageInput: 12, // V
   pwmPercentage: 50, // %
   capacitorCapacity: 44, // µF
-  resistance: 15, // Ω
+  resistance: 4, // Ω
 };
 
-const INTERVAL_MS = 1000;
+const INTERVAL_MS = 300;
 const SETTLE_MS = 2000;
 const OUTPUT_DIR = '/home/user1-44';
 // ───────────────────────────────────────────────────────
