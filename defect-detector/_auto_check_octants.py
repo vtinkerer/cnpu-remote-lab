@@ -25,8 +25,8 @@ DEFAULT_PARAMS = {
     'Rload': 3.8,       # load resistance (Ohm)
     'RC': 0.08779711061951505,     # capacitor ESR (Ohm)
     'RL': 19.5e-3, # inductor ESR (Ohm)
-    'RD': 3.3157359136705763e-12,     # transistor RDS(on) (Ohm)
-    'RDS_ON': 1e-06,     # diode resistance (Ohm)
+    'RDS_ON': 3.3157359136705763e-12,     # transistor RDS(on) (Ohm)
+    'RD': 1e-06,     # diode resistance (Ohm)
 }
 
 # Function to create a buck converter
@@ -128,7 +128,9 @@ def determine_octant(baseline, modified):
     results = []
     
     params = ['vout_avg', 'vout_ripple', 'il_avg', 'il_ripple']
-    thresholds = [5.34, 50.03, 13.96, 50.7]
+    # thresholds = [5.34, 50.03, 13.96, 50.7]
+    # thresholds = [5.0, 55.0, 8.0, 33.0]
+    thresholds = [5.0, 56.5,  8.5, 38.0]
 
     for param, threshold in zip(params, thresholds):
         baseline_value = baseline[param]
@@ -248,7 +250,7 @@ def analyze_parameter_impact():
             {'label': '+++', 'mult': 1e18},
             {'label': '++', 'mult': 5},
             {'label': '+', 'mult': 1.25},
-            {'label': '-', 'mult': 1/1.25},
+            {'label': '-', 'mult': 1/1.1},
             {'label': '--', 'mult': 1/5},
             {'label': '---', 'mult': 0}
         ],

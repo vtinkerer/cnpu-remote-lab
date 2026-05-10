@@ -4,7 +4,7 @@ import numpy as np
 from scipy import stats
 
 # Read the file
-with open('defect-detector/raw-measurements.json', 'r') as f:
+with open('defect-detector/raw-measurements-with-v-12-pwm-1-c-44-r-4.jsonl', 'r') as f:
     content = f.read()
 
 # Parse JSON objects (each line is a separate JSON object)

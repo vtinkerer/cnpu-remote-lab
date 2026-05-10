@@ -43,3 +43,5 @@ Thumbs.db
 .env
 
 .cursor
+
+defect-detector/.simulation_cache/

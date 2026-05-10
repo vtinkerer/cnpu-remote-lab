@@ -107,7 +107,7 @@ def filter_signal_fft(signal, time):
 def filter_signal(signal, signal_type):
     window_width = 0
     if signal_type == 'current':
-        window_width = 17  # Wider window for current to remove spikes
+        window_width = 13  # Wider window for current to remove spikes
     elif signal_type == 'voltage':
         window_width = 8   # Narrower window for voltage to preserve details
     else:
