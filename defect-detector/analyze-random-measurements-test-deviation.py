@@ -4,6 +4,7 @@ from collections import Counter
 import numpy as np
 import matplotlib.pyplot as plt
 from .simulation import BuckConverter
+from .state_space_model import StateSpaceBuckConverter, StateSpaceBuckConverterNative
 from .utils import filter_signal
 from . import simulation_cache
 
@@ -59,10 +60,17 @@ def calculate_statistics(voltage, current):
         'current_ripple': _ripple(current)
     }
 
-def run_simulation_with_optimized_params(circuit_params, optimization_params, time_points):
+# Simulation models compared against each other on every test case
+MODEL_KEYS = ['spice', 'state_space']
+MODEL_LABELS = {'spice': 'SPICE', 'state_space': 'State-space'}
+MODEL_CLASSES = {'spice': BuckConverter, 'state_space': StateSpaceBuckConverterNative}
+
+
+def run_simulation_with_optimized_params(circuit_params, optimization_params, time_points,
+                                         model_key='spice'):
     """Run simulation with optimized parameters, cached on disk for 1h."""
     cache_key = simulation_cache.make_key(
-        circuit_params.to_dict(),
+        {**circuit_params.to_dict(), '_model': model_key},
         optimization_params,
         np.asarray(time_points),
     )
@@ -70,7 +78,7 @@ def run_simulation_with_optimized_params(circuit_params, optimization_params, ti
     if cached is not None:
         return cached
 
-    buck = BuckConverter(circuit_params, optimization_params)
+    buck = MODEL_CLASSES[model_key](circuit_params, optimization_params)
     simulation_result = buck.run_simulation(time_points)
 
     sim_voltage = simulation_result['sim_voltage_full']
@@ -159,12 +167,9 @@ def classify_vector(differences):
 
 
 def plot_comparison(all_comparisons, output_path):
-    """Plot the four difference metrics for a single test case."""
-    indices = [c['index'] for c in all_comparisons]
-    diffs_per_metric = {
-        key: [c['differences'][f'{key}_diff'] for c in all_comparisons]
-        for key in METRIC_KEYS
-    }
+    """Plot the four difference metrics for a single test case, one bar
+    series per simulation model."""
+    indices = np.array([c['index'] for c in all_comparisons])
 
     fig, axes = plt.subplots(2, 2, figsize=(16, 12))
     axis_positions = {
@@ -173,20 +178,26 @@ def plot_comparison(all_comparisons, output_path):
         'current_mean': axes[1, 0],
         'current_ripple': axes[1, 1],
     }
+    model_colors = {'spice': 'steelblue', 'state_space': 'darkorange'}
+    width = 0.8 / len(MODEL_KEYS)
 
     for key, title in zip(METRIC_KEYS, METRIC_TITLES):
         ax = axis_positions[key]
-        data = diffs_per_metric[key]
-        bars = ax.bar(indices, data, color='steelblue', alpha=0.7, edgecolor='black')
-        ax.axhline(y=0, color='red', linestyle='--', linewidth=1, label='Zero Difference')
+        threshold = THRESHOLDS[key]
+        for m_idx, model_key in enumerate(MODEL_KEYS):
+            data = [c['models'][model_key]['differences'][f'{key}_diff']
+                    for c in all_comparisons]
+            offset = (m_idx - (len(MODEL_KEYS) - 1) / 2) * width
+            ax.bar(indices + offset, data, width=width,
+                   color=model_colors[model_key], alpha=0.7,
+                   label=MODEL_LABELS[model_key])
+        ax.axhline(y=0, color='red', linestyle='--', linewidth=1)
+        ax.axhline(y=threshold, color='gray', linestyle=':', linewidth=1.5)
+        ax.axhline(y=-threshold, color='gray', linestyle=':', linewidth=1.5)
         ax.set_xlabel('Measurement Index')
         ax.set_ylabel(f'% Difference of {title}')
         ax.tick_params(axis='both', which='major')
         ax.grid(axis='y', alpha=0.3)
-
-        threshold = THRESHOLDS[key]
-        for bar, diff in zip(bars, data):
-            bar.set_color('green' if abs(diff) < threshold else 'red')
 
     axes[1, 0].legend(fontsize=14)
 
@@ -222,69 +233,133 @@ def run_test_case(test_case, optimization_params, show_plot=False):
     reference_circuit_params = CircuitParams(reference_circuit_params_dict)
     time_points = reference_measurement['measurements']['time']
 
-    sim_voltage, sim_current = run_simulation_with_optimized_params(
-        reference_circuit_params,
-        optimization_params,
-        time_points
-    )
-    sim_stats = process_simulation_result(sim_voltage, sim_current)
-    print(
-        f"Sim stats — V_mean={sim_stats['voltage_mean']:.4f}, "
-        f"V_ripple={sim_stats['voltage_ripple']:.4f}, "
-        f"I_mean={sim_stats['current_mean']:.4f}, "
-        f"I_ripple={sim_stats['current_ripple']:.4f}"
-    )
+    # Reference simulation with each model
+    sim_stats_by_model = {}
+    for model_key in MODEL_KEYS:
+        sim_voltage, sim_current = run_simulation_with_optimized_params(
+            reference_circuit_params,
+            optimization_params,
+            time_points,
+            model_key=model_key,
+        )
+        sim_stats = process_simulation_result(sim_voltage, sim_current)
+        sim_stats_by_model[model_key] = sim_stats
+        print(
+            f"Sim stats [{MODEL_LABELS[model_key]:<11}] — "
+            f"V_mean={sim_stats['voltage_mean']:.4f}, "
+            f"V_ripple={sim_stats['voltage_ripple']:.4f}, "
+            f"I_mean={sim_stats['current_mean']:.4f}, "
+            f"I_ripple={sim_stats['current_ripple']:.4f}"
+        )
 
     all_comparisons = []
-    all_vectors = []
+    all_vectors = {model_key: [] for model_key in MODEL_KEYS}
     for idx, measurement_entry in enumerate(measurements_data):
         meas_stats = process_measurement(measurement_entry)
-        differences = calculate_percentage_differences(sim_stats, meas_stats)
-        vector = classify_vector(differences)
-        all_vectors.append(vector)
+        models = {}
+        for model_key in MODEL_KEYS:
+            differences = calculate_percentage_differences(
+                sim_stats_by_model[model_key], meas_stats)
+            vector = classify_vector(differences)
+            all_vectors[model_key].append(vector)
+            models[model_key] = {'differences': differences, 'vector': vector}
         all_comparisons.append({
             'index': idx,
-            'sim_stats': sim_stats,
             'meas_stats': meas_stats,
-            'differences': differences,
-            'vector': vector,
+            'models': models,
         })
+
+    n_meas = len(all_comparisons)
 
     # Per-metric diff distribution — useful for calibrating THRESHOLDS,
     # especially on the no-deviation (OK) baseline run.
     print("\nDiff distribution (% of sim) — helpful for threshold calibration:")
-    print(f"  {'metric':<16} {'min':>9} {'p1':>9} {'p50':>9} {'p99':>9} {'max':>9} {'p99(|d|)':>10}  threshold")
+    print(f"  {'metric':<16} {'model':<12} {'min':>9} {'p1':>9} {'p50':>9} {'p99':>9} {'max':>9} {'p99(|d|)':>10}  threshold")
     for key in METRIC_KEYS:
-        diffs = np.array([c['differences'][f'{key}_diff'] for c in all_comparisons])
-        abs_p99 = np.percentile(np.abs(diffs), 99)
-        print(
-            f"  {key:<16} "
-            f"{np.min(diffs):>9.2f} "
-            f"{np.percentile(diffs, 1):>9.2f} "
-            f"{np.percentile(diffs, 50):>9.2f} "
-            f"{np.percentile(diffs, 99):>9.2f} "
-            f"{np.max(diffs):>9.2f} "
-            f"{abs_p99:>10.2f}  ±{THRESHOLDS[key]}"
-        )
+        for model_key in MODEL_KEYS:
+            diffs = np.array([c['models'][model_key]['differences'][f'{key}_diff']
+                              for c in all_comparisons])
+            abs_p99 = np.percentile(np.abs(diffs), 99)
+            print(
+                f"  {key:<16} {MODEL_LABELS[model_key]:<12} "
+                f"{np.min(diffs):>9.2f} "
+                f"{np.percentile(diffs, 1):>9.2f} "
+                f"{np.percentile(diffs, 50):>9.2f} "
+                f"{np.percentile(diffs, 99):>9.2f} "
+                f"{np.max(diffs):>9.2f} "
+                f"{abs_p99:>10.2f}  ±{THRESHOLDS[key]}"
+            )
 
-    vector_counts = Counter(all_vectors)
-    sorted_vectors = sorted(vector_counts.items(), key=lambda x: (-x[1], x[0]))
-
-    print(f"\nUnique vectors: {len(vector_counts)} (out of {len(all_vectors)} measurements)")
-    for vector, count in sorted_vectors:
+    # Vector distributions of both models side by side
+    vector_counts = {m: Counter(all_vectors[m]) for m in MODEL_KEYS}
+    all_seen_vectors = sorted(
+        set().union(*[vector_counts[m].keys() for m in MODEL_KEYS]),
+        key=lambda v: (-max(vector_counts[m][v] for m in MODEL_KEYS), v),
+    )
+    print(f"\nVector distribution ({n_meas} measurements):")
+    header = f"  {'vector':<8}" + ''.join(f"{MODEL_LABELS[m]:>20}" for m in MODEL_KEYS)
+    print(header)
+    for vector in all_seen_vectors:
         in_expected = ' (expected)' if vector in expected_vectors else ''
-        pct = count / len(all_vectors) * 100
-        print(f"  {vector}  :  {count:4d} occurrences ({pct:5.1f}%){in_expected}")
+        cells = ''.join(
+            f"{vector_counts[m][vector]:>12} ({vector_counts[m][vector] / n_meas * 100:5.1f}%)"
+            for m in MODEL_KEYS
+        )
+        print(f"  {vector:<8}{cells}{in_expected}")
 
-    matched = sum(count for vec, count in vector_counts.items() if vec in expected_vectors)
-    matched_pct = matched / len(all_vectors) * 100 if all_vectors else 0.0
-    dominant_vector = sorted_vectors[0][0] if sorted_vectors else None
-    passed = bool(expected_vectors) and dominant_vector in expected_vectors
+    # Per-measurement correct-reason detection: a model detects the correct
+    # fault reason when its vector is one of the expected vectors.
+    correct_breakdown = None
+    if expected_vectors and n_meas:
+        correct = {
+            m: np.array([v in expected_vectors for v in all_vectors[m]])
+            for m in MODEL_KEYS
+        }
+        spice_ok = correct['spice']
+        ss_ok = correct['state_space']
+        correct_breakdown = {
+            'both_correct': int(np.sum(spice_ok & ss_ok)),
+            'spice_only': int(np.sum(spice_ok & ~ss_ok)),
+            'state_space_only': int(np.sum(~spice_ok & ss_ok)),
+            'both_wrong': int(np.sum(~spice_ok & ~ss_ok)),
+        }
+        print("\nCorrect fault-reason detection (vector in expected set):")
+        for m in MODEL_KEYS:
+            n_ok = int(np.sum(correct[m]))
+            print(f"  {MODEL_LABELS[m]:<11}: {n_ok}/{n_meas} ({n_ok / n_meas * 100:.1f}%)")
+        delta_pp = (np.sum(ss_ok) - np.sum(spice_ok)) / n_meas * 100
+        print(f"  delta (State-space - SPICE): {delta_pp:+.2f} pp")
+        print(f"  both correct: {correct_breakdown['both_correct']} | "
+              f"only SPICE: {correct_breakdown['spice_only']} | "
+              f"only State-space: {correct_breakdown['state_space_only']} | "
+              f"both wrong: {correct_breakdown['both_wrong']}")
+
+    # Pass/fail per model
+    model_results = {}
+    for model_key in MODEL_KEYS:
+        counts = vector_counts[model_key]
+        sorted_vectors = sorted(counts.items(), key=lambda x: (-x[1], x[0]))
+        dominant_vector = sorted_vectors[0][0] if sorted_vectors else None
+        matched = sum(count for vec, count in counts.items() if vec in expected_vectors)
+        matched_pct = matched / n_meas * 100 if n_meas else 0.0
+        passed = bool(expected_vectors) and dominant_vector in expected_vectors
+        model_results[model_key] = {
+            'dominant_vector': dominant_vector,
+            'matched_count': matched,
+            'matched_pct': matched_pct,
+            'passed': passed,
+            'vector_counts': dict(counts),
+        }
 
     if expected_vectors:
         print(f"\nExpected vectors: {sorted(expected_vectors)}")
-        print(f"Dominant vector: {dominant_vector}  ->  {'PASS' if passed else 'FAIL'}")
-        print(f"Measurements matching any expected vector: {matched}/{len(all_vectors)} ({matched_pct:.1f}%)")
+        for model_key in MODEL_KEYS:
+            mr = model_results[model_key]
+            print(
+                f"  [{MODEL_LABELS[model_key]:<11}] dominant={mr['dominant_vector']} "
+                f"-> {'PASS' if mr['passed'] else 'FAIL'} | "
+                f"matching expected: {mr['matched_count']}/{n_meas} ({mr['matched_pct']:.1f}%)"
+            )
     else:
         print("\nNo expected vectors specified — reporting only.")
 
@@ -298,12 +373,9 @@ def run_test_case(test_case, optimization_params, show_plot=False):
         'name': name,
         'measurements_file': measurements_path,
         'expected_vectors': sorted(expected_vectors),
-        'dominant_vector': dominant_vector,
-        'matched_count': matched,
-        'matched_pct': matched_pct,
-        'total': len(all_vectors),
-        'passed': passed,
-        'vector_counts': dict(vector_counts),
+        'total': n_meas,
+        'correct_breakdown': correct_breakdown,
+        'models': model_results,
     }
 
 
@@ -316,19 +388,19 @@ TEST_CASES = [
         'name': 'D=5 instead of 50 (PWM extremely low)',
         'measurements_file': 'defect-detector/raw-measurements-with-v-12-pwm-5-c-44-r-4.jsonl',
         'overrides': {'pwm_percentage': 50},
-        'expected_vectors': ['-0-0'],
+        'expected_vectors': ['-0-0', '----'],
     },
     {
         'name': 'D 40 instead of 50',
         'measurements_file': 'defect-detector/raw-measurements-with-40-pwm-instead-of-50.json',
         'overrides': {'pwm_percentage': 50},
-        'expected_vectors': ['-0-0'],
+        'expected_vectors': ['-0-0', '----'],
     },
     {
         'name': 'D 45 instead of 50',
         'measurements_file': 'defect-detector/raw-measurements-with-45-pwm-instead-of-50.json',
         'overrides': {'pwm_percentage': 50},
-        'expected_vectors': ['-0-0'],
+        'expected_vectors': ['-0-0', '----'],
     },
     # --- PWM (duty cycle) deviation tests from notes ---
     {
@@ -336,13 +408,13 @@ TEST_CASES = [
         'measurements_file': 'defect-detector/raw-measurements-with-1-pwm-instead-of-50.json',
         # File's circuit_params has r_load=0.4 (abnormal) 
         'overrides': {'pwm_percentage': 50 },
-        'expected_vectors': ['-0-0'],
+        'expected_vectors': ['-0-0', '----'],
     },
     {
         'name': 'D=60 instead of 50 (PWM slightly high)',
         'measurements_file': 'defect-detector/raw-measurements-with-60-pwm-instead-of-50.json',
         'overrides': {'pwm_percentage': 50},
-        'expected_vectors': ['+0+0'],
+        'expected_vectors': ['+0+0', '+-+-', '+0+-'],
     },
     # --- Input voltage deviation tests from notes ---
     {
@@ -374,19 +446,19 @@ TEST_CASES = [
         'name': 'R_load=2Ω instead of 4Ω',
         'measurements_file': 'defect-detector/raw-measurements-with-2-ohm-instead-of-4.json',
         'overrides': {'r_load': 4},
-        'expected_vectors': ['00+0'],
+        'expected_vectors': ['00+0', '--+0'],
     },
     {
         'name': 'R_load=5Ω instead of 4Ω',
         'measurements_file': 'defect-detector/raw-measurements-with-5-ohm-instead-of-4.json',
         'overrides': {'r_load': 4},
-        'expected_vectors': ['00-0'],
+        'expected_vectors': ['00-0', '+---', '+0-0'],
     },
         {
         'name': 'R_load=15Ω instead of 4Ω',
         'measurements_file': 'defect-detector/raw-measurements-with-v-12-pwm-50-c-44-r-15.jsonl',
         'overrides': {'r_load': 4},
-        'expected_vectors': ['00-0', '+0-0'],
+        'expected_vectors': ['00-0', '+---', '+0-0'],
     },
     # --- Baseline: no deviation (algorithm must NOT raise a false positive) ---
     {
@@ -414,30 +486,54 @@ def main():
                 'name': test_case['name'],
                 'measurements_file': test_case['measurements_file'],
                 'expected_vectors': test_case.get('expected_vectors', []),
-                'dominant_vector': None,
-                'matched_count': 0,
-                'matched_pct': 0.0,
                 'total': 0,
-                'passed': False,
-                'vector_counts': {},
+                'correct_breakdown': None,
+                'models': {},
                 'error': str(e),
             })
 
-    print("\n" + "=" * 70)
-    print("TEST CASE SUMMARY")
-    print("=" * 70)
+    print("\n" + "=" * 100)
+    print("TEST CASE SUMMARY (SPICE vs State-space, % = correct fault-reason detection)")
+    print("=" * 100)
     for result in results:
-        status = 'PASS' if result['passed'] else ('SKIP' if 'error' in result else 'FAIL')
-        print(
-            f"  [{status}] {result['name']}\n"
-            f"         expected={result['expected_vectors']} "
-            f"dominant={result['dominant_vector']} "
-            f"matched={result['matched_count']}/{result['total']} "
-            f"({result['matched_pct']:.1f}%)"
-        )
+        if 'error' in result:
+            print(f"  [SKIP] {result['name']}: {result['error']}")
+            continue
+        deltas = (result['models']['state_space']['matched_pct']
+                  - result['models']['spice']['matched_pct'])
+        print(f"  {result['name']}  (expected={result['expected_vectors']}, "
+              f"delta {deltas:+.2f} pp)")
+        for model_key in MODEL_KEYS:
+            mr = result['models'][model_key]
+            status = 'PASS' if mr['passed'] else 'FAIL'
+            print(
+                f"      [{status}] {MODEL_LABELS[model_key]:<11} "
+                f"dominant={mr['dominant_vector']} "
+                f"correct={mr['matched_count']}/{result['total']} "
+                f"({mr['matched_pct']:.1f}%)"
+            )
 
-    failures = sum(1 for r in results if not r['passed'])
-    print(f"\nTotal: {len(results)} | Passed: {len(results) - failures} | Failed/Skipped: {failures}")
+    print()
+    valid = [r for r in results if 'error' not in r]
+    for model_key in MODEL_KEYS:
+        passed = sum(1 for r in valid if r['models'][model_key]['passed'])
+        total_meas = sum(r['total'] for r in valid)
+        total_correct = sum(r['models'][model_key]['matched_count'] for r in valid)
+        print(f"  {MODEL_LABELS[model_key]:<11}: {passed}/{len(results)} cases passed | "
+              f"correct reason on {total_correct}/{total_meas} measurements "
+              f"({total_correct / total_meas * 100:.2f}%)"
+              f"{'' if len(valid) == len(results) else f' ({len(results) - len(valid)} skipped)'}")
+    if valid:
+        total_meas = sum(r['total'] for r in valid)
+        both_wrong = sum(r['correct_breakdown']['both_wrong']
+                         for r in valid if r['correct_breakdown'])
+        spice_only = sum(r['correct_breakdown']['spice_only']
+                         for r in valid if r['correct_breakdown'])
+        ss_only = sum(r['correct_breakdown']['state_space_only']
+                      for r in valid if r['correct_breakdown'])
+        print(f"  Disagreements: only SPICE correct on {spice_only}, "
+              f"only State-space correct on {ss_only}, "
+              f"both wrong on {both_wrong} of {total_meas} measurements")
 
 
 if __name__ == "__main__":

@@ -2,6 +2,7 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 from .simulation import BuckConverter
+from .utils import filter_signal
 
 def load_json_file(filepath):
     """Load JSON data from file"""
@@ -41,10 +42,10 @@ def process_simulation_result(sim_voltage, sim_current):
     return calculate_statistics(sim_voltage, sim_current)
 
 def process_measurement(measurement_data):
-    """Process measurement data - no filtering, just calculate statistics"""
+    """Process measurement data - filter current, then calculate statistics"""
     voltage = np.asarray(measurement_data['measurements']['voltage'])
-    current = np.asarray(measurement_data['measurements']['current'])
-    
+    current = filter_signal(np.asarray(measurement_data['measurements']['current']), 'current')
+
     return calculate_statistics(voltage, current)
 
 def calculate_percentage_differences(sim_stats, meas_stats):
@@ -93,8 +94,7 @@ def main():
 
     # Load random measurements
     print("Loading random measurements...")
-    measurements_data = load_ndjson_file('defect-detector/filtered-current-raw-measurements.json')
-    
+    measurements_data = load_ndjson_file('defect-detector/raw-measurements-with-ok.json')
     print(f"Found {len(measurements_data)} measurements to process\n")
     
     # Extract first circuit parameters and time points
@@ -177,131 +177,131 @@ def main():
     current_mean_diffs = [c['differences']['current_mean_diff'] for c in all_comparisons]
     current_ripple_diffs = [c['differences']['current_ripple_diff'] for c in all_comparisons]
     
-    # Create comprehensive comparison plot
-    print("Generating comprehensive comparison plots...")
-    
-    fig, axes = plt.subplots(4, 1, figsize=(12, 22))
-    
-    # Plot 1: Voltage Mean Differences
-    ax1 = axes[0]
-    bars1 = ax1.bar(indices, voltage_mean_diffs, color='steelblue', alpha=0.7, edgecolor='black')
-    ax1.axhline(y=0, color='red', linestyle='--', linewidth=1, label='Zero Difference')
-    ax1.set_xlabel('Measurement Index', fontsize=16)
-    ax1.set_ylabel('% Difference of Voltage Mean', fontsize=16)
-    ax1.tick_params(axis='both', which='major', labelsize=14)
-    ax1.grid(axis='y', alpha=0.3)
-    ax1.legend(fontsize=14)
-    
-    # Color bars based on magnitude
-    for bar, diff in zip(bars1, voltage_mean_diffs):
-        if abs(diff) < 5:
-            bar.set_color('green')
-        elif abs(diff) < 10:
-            bar.set_color('orange')
-        else:
-            bar.set_color('red')
-    
-    # Plot 2: Voltage Ripple Differences
-    ax2 = axes[1]
-    bars2 = ax2.bar(indices, voltage_ripple_diffs, color='steelblue', alpha=0.7, edgecolor='black')
-    ax2.axhline(y=0, color='red', linestyle='--', linewidth=1, label='Zero Difference')
-    ax2.set_xlabel('Measurement Index', fontsize=16)
-    ax2.set_ylabel('% Difference of Voltage Ripple', fontsize=16)
-    ax2.tick_params(axis='both', which='major', labelsize=14)
-    ax2.grid(axis='y', alpha=0.3)
-    ax2.legend(fontsize=14)
-    
-    for bar, diff in zip(bars2, voltage_ripple_diffs):
-        if abs(diff) < 5:
-            bar.set_color('green')
-        elif abs(diff) < 10:
-            bar.set_color('orange')
-        else:
-            bar.set_color('red')
-    
-    # Plot 3: Current Mean Differences
-    ax3 = axes[2]
-    bars3 = ax3.bar(indices, current_mean_diffs, color='steelblue', alpha=0.7, edgecolor='black')
-    ax3.axhline(y=0, color='red', linestyle='--', linewidth=1, label='Zero Difference')
-    ax3.set_xlabel('Measurement Index', fontsize=16)
-    ax3.set_ylabel('% Difference of Current Mean', fontsize=16)
-    ax3.tick_params(axis='both', which='major', labelsize=14)
-    ax3.grid(axis='y', alpha=0.3)
-    ax3.legend(fontsize=14)
-    
-    for bar, diff in zip(bars3, current_mean_diffs):
-        if abs(diff) < 5:
-            bar.set_color('green')
-        elif abs(diff) < 10:
-            bar.set_color('orange')
-        else:
-            bar.set_color('red')
-    
-    # Plot 4: Current Ripple Differences
-    ax4 = axes[3]
-    bars4 = ax4.bar(indices, current_ripple_diffs, color='steelblue', alpha=0.7, edgecolor='black')
-    ax4.axhline(y=0, color='red', linestyle='--', linewidth=1, label='Zero Difference')
-    ax4.set_xlabel('Measurement Index', fontsize=16)
-    ax4.set_ylabel('% Difference of Current Ripple', fontsize=16)
-    ax4.tick_params(axis='both', which='major', labelsize=14)
-    ax4.grid(axis='y', alpha=0.3)
-    ax4.legend(fontsize=14)
-    
-    for bar, diff in zip(bars4, current_ripple_diffs):
-        if abs(diff) < 5:
-            bar.set_color('green')
-        elif abs(diff) < 10:
-            bar.set_color('orange')
-        else:
-            bar.set_color('red')
-    
-    plt.tight_layout()
-    plt.savefig('all_measurements_comparison.svg', bbox_inches='tight')
-    print("Plot saved as 'all_measurements_comparison.svg'")
-    plt.show()
-    
-    # Create summary statistics plot
-    fig2, axes2 = plt.subplots(2, 2, figsize=(14, 10))
-    fig2.suptitle('Summary Statistics: Percentage Differences Distribution', 
-                  fontsize=16, fontweight='bold')
-    
     metrics = [voltage_mean_diffs, voltage_ripple_diffs, current_mean_diffs, current_ripple_diffs]
     titles = ['Voltage Mean', 'Voltage Ripple', 'Current Mean', 'Current Ripple']
-    
-    for ax, data, title in zip(axes2.flat, metrics, titles):
-        ax.hist(data, bins=15, color='steelblue', alpha=0.7, edgecolor='black')
-        ax.axvline(x=0, color='red', linestyle='--', linewidth=2, label='Zero Difference')
-        ax.axvline(x=np.mean(data), color='green', linestyle='--', linewidth=2, label=f'Mean: {np.mean(data):.2f}%')
-        ax.set_xlabel('Percentage Difference (%)')
-        ax.set_ylabel('Frequency')
-        ax.set_title(f'{title} Distribution')
-        ax.legend()
-        ax.grid(axis='y', alpha=0.3)
-    
-    plt.tight_layout()
-    plt.show()
-    
-    # Create box plot for all metrics
-    fig3, ax = plt.subplots(figsize=(12, 8))
-    box_data = [voltage_mean_diffs, voltage_ripple_diffs, current_mean_diffs, current_ripple_diffs]
-    box_labels = ['Voltage\nMean', 'Voltage\nRipple', 'Current\nMean', 'Current\nRipple']
-    
-    bp = ax.boxplot(box_data, labels=box_labels, patch_artist=True, 
-                    notch=True, showmeans=True)
-    
-    for patch in bp['boxes']:
-        patch.set_facecolor('lightblue')
-        patch.set_alpha(0.7)
-    
-    ax.axhline(y=0, color='red', linestyle='--', linewidth=1, label='Zero Difference')
-    ax.set_ylabel('Percentage Difference (%)')
-    ax.set_title('Box Plot: Percentage Differences Across All Measurements')
-    ax.grid(axis='y', alpha=0.3)
-    ax.legend()
-    
-    plt.tight_layout()
-    plt.show()
-    
+
+    # # Create comprehensive comparison plot
+    # print("Generating comprehensive comparison plots...")
+    #
+    # fig, axes = plt.subplots(4, 1, figsize=(12, 22))
+    #
+    # # Plot 1: Voltage Mean Differences
+    # ax1 = axes[0]
+    # bars1 = ax1.bar(indices, voltage_mean_diffs, color='steelblue', alpha=0.7, edgecolor='black')
+    # ax1.axhline(y=0, color='red', linestyle='--', linewidth=1, label='Zero Difference')
+    # ax1.set_xlabel('Measurement Index', fontsize=16)
+    # ax1.set_ylabel('% Difference of Voltage Mean', fontsize=16)
+    # ax1.tick_params(axis='both', which='major', labelsize=14)
+    # ax1.grid(axis='y', alpha=0.3)
+    # ax1.legend(fontsize=14)
+    #
+    # # Color bars based on magnitude
+    # for bar, diff in zip(bars1, voltage_mean_diffs):
+    #     if abs(diff) < 5:
+    #         bar.set_color('green')
+    #     elif abs(diff) < 10:
+    #         bar.set_color('orange')
+    #     else:
+    #         bar.set_color('red')
+    #
+    # # Plot 2: Voltage Ripple Differences
+    # ax2 = axes[1]
+    # bars2 = ax2.bar(indices, voltage_ripple_diffs, color='steelblue', alpha=0.7, edgecolor='black')
+    # ax2.axhline(y=0, color='red', linestyle='--', linewidth=1, label='Zero Difference')
+    # ax2.set_xlabel('Measurement Index', fontsize=16)
+    # ax2.set_ylabel('% Difference of Voltage Ripple', fontsize=16)
+    # ax2.tick_params(axis='both', which='major', labelsize=14)
+    # ax2.grid(axis='y', alpha=0.3)
+    # ax2.legend(fontsize=14)
+    #
+    # for bar, diff in zip(bars2, voltage_ripple_diffs):
+    #     if abs(diff) < 5:
+    #         bar.set_color('green')
+    #     elif abs(diff) < 10:
+    #         bar.set_color('orange')
+    #     else:
+    #         bar.set_color('red')
+    #
+    # # Plot 3: Current Mean Differences
+    # ax3 = axes[2]
+    # bars3 = ax3.bar(indices, current_mean_diffs, color='steelblue', alpha=0.7, edgecolor='black')
+    # ax3.axhline(y=0, color='red', linestyle='--', linewidth=1, label='Zero Difference')
+    # ax3.set_xlabel('Measurement Index', fontsize=16)
+    # ax3.set_ylabel('% Difference of Current Mean', fontsize=16)
+    # ax3.tick_params(axis='both', which='major', labelsize=14)
+    # ax3.grid(axis='y', alpha=0.3)
+    # ax3.legend(fontsize=14)
+    #
+    # for bar, diff in zip(bars3, current_mean_diffs):
+    #     if abs(diff) < 5:
+    #         bar.set_color('green')
+    #     elif abs(diff) < 10:
+    #         bar.set_color('orange')
+    #     else:
+    #         bar.set_color('red')
+    #
+    # # Plot 4: Current Ripple Differences
+    # ax4 = axes[3]
+    # bars4 = ax4.bar(indices, current_ripple_diffs, color='steelblue', alpha=0.7, edgecolor='black')
+    # ax4.axhline(y=0, color='red', linestyle='--', linewidth=1, label='Zero Difference')
+    # ax4.set_xlabel('Measurement Index', fontsize=16)
+    # ax4.set_ylabel('% Difference of Current Ripple', fontsize=16)
+    # ax4.tick_params(axis='both', which='major', labelsize=14)
+    # ax4.grid(axis='y', alpha=0.3)
+    # ax4.legend(fontsize=14)
+    #
+    # for bar, diff in zip(bars4, current_ripple_diffs):
+    #     if abs(diff) < 5:
+    #         bar.set_color('green')
+    #     elif abs(diff) < 10:
+    #         bar.set_color('orange')
+    #     else:
+    #         bar.set_color('red')
+    #
+    # plt.tight_layout()
+    # plt.savefig('all_measurements_comparison.svg', bbox_inches='tight')
+    # print("Plot saved as 'all_measurements_comparison.svg'")
+    # plt.show()
+    #
+    # # Create summary statistics plot
+    # fig2, axes2 = plt.subplots(2, 2, figsize=(14, 10))
+    # fig2.suptitle('Summary Statistics: Percentage Differences Distribution',
+    #               fontsize=16, fontweight='bold')
+    #
+    # for ax, data, title in zip(axes2.flat, metrics, titles):
+    #     ax.hist(data, bins=15, color='steelblue', alpha=0.7, edgecolor='black')
+    #     ax.axvline(x=0, color='red', linestyle='--', linewidth=2, label='Zero Difference')
+    #     ax.axvline(x=np.mean(data), color='green', linestyle='--', linewidth=2, label=f'Mean: {np.mean(data):.2f}%')
+    #     ax.set_xlabel('Percentage Difference (%)')
+    #     ax.set_ylabel('Frequency')
+    #     ax.set_title(f'{title} Distribution')
+    #     ax.legend()
+    #     ax.grid(axis='y', alpha=0.3)
+    #
+    # plt.tight_layout()
+    # plt.show()
+    #
+    # # Create box plot for all metrics
+    # fig3, ax = plt.subplots(figsize=(12, 8))
+    # box_data = [voltage_mean_diffs, voltage_ripple_diffs, current_mean_diffs, current_ripple_diffs]
+    # box_labels = ['Voltage\nMean', 'Voltage\nRipple', 'Current\nMean', 'Current\nRipple']
+    #
+    # bp = ax.boxplot(box_data, labels=box_labels, patch_artist=True,
+    #                 notch=True, showmeans=True)
+    #
+    # for patch in bp['boxes']:
+    #     patch.set_facecolor('lightblue')
+    #     patch.set_alpha(0.7)
+    #
+    # ax.axhline(y=0, color='red', linestyle='--', linewidth=1, label='Zero Difference')
+    # ax.set_ylabel('Percentage Difference (%)')
+    # ax.set_title('Box Plot: Percentage Differences Across All Measurements')
+    # ax.grid(axis='y', alpha=0.3)
+    # ax.legend()
+    #
+    # plt.tight_layout()
+    # plt.show()
+
     # Print summary statistics
     print("\n" + "="*60)
     print("SUMMARY STATISTICS")

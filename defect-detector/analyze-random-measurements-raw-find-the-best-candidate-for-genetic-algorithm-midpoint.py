@@ -1,9 +1,10 @@
 import json
 import matplotlib.pyplot as plt
 import numpy as np
+from .utils import filter_signal
 
 # Read the file
-with open('defect-detector/filtered-current-raw-measurements.json', 'r') as f:
+with open('defect-detector/raw-measurements-with-ok.json', 'r') as f:
     content = f.read()
 
 # Parse JSON objects (each line is a separate JSON object)
@@ -15,12 +16,15 @@ for line in content.strip().split('\n'):
 # Extract statistics from each measurement
 stats_list = []
 for idx, measurement in enumerate(data):
+    voltage = measurement['measurements']['voltage']
+    current = filter_signal(measurement['measurements']['current'], 'current')
+    measurement['measurements']['current'] = list(current)
 
-    rippleV = max(measurement['measurements']['voltage']) - min(measurement['measurements']['voltage'])
-    rippleI = max(measurement['measurements']['current']) - min(measurement['measurements']['current'])
+    rippleV = max(voltage) - min(voltage)
+    rippleI = max(current) - min(current)
 
-    meanV = np.mean(measurement['measurements']['voltage'])
-    meanI = np.mean(measurement['measurements']['current'])
+    meanV = np.mean(voltage)
+    meanI = np.mean(current)
 
     stats_list.append({
         'index': idx,
